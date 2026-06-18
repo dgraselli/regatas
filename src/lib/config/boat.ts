@@ -5,9 +5,17 @@ import type {
   RoutingConfig,
 } from '@/lib/types/config';
 
+/** Datos del barco del usuario. */
+export const BOAT = {
+  name: 'Plenamar New 23',
+  lengthFt: 23,
+};
+
 /**
- * Polar genérica de un crucero ~30-34 pies. Reemplazar por la polar real del
- * velero cuando se disponga. speeds[i][j] en nudos para twaPoints[i] / twsPoints[j].
+ * Polar del Plenamar New 23 (velero de ~23 pies, eslora ~7 m).
+ * Velocidad de casco ~5,8-6 kt; ciñe algo peor que un crucero grande y arranca
+ * más lento con viento flojo. Valores estimados (no medidos) — ajustar con datos
+ * reales del barco si se dispone. speeds[i][j] en nudos para twaPoints[i] / twsPoints[j].
  */
 export const DEFAULT_POLAR: BoatPolar = {
   twaPoints: [0, 30, 40, 52, 60, 75, 90, 110, 120, 135, 150, 165, 180],
@@ -15,17 +23,17 @@ export const DEFAULT_POLAR: BoatPolar = {
   speeds: [
     [0.0, 0.0, 0.0, 0.0, 0.0], // 0  - de proa, zona muerta
     [0.0, 0.0, 0.0, 0.0, 0.0], // 30 - zona muerta
-    [4.0, 5.2, 5.8, 6.0, 6.0], // 40 - límite de ceñida
-    [4.8, 5.8, 6.2, 6.4, 6.3], // 52 - ceñida
-    [5.0, 6.0, 6.5, 6.7, 6.6], // 60
-    [5.2, 6.2, 6.8, 7.0, 7.0], // 75
-    [5.3, 6.4, 7.0, 7.2, 7.3], // 90 - través
-    [5.0, 6.2, 6.9, 7.2, 7.4], // 110
-    [4.7, 6.0, 6.7, 7.1, 7.4], // 120 - aleta
-    [4.2, 5.5, 6.3, 6.8, 7.2], // 135
-    [3.6, 4.9, 5.7, 6.3, 6.8], // 150
-    [3.0, 4.2, 5.0, 5.6, 6.2], // 165
-    [2.8, 3.9, 4.7, 5.3, 5.9], // 180 - popa
+    [0.0, 0.0, 0.0, 0.0, 0.0], // 40 - todavía en zona muerta (ciñe peor)
+    [3.4, 4.4, 4.9, 5.1, 5.1], // 52 - ceñida
+    [3.7, 4.7, 5.2, 5.4, 5.4], // 60
+    [3.9, 4.9, 5.4, 5.6, 5.6], // 75
+    [4.0, 5.0, 5.5, 5.7, 5.7], // 90 - través
+    [3.8, 4.9, 5.4, 5.7, 5.8], // 110
+    [3.5, 4.7, 5.3, 5.6, 5.8], // 120 - aleta
+    [3.1, 4.3, 4.9, 5.4, 5.7], // 135
+    [2.6, 3.8, 4.5, 5.0, 5.4], // 150
+    [2.1, 3.2, 3.9, 4.4, 4.9], // 165
+    [1.9, 2.9, 3.6, 4.1, 4.6], // 180 - popa
   ],
 };
 
@@ -50,9 +58,10 @@ export const SURGE: SurgeThresholds = {
 };
 
 export const ROUTING: RoutingConfig = {
-  noGoAngle: 40,
-  tackingEfficiency: 0.65,
-  reefGust: 28,
+  // El Plenamar 23 ciñe peor que un crucero grande y conviene tomar rizos antes.
+  noGoAngle: 45,
+  tackingEfficiency: 0.6,
+  reefGust: 23,
 };
 
 /** Hora local aproximada de salida y puesta de sol para flags de "llega de noche". */

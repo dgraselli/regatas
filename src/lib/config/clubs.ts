@@ -9,11 +9,11 @@ export const TIMEZONE = 'America/Argentina/Buenos_Aires';
 export const CLUBS: Club[] = [
   {
     id: 'la-plata',
-    name: 'La Plata (Río Santiago / club náutico)',
-    lat: -34.9,
-    lon: -57.95,
+    name: 'Mi amarra (La Plata)',
+    lat: -34.839876,
+    lon: -57.923381,
     timezone: TIMEZONE,
-    notes: 'Punto de salida por defecto del cruce a Colonia.',
+    notes: 'Amarra propia. Punto de salida por defecto del cruce a Colonia.',
   },
   {
     id: 'buenos-aires',

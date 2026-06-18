@@ -11,11 +11,11 @@ export const ROUTES: Route[] = [
   {
     id: 'laplata-colonia',
     name: 'La Plata → Colonia',
-    approxNm: 26,
+    approxNm: 23,
     timezone: TIMEZONE,
     waypoints: [
-      { name: 'La Plata', lat: -34.9, lon: -57.95 },
-      { name: 'Medio del Río', lat: -34.68, lon: -57.9 },
+      { name: 'Mi amarra (La Plata)', lat: -34.839876, lon: -57.923381 },
+      { name: 'Medio del Río', lat: -34.65, lon: -57.88 },
       { name: 'Aprox. Colonia', lat: -34.5, lon: -57.86 },
       { name: 'Colonia del Sacramento', lat: -34.47, lon: -57.84 },
     ],

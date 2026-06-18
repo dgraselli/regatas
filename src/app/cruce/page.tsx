@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useCrossingPlan } from '@/lib/hooks/useCrossingPlan';
 import { DEFAULT_ROUTE_ID, getRoute } from '@/lib/config/routes';
+import { BOAT } from '@/lib/config/boat';
 import { DepartureRanker } from '@/components/crossing/DepartureRanker';
 import { LegTable } from '@/components/crossing/LegTable';
 import { RouteMap } from '@/components/crossing/RouteMap';
@@ -23,8 +24,9 @@ export default function CrucePage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Cruce {route.name}</h1>
         <p className="text-slate-500 text-sm">
-          Mejor hora de salida según el viento (~{route.approxNm} NM). Se evalúa la derrota
-          fija a distintas horas y se rankea por tiempo y seguridad.
+          Mejor hora de salida según el viento (~{route.approxNm} NM), calculada con la
+          polar del <strong>{BOAT.name}</strong>. Se evalúa la derrota fija a distintas
+          horas y se rankea por tiempo y seguridad.
         </p>
       </div>
 

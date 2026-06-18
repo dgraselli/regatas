@@ -1,0 +1,141 @@
+import type { HourlyPoint, DayScore, TrafficLevel } from '@/lib/types/forecast';
+import type { ScoringThresholds } from '@/lib/types/config';
+import type { SurgeAlert } from '@/lib/types/water';
+import { SCORING, DAYLIGHT } from '@/lib/config/boat';
+
+function hourOf(iso: string): number {
+  // iso local 'YYYY-MM-DDTHH:mm' -> HH
+  return Number(iso.slice(11, 13));
+}
+
+function dateOf(iso: string): string {
+  return iso.slice(0, 10);
+}
+
+function median(values: number[]): number {
+  if (values.length === 0) return 0;
+  const s = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+/** Media circular de direcciones (grados), resultado en 0..360. */
+function circularMean(degs: number[]): number {
+  if (degs.length === 0) return 0;
+  let x = 0;
+  let y = 0;
+  for (const d of degs) {
+    x += Math.cos((d * Math.PI) / 180);
+    y += Math.sin((d * Math.PI) / 180);
+  }
+  return (((Math.atan2(y, x) * 180) / Math.PI) + 360) % 360;
+}
+
+function groupByDay(hourly: HourlyPoint[]): Map<string, HourlyPoint[]> {
+  const map = new Map<string, HourlyPoint[]>();
+  for (const p of hourly) {
+    const d = dateOf(p.time);
+    const arr = map.get(d) ?? [];
+    arr.push(p);
+    map.set(d, arr);
+  }
+  return map;
+}
+
+/**
+ * Califica un único día a partir de sus puntos horarios.
+ * Considera solo horas de luz para viento/ráfagas. Una alerta de surge activa
+ * ese día degrada el nivel.
+ */
+export function scoreDay(
+  date: string,
+  points: HourlyPoint[],
+  thresholds: ScoringThresholds = SCORING,
+  surgeOnDay: SurgeAlert[] = [],
+): DayScore {
+  const daylight = points.filter(
+    (p) => hourOf(p.time) >= DAYLIGHT.sunriseHour && hourOf(p.time) <= DAYLIGHT.sunsetHour,
+  );
+  const usable = daylight.length ? daylight : points;
+
+  const windMedianKt = Math.round(median(usable.map((p) => p.windKt)));
+  const gustPeakKt = Math.round(Math.max(0, ...usable.map((p) => p.gustKt)));
+  const windDirDominant = Math.round(circularMean(usable.map((p) => p.windDir)));
+  const precipTotalMm = Math.round(usable.reduce((s, p) => s + p.precipMm, 0) * 10) / 10;
+  const temps = points.map((p) => p.tempC);
+  const tempMinC = Math.round(Math.min(...temps));
+  const tempMaxC = Math.round(Math.max(...temps));
+
+  const reasons: string[] = [];
+  let level: TrafficLevel = 'verde';
+
+  const escalate = (to: TrafficLevel, reason: string) => {
+    reasons.push(reason);
+    const order: TrafficLevel[] = ['verde', 'amarillo', 'rojo'];
+    if (order.indexOf(to) > order.indexOf(level)) level = to;
+  };
+
+  // Viento
+  if (windMedianKt >= thresholds.dangerWind) {
+    escalate('rojo', `Viento muy fuerte (~${windMedianKt} kt)`);
+  } else if (windMedianKt >= thresholds.strongWind) {
+    escalate('amarillo', `Viento fuerte (~${windMedianKt} kt)`);
+  } else if (windMedianKt < thresholds.idealWindMin) {
+    escalate('amarillo', `Viento flojo (~${windMedianKt} kt)`);
+  }
+
+  // Ráfagas
+  if (gustPeakKt >= thresholds.gustRed) {
+    escalate('rojo', `Ráfagas peligrosas (hasta ${gustPeakKt} kt)`);
+  } else if (gustPeakKt >= thresholds.gustYellow) {
+    escalate('amarillo', `Ráfagas marcadas (hasta ${gustPeakKt} kt)`);
+  }
+
+  // Lluvia
+  if (precipTotalMm >= thresholds.rainRed) {
+    escalate('rojo', `Lluvia fuerte (${precipTotalMm} mm)`);
+  } else if (precipTotalMm >= thresholds.rainYellow) {
+    escalate('amarillo', `Algo de lluvia (${precipTotalMm} mm)`);
+  }
+
+  // Surge meteorológico
+  for (const alert of surgeOnDay) {
+    const to: TrafficLevel = alert.severity >= 2 ? 'rojo' : 'amarillo';
+    escalate(to, alert.message);
+  }
+
+  if (level === 'verde' && reasons.length === 0) {
+    reasons.push(`Buenas condiciones (~${windMedianKt} kt, sin lluvia)`);
+  }
+
+  return {
+    date,
+    level,
+    reasons,
+    metrics: {
+      windMedianKt,
+      gustPeakKt,
+      windDirDominant,
+      precipTotalMm,
+      tempMinC,
+      tempMaxC,
+    },
+  };
+}
+
+/** Califica todos los días presentes en el pronóstico horario. */
+export function scoreDays(
+  hourly: HourlyPoint[],
+  thresholds: ScoringThresholds = SCORING,
+  surgeAlerts: SurgeAlert[] = [],
+): DayScore[] {
+  const byDay = groupByDay(hourly);
+  const days: DayScore[] = [];
+  for (const [date, points] of byDay) {
+    const surgeOnDay = surgeAlerts.filter(
+      (a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date,
+    );
+    days.push(scoreDay(date, points, thresholds, surgeOnDay));
+  }
+  return days.sort((a, b) => a.date.localeCompare(b.date));
+}

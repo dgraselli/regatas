@@ -1,0 +1,18 @@
+{
+  "name": "Regatas — Asistente Náutico",
+  "short_name": "Regatas",
+  "description": "Pronóstico, semáforo de navegabilidad, alertas de sudestada/bajante y planificador del cruce La Plata → Colonia.",
+  "lang": "es",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1d63d8",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

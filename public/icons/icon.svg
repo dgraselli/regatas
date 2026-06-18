@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#1d63d8"/>
+  <!-- olas -->
+  <path d="M0 392 q64 -40 128 0 t128 0 t128 0 t128 0 V512 H0 Z" fill="#3b97f6"/>
+  <path d="M0 432 q64 -40 128 0 t128 0 t128 0 t128 0 V512 H0 Z" fill="#93d0fd"/>
+  <!-- velero -->
+  <path d="M256 96 L256 320 L150 320 Z" fill="#ffffff"/>
+  <path d="M276 150 L276 320 L372 320 Z" fill="#dbeefe"/>
+  <rect x="250" y="96" width="10" height="240" fill="#172d54"/>
+  <path d="M140 336 L372 336 L340 384 L172 384 Z" fill="#172d54"/>
+</svg>

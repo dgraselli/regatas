@@ -1,29 +1,32 @@
-import type { Route } from '@/lib/types/config';
-import { TIMEZONE } from '@/lib/config/clubs';
+import type { Route, RoutePoint } from '@/lib/types/config';
+import { TIMEZONE } from '@/lib/profile/defaults';
+import { haversineNm } from '@/lib/domain/geo';
 
 /**
- * Ruta del cruce La Plata → Colonia del Sacramento.
- * Waypoints aproximados a lo largo de la derrota (~26 NM / ~48 km).
- * El pronóstico de viento se muestrea en el punto medio (la grilla de
- * Open-Meteo es gruesa), pero la estructura permite muestrear por waypoint.
+ * Construye una ruta entre dos puntos cualesquiera (la amarra del usuario y un
+ * destino), con un waypoint intermedio en el medio para muestrear el viento.
  */
-export const ROUTES: Route[] = [
-  {
-    id: 'laplata-colonia',
-    name: 'La Plata → Colonia',
-    approxNm: 23,
+export function buildRoute(from: RoutePoint, to: RoutePoint): Route {
+  const mid: RoutePoint = {
+    name: 'Medio del cruce',
+    lat: (from.lat + to.lat) / 2,
+    lon: (from.lon + to.lon) / 2,
+  };
+  const approxNm = Math.round(haversineNm(from.lat, from.lon, to.lat, to.lon));
+  return {
+    id: `${slug(from.name)}-${slug(to.name)}`,
+    name: `${from.name} → ${to.name}`,
+    approxNm,
     timezone: TIMEZONE,
-    waypoints: [
-      { name: 'Mi amarra (La Plata)', lat: -34.839876, lon: -57.923381 },
-      { name: 'Medio del Río', lat: -34.65, lon: -57.88 },
-      { name: 'Aprox. Colonia', lat: -34.5, lon: -57.86 },
-      { name: 'Colonia del Sacramento', lat: -34.47, lon: -57.84 },
-    ],
-  },
-];
+    waypoints: [from, mid, to],
+  };
+}
 
-export const DEFAULT_ROUTE_ID = 'laplata-colonia';
-
-export function getRoute(id: string): Route {
-  return ROUTES.find((r) => r.id === id) ?? ROUTES[0];
+function slug(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }

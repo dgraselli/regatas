@@ -1,19 +1,29 @@
 'use client';
 
-import { useState } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
-import { DEFAULT_CLUB_ID } from '@/lib/config/clubs';
+import { useProfile } from '@/lib/profile/ProfileContext';
 import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
 import { LocationPicker } from '@/components/common/LocationPicker';
+import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 
 export default function AlertasPage() {
-  const [clubId, setClubId] = useState(DEFAULT_CLUB_ID);
-  const forecast = useForecast(clubId);
+  const { profile, hydrated, activeLocation, setActiveLocation } = useProfile();
+  const forecast = useForecast(activeLocation, profile.caution);
   const water = useWaterLevel();
+
+  if (!hydrated) return <Loading />;
+  if (!activeLocation) {
+    return (
+      <Onboarding
+        title="Configurá tu lugar"
+        body="Agregá tu amarra para ver alertas de sudestada y bajante en tu zona."
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -25,7 +35,11 @@ export default function AlertasPage() {
             riesgo de varadura), estimadas según viento y nivel observado.
           </p>
         </div>
-        <LocationPicker value={clubId} onChange={setClubId} />
+        <LocationPicker
+          locations={profile.locations}
+          value={activeLocation.id}
+          onChange={setActiveLocation}
+        />
       </div>
 
       <Card>

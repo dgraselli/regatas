@@ -6,7 +6,8 @@ import { usePathname } from 'next/navigation';
 const LINKS = [
   { href: '/', label: 'Panel' },
   { href: '/alertas', label: 'Alertas de marea' },
-  { href: '/cruce', label: 'Cruce a Colonia' },
+  { href: '/cruce', label: 'Cruce' },
+  { href: '/perfil', label: 'Mi perfil' },
 ];
 
 export function NavBar() {

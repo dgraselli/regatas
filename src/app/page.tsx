@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
-import { DEFAULT_CLUB_ID } from '@/lib/config/clubs';
+import { Onboarding } from '@/components/common/Onboarding';
+import { useProfile } from '@/lib/profile/ProfileContext';
 import { ForecastStrip } from '@/components/dashboard/ForecastStrip';
 import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
@@ -14,9 +15,9 @@ import { Loading, ErrorState } from '@/components/ui/States';
 import { formatDate } from '@/lib/format';
 
 export default function DashboardPage() {
-  const [clubId, setClubId] = useState(DEFAULT_CLUB_ID);
+  const { profile, hydrated, activeLocation, activeBoat, setActiveLocation } = useProfile();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const { data, isLoading, isError, error } = useForecast(clubId);
+  const { data, isLoading, isError, error } = useForecast(activeLocation, profile.caution);
 
   const days = data?.bundle.days ?? [];
   const activeDate = selectedDate ?? days[0]?.date ?? '';
@@ -27,17 +28,33 @@ export default function DashboardPage() {
     [data, activeDate],
   );
 
+  if (!hydrated) return <Loading />;
+
+  if (!activeLocation) {
+    return (
+      <Onboarding
+        title="Configurá tu lugar"
+        body="Agregá tu amarra o el lugar desde donde navegás para ver el pronóstico y el semáforo de navegabilidad."
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">¿Salimos a navegar?</h1>
           <p className="text-slate-500 text-sm">
-            Pronóstico de los próximos días con semáforo de navegabilidad.
+            Pronóstico de los próximos días con semáforo de navegabilidad
+            {activeBoat ? ` para el ${activeBoat.name}` : ''}.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <LocationPicker value={clubId} onChange={setClubId} />
+          <LocationPicker
+            locations={profile.locations}
+            value={activeLocation.id}
+            onChange={setActiveLocation}
+          />
           <OfflineBadge fetchedAt={data?.bundle.fetchedAt} />
         </div>
       </div>

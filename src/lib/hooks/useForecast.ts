@@ -1,12 +1,14 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getForecastBundle } from '@/lib/services';
-import { getClub } from '@/lib/config/clubs';
+import { getForecastBundle, type ForecastPoint } from '@/lib/services';
+import { scoringFor } from '@/lib/config/boat';
+import type { Caution } from '@/lib/profile/types';
 
-export function useForecast(clubId: string) {
+export function useForecast(loc: ForecastPoint | null, caution: Caution = 'normal') {
   return useQuery({
-    queryKey: ['forecast', clubId],
-    queryFn: () => getForecastBundle(getClub(clubId)),
+    queryKey: ['forecast', loc?.id ?? 'none', caution],
+    queryFn: () => getForecastBundle(loc!, scoringFor(caution)),
+    enabled: !!loc,
   });
 }

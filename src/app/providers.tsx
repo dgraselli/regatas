@@ -4,6 +4,7 @@ import { useState, useEffect, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import { ProfileProvider } from '@/lib/profile/ProfileContext';
 
 /**
  * Provee React Query con persistencia en localStorage para que el último
@@ -41,12 +42,16 @@ export function Providers({ children }: { children: ReactNode }) {
 
   if (!persister) {
     // SSR / prerender: cliente sin persistencia (se hidrata en el navegador).
-    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
+    return (
+      <QueryClientProvider client={client}>
+        <ProfileProvider>{children}</ProfileProvider>
+      </QueryClientProvider>
+    );
   }
 
   return (
     <PersistQueryClientProvider client={client} persistOptions={{ persister }}>
-      {children}
+      <ProfileProvider>{children}</ProfileProvider>
     </PersistQueryClientProvider>
   );
 }

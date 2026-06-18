@@ -1,4 +1,4 @@
-import type { Club } from '@/lib/types/config';
+import type { BoatPolar, RoutingConfig, ScoringThresholds, RoutePoint } from '@/lib/types/config';
 import type { ForecastBundle } from '@/lib/types/forecast';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
 import type { CrossingPlan } from '@/lib/types/crossing';
@@ -10,30 +10,39 @@ import { normalizeWaterLevel } from '@/lib/transforms/normalizeWaterLevel';
 import { scoreDays } from '@/lib/domain/scoring';
 import { detectSurge } from '@/lib/domain/surge';
 import { planCrossing } from '@/lib/domain/routing';
-import { getRoute } from '@/lib/config/routes';
+import { buildRoute } from '@/lib/config/routes';
+import { TIMEZONE } from '@/lib/profile/defaults';
 
-/** Pronóstico normalizado + días puntuados + alertas de surge para un club. */
-export async function getForecastBundle(club: Club): Promise<{
-  bundle: ForecastBundle;
-  surge: SurgeAlert[];
-}> {
+export interface ForecastPoint {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  timezone?: string;
+}
+
+/** Pronóstico normalizado + días puntuados + alertas de surge para un lugar. */
+export async function getForecastBundle(
+  loc: ForecastPoint,
+  thresholds?: ScoringThresholds,
+): Promise<{ bundle: ForecastBundle; surge: SurgeAlert[] }> {
   const [forecast, marine] = await Promise.all([
-    fetchForecast(club.lat, club.lon),
-    fetchMarine(club.lat, club.lon),
+    fetchForecast(loc.lat, loc.lon),
+    fetchMarine(loc.lat, loc.lon),
   ]);
   const hourly = normalizeForecast(forecast, marine);
   const surge = detectSurge(hourly);
-  const days = scoreDays(hourly, undefined, surge);
+  const days = scoreDays(hourly, thresholds, surge);
   const fetchedAt = new Date().toISOString();
 
   return {
     bundle: {
       club: {
-        id: club.id,
-        name: club.name,
-        lat: club.lat,
-        lon: club.lon,
-        timezone: club.timezone,
+        id: loc.id,
+        name: loc.name,
+        lat: loc.lat,
+        lon: loc.lon,
+        timezone: loc.timezone ?? TIMEZONE,
       },
       fetchedAt,
       hourly,
@@ -48,14 +57,22 @@ export async function getWaterStatus(stationId?: string): Promise<WaterLevelStat
   return normalizeWaterLevel(res, new Date().toISOString());
 }
 
-/** Plan de cruce para una ruta, usando el viento muestreado en su punto medio. */
-export async function getCrossingPlan(routeId: string): Promise<CrossingPlan> {
-  const route = getRoute(routeId);
+/**
+ * Plan de cruce entre dos puntos, con la polar del barco del usuario.
+ * El viento se muestrea en el punto medio de la derrota.
+ */
+export async function getCrossingPlan(
+  from: RoutePoint,
+  to: RoutePoint,
+  polar: BoatPolar,
+  routingCfg: RoutingConfig,
+): Promise<CrossingPlan> {
+  const route = buildRoute(from, to);
   const mid = route.waypoints[Math.floor(route.waypoints.length / 2)];
   const [forecast, marine] = await Promise.all([
     fetchForecast(mid.lat, mid.lon),
     fetchMarine(mid.lat, mid.lon),
   ]);
   const hourly = normalizeForecast(forecast, marine);
-  return planCrossing(route, hourly);
+  return planCrossing(route, hourly, polar, routingCfg);
 }

@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { planCrossing, addHoursIso } from '@/lib/domain/routing';
-import { getRoute } from '@/lib/config/routes';
+import { buildRoute } from '@/lib/config/routes';
 import type { HourlyPoint } from '@/lib/types/forecast';
 
-const route = getRoute('laplata-colonia');
+const route = buildRoute(
+  { name: 'Mi amarra', lat: -34.839876, lon: -57.923381 },
+  { name: 'Colonia', lat: -34.47, lon: -57.84 },
+);
 
 function forecast(dir: number, wind: number): HourlyPoint[] {
   return Array.from({ length: 80 }, (_, i) => ({

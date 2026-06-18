@@ -1,41 +1,16 @@
-import type {
-  BoatPolar,
-  ScoringThresholds,
-  SurgeThresholds,
-  RoutingConfig,
-} from '@/lib/types/config';
+import type { ScoringThresholds, SurgeThresholds } from '@/lib/types/config';
+import { generatePolar, deriveRouting } from '@/lib/domain/polarModel';
 
-/** Datos del barco del usuario. */
-export const BOAT = {
-  name: 'Plenamar New 23',
-  lengthFt: 23,
-};
+/** Eslora por defecto al crear un barco nuevo (pies). */
+export const DEFAULT_LENGTH_FT = 23;
 
 /**
- * Polar del Plenamar New 23 (velero de ~23 pies, eslora ~7 m).
- * Velocidad de casco ~5,8-6 kt; ciñe algo peor que un crucero grande y arranca
- * más lento con viento flojo. Valores estimados (no medidos) — ajustar con datos
- * reales del barco si se dispone. speeds[i][j] en nudos para twaPoints[i] / twsPoints[j].
+ * Polar y parámetros de navegación por defecto, derivados de la eslora.
+ * Cada barco del usuario genera los suyos a partir de su eslora; estos sirven
+ * como valores por defecto cuando no hay barco seleccionado.
  */
-export const DEFAULT_POLAR: BoatPolar = {
-  twaPoints: [0, 30, 40, 52, 60, 75, 90, 110, 120, 135, 150, 165, 180],
-  twsPoints: [5, 10, 15, 20, 25],
-  speeds: [
-    [0.0, 0.0, 0.0, 0.0, 0.0], // 0  - de proa, zona muerta
-    [0.0, 0.0, 0.0, 0.0, 0.0], // 30 - zona muerta
-    [0.0, 0.0, 0.0, 0.0, 0.0], // 40 - todavía en zona muerta (ciñe peor)
-    [3.4, 4.4, 4.9, 5.1, 5.1], // 52 - ceñida
-    [3.7, 4.7, 5.2, 5.4, 5.4], // 60
-    [3.9, 4.9, 5.4, 5.6, 5.6], // 75
-    [4.0, 5.0, 5.5, 5.7, 5.7], // 90 - través
-    [3.8, 4.9, 5.4, 5.7, 5.8], // 110
-    [3.5, 4.7, 5.3, 5.6, 5.8], // 120 - aleta
-    [3.1, 4.3, 4.9, 5.4, 5.7], // 135
-    [2.6, 3.8, 4.5, 5.0, 5.4], // 150
-    [2.1, 3.2, 3.9, 4.4, 4.9], // 165
-    [1.9, 2.9, 3.6, 4.1, 4.6], // 180 - popa
-  ],
-};
+export const DEFAULT_POLAR = generatePolar(DEFAULT_LENGTH_FT);
+export const ROUTING = deriveRouting(DEFAULT_LENGTH_FT);
 
 export const SCORING: ScoringThresholds = {
   idealWindMin: 6,
@@ -48,6 +23,17 @@ export const SCORING: ScoringThresholds = {
   rainRed: 12,
 };
 
+/** Umbrales del semáforo ajustados al nivel de tolerancia al riesgo. */
+export function scoringFor(caution: 'prudente' | 'normal' | 'audaz'): ScoringThresholds {
+  if (caution === 'prudente') {
+    return { ...SCORING, strongWind: 18, dangerWind: 24, gustYellow: 22, gustRed: 28, rainYellow: 1, rainRed: 8 };
+  }
+  if (caution === 'audaz') {
+    return { ...SCORING, idealWindMin: 5, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16 };
+  }
+  return SCORING;
+}
+
 export const SURGE: SurgeThresholds = {
   // Sudestada: viento del sector SE (de dónde viene).
   sudestadaSector: [112, 157],
@@ -55,13 +41,6 @@ export const SURGE: SurgeThresholds = {
   bajanteSector: [292, 22],
   minWindKt: 18,
   minHours: 6,
-};
-
-export const ROUTING: RoutingConfig = {
-  // El Plenamar 23 ciñe peor que un crucero grande y conviene tomar rizos antes.
-  noGoAngle: 45,
-  tackingEfficiency: 0.6,
-  reefGust: 23,
 };
 
 /** Hora local aproximada de salida y puesta de sol para flags de "llega de noche". */

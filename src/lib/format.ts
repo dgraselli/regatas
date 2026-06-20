@@ -1,0 +1,37 @@
+/** Utilidades de formato para la UI (en español). */
+
+const DIRS = [
+  'N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE',
+  'S', 'SSO', 'SO', 'OSO', 'O', 'ONO', 'NO', 'NNO',
+];
+
+/** Grados (de dónde viene el viento) → punto cardinal. */
+export function compass(deg: number): string {
+  const i = Math.round((((deg % 360) + 360) % 360) / 22.5) % 16;
+  return DIRS[i];
+}
+
+const DOW = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+const MON = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+/** 'YYYY-MM-DD' → 'Mié 18 jun'. Sin dependencia de zona horaria. */
+export function formatDate(iso: string): string {
+  const y = Number(iso.slice(0, 4));
+  const m = Number(iso.slice(5, 7)) - 1;
+  const d = Number(iso.slice(8, 10));
+  const dow = new Date(Date.UTC(y, m, d)).getUTCDay();
+  return `${DOW[dow]} ${d} ${MON[m]}`;
+}
+
+/** 'YYYY-MM-DDTHH:mm' → 'HH:mm'. */
+export function formatHour(iso: string): string {
+  return iso.slice(11, 16);
+}
+
+/** Horas decimales → 'Xh YYmin'. */
+export function formatDuration(hours: number): string {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  if (h === 0) return `${m} min`;
+  return m === 0 ? `${h} h` : `${h} h ${m} min`;
+}

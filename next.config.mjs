@@ -1,19 +1,21 @@
 /** @type {import('next').NextConfig} */
+
+// En GitHub Pages la app se sirve desde https://<usuario>.github.io/regatas/,
+// así que en producción necesita basePath/assetPrefix. En dev queda en la raíz.
+const basePath = process.env.NODE_ENV === 'production' ? '/regatas' : '';
+
 const nextConfig = {
   reactStrictMode: true,
-  // El service worker se sirve estático desde /public/sw.js y se registra en el cliente.
-  // Cabeceras para que el SW y el manifest se cacheen correctamente.
-  async headers() {
-    return [
-      {
-        source: '/sw.js',
-        headers: [
-          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-          { key: 'Service-Worker-Allowed', value: '/' },
-        ],
-      },
-    ];
-  },
+  // Export estático: genera la carpeta `out/` para hosting estático (GitHub Pages).
+  output: 'export',
+  basePath,
+  assetPrefix: basePath || undefined,
+  // Sin servidor de imágenes en export estático.
+  images: { unoptimized: true },
+  // Genera /ruta/index.html (rutas robustas en GitHub Pages).
+  trailingSlash: true,
+  // Disponible en el cliente para registrar el service worker con el basePath correcto.
+  env: { NEXT_PUBLIC_BASE_PATH: basePath },
 };
 
 export default nextConfig;

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'Regatas — Asistente Náutico',
   description:
     'Pronóstico, semáforo de navegabilidad, alertas de sudestada/bajante y planificador del cruce La Plata → Colonia en el Río de la Plata.',
-  manifest: '/manifest.webmanifest',
+  manifest: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ''}/manifest.webmanifest`,
   appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Regatas' },
 };
 

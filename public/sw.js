@@ -3,7 +3,8 @@
    de modo que el último pronóstico quede disponible offline. */
 
 const CACHE = 'regatas-v1';
-const SHELL = ['/', '/alertas', '/cruce', '/perfil', '/manifest.webmanifest', '/icons/icon.svg'];
+// Rutas relativas al scope del SW: en dev resuelven a la raíz; en GitHub Pages, a /regatas/.
+const SHELL = ['./', './alertas/', './cruce/', './perfil/', './manifest.webmanifest', './icons/icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

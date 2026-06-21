@@ -13,7 +13,7 @@ import { Loading, ErrorState } from '@/components/ui/States';
 export default function AlertasPage() {
   const { profile, hydrated, activeLocation, setActiveLocation } = useProfile();
   const forecast = useForecast(activeLocation, profile.caution);
-  const water = useWaterLevel();
+  const water = useWaterLevel(activeLocation);
 
   if (!hydrated) return <Loading />;
   if (!activeLocation) {
@@ -43,11 +43,21 @@ export default function AlertasPage() {
       </div>
 
       <Card>
-        <CardHeader title="Nivel de agua observado" subtitle="Fuente: INA (ejemplo)" />
+        <CardHeader
+          title="Nivel de agua observado"
+          subtitle="Fuente: INA — Sistema de Alerta Hidrológico (estación más cercana)"
+        />
         <div className="px-4 pb-4 pt-3">
           {water.isLoading && <Loading />}
           {water.isError && <ErrorState />}
-          {water.data && <WaterLevelGauge status={water.data} />}
+          {water.data &&
+            (water.data.observations.length > 0 ? (
+              <WaterLevelGauge status={water.data} />
+            ) : (
+              <p className="text-sm text-slate-500">
+                Sin datos recientes de la estación más cercana.
+              </p>
+            ))}
         </div>
       </Card>
 

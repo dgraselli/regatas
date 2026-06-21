@@ -11,6 +11,7 @@ import { scoreDays } from '@/lib/domain/scoring';
 import { detectSurge } from '@/lib/domain/surge';
 import { planCrossing } from '@/lib/domain/routing';
 import { buildRoute } from '@/lib/config/routes';
+import { nearestStation } from '@/lib/config/inaStations';
 import { TIMEZONE } from '@/lib/profile/defaults';
 
 export interface ForecastPoint {
@@ -52,8 +53,13 @@ export async function getForecastBundle(
   };
 }
 
-export async function getWaterStatus(stationId?: string): Promise<WaterLevelStatus> {
-  const res = await fetchWaterLevel(stationId);
+/** Nivel de agua observado de la estación del INA más cercana al lugar dado. */
+export async function getWaterStatus(loc?: {
+  lat: number;
+  lon: number;
+}): Promise<WaterLevelStatus> {
+  const station = loc ? nearestStation(loc.lat, loc.lon) : undefined;
+  const res = await fetchWaterLevel(station?.seriesId, station?.name);
   return normalizeWaterLevel(res, new Date().toISOString());
 }
 

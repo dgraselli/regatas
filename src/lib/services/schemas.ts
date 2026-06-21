@@ -26,6 +26,15 @@ export const openMeteoMarineSchema = z.object({
 });
 export type OpenMeteoMarine = z.infer<typeof openMeteoMarineSchema>;
 
+/** Observaciones puntuales crudas de la API a5 del INA. */
+export const inaObservacionesSchema = z.array(
+  z.object({
+    timestart: z.string(),
+    valor: z.number().nullable(),
+  }),
+);
+export type InaObservaciones = z.infer<typeof inaObservacionesSchema>;
+
 /** Respuesta normalizada del nivel de agua observado (forma simplificada tipo INA). */
 export const waterLevelSchema = z.object({
   stationName: z.string(),

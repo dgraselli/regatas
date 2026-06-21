@@ -74,9 +74,11 @@ Para usar APIs reales: poné `NEXT_PUBLIC_USE_MOCKS=false` en `.env.local`.
 ## Próximos pasos sugeridos (roadmap)
 
 ### Prioritario
-- [ ] **Integrar la API real del INA** (nivel de agua observado): confirmar URL base,
-      IDs de estación y auth en https://alerta.ina.gob.ar, completar
-      `src/lib/services/inaHidrologico.ts` y asociar la estación al lugar activo.
+- [x] **Integrar la API real del INA** (nivel de agua observado): se usa la API pública
+      "a5" (`https://alerta.ina.gob.ar/a5/obs/puntual/series/{id}/observaciones`, sin auth,
+      CORS abierto), variable altura hidrométrica (var=2). La estación se elige por cercanía
+      al lugar activo (`src/lib/config/inaStations.ts`, `inaHidrologico.ts`). Pendiente menor:
+      ampliar/curar el catálogo de estaciones.
 - [ ] **Editar** barcos/lugares existentes (hoy solo alta/baja/selección).
       Ya existe `updateBoat` / `updateLocation` en `ProfileContext` — falta UI.
 - [ ] **Importar/exportar perfil** (JSON) para llevarlo a otro dispositivo, ya que no

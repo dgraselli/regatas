@@ -5,6 +5,7 @@ import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
+import { MetodologiaInfo } from '@/components/alerts/MetodologiaInfo';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -73,18 +74,7 @@ export default function AlertasPage() {
           ))}
       </section>
 
-      <p className="text-xs text-slate-400">
-        El pronóstico oficial de altura de agua y sudestadas lo emite el{' '}
-        <a
-          className="underline"
-          href="https://www.hidro.gob.ar"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Servicio de Hidrografía Naval (SHN)
-        </a>
-        . Estas alertas son orientativas.
-      </p>
+      <MetodologiaInfo stationName={water.data?.stationName} />
     </div>
   );
 }

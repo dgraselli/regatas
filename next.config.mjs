@@ -3,9 +3,10 @@ import { readFileSync } from 'node:fs';
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
-// En GitHub Pages la app se sirve desde https://<usuario>.github.io/regatas/,
-// así que en producción necesita basePath/assetPrefix. En dev queda en la raíz.
-const basePath = process.env.NODE_ENV === 'production' ? '/regatas' : '';
+// Con dominio propio (regatas.com.ar) el sitio se sirve en la RAÍZ, así que el
+// basePath va vacío. Si alguna vez se publica bajo un subdirectorio (p.ej.
+// usuario.github.io/regatas), setear NEXT_PUBLIC_BASE_PATH=/regatas en el build.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
 const nextConfig = {
   reactStrictMode: true,

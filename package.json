@@ -1,6 +1,6 @@
 {
   "name": "regatas",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Asistente náutico para el Río de la Plata: pronóstico, semáforo de navegabilidad, alertas de sudestada/bajante y planificador del cruce La Plata → Colonia.",
   "scripts": {

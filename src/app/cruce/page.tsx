@@ -13,6 +13,7 @@ import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { buildRoute } from '@/lib/config/routes';
 import { formatDate, formatHour, formatDuration, compass } from '@/lib/format';
+import { track } from '@/lib/analytics';
 
 export default function CrucePage() {
   const { profile, hydrated, activeBoat, activeLocation } = useProfile();
@@ -121,7 +122,10 @@ export default function CrucePage() {
               <DepartureRanker
                 candidates={data.ranked}
                 selectedIndex={selected}
-                onSelect={setSelected}
+                onSelect={(i) => {
+                  setSelected(i);
+                  track('crossing_select_departure', { index: i });
+                }}
               />
             </Card>
             {route && (

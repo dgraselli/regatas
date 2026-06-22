@@ -22,6 +22,12 @@ jobs:
     env:
       # Usa las APIs reales (Open-Meteo) en el sitio publicado, no los mocks.
       NEXT_PUBLIC_USE_MOCKS: 'false'
+      # Analítica (Umami) y feedback (Tally). El Website ID de Umami es público
+      # (va en el <script> del sitio), así que se deja como default; se puede
+      # sobreescribir en Settings → Secrets and variables → Actions → Variables.
+      NEXT_PUBLIC_UMAMI_SRC: ${{ vars.NEXT_PUBLIC_UMAMI_SRC || 'https://cloud.umami.is/script.js' }}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.NEXT_PUBLIC_UMAMI_WEBSITE_ID || '5072e63d-c5b4-4813-84c6-8e63abccf357' }}
+      NEXT_PUBLIC_FEEDBACK_URL: ${{ vars.NEXT_PUBLIC_FEEDBACK_URL || 'https://tally.so/r/D4bxkE' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

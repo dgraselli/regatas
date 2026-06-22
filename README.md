@@ -75,6 +75,24 @@ Con `NEXT_PUBLIC_USE_MOCKS=true` (default, ver `.env.example`) la app usa datos 
 ejemplo generados localmente, por lo que funciona **sin acceso a red** (ideal para
 dev, tests y build). Poné `false` para que el navegador llame a las APIs reales.
 
+## Analítica y feedback
+
+Ambos son **opcionales** y se activan por variables de entorno (ver `.env.example`);
+si no se configuran, no se cargan.
+
+- **Analítica anónima sin cookies** ([Umami](https://umami.is)): `NEXT_PUBLIC_UMAMI_SRC`
+  y `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Registra páginas vistas (qué features se usan más,
+  desde dónde) y eventos personalizados (`track()` en `src/lib/analytics.ts`:
+  `change_caution`, `add_known_club`, `crossing_select_departure`, `feedback_open`, …).
+  Al ser cookieless no requiere banner de consentimiento.
+- **Feedback**: `NEXT_PUBLIC_FEEDBACK_URL` apunta a un formulario externo (ej. Tally).
+  Aparece un botón "Enviar feedback" en el pie que abre el formulario con la página
+  actual como parámetro `page`.
+
+En producción (GitHub Pages) se cargan desde *Settings → Secrets and variables →
+Actions → Variables* (`NEXT_PUBLIC_UMAMI_SRC`, `NEXT_PUBLIC_UMAMI_WEBSITE_ID`,
+`NEXT_PUBLIC_FEEDBACK_URL`), que el workflow inyecta en el build.
+
 ## Arquitectura
 
 - `src/lib/domain/` — lógica pura y testeada: `scoring` (semáforo), `surge`

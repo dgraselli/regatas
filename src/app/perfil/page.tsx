@@ -5,6 +5,7 @@ import { useProfile } from '@/lib/profile/ProfileContext';
 import { TIMEZONE } from '@/lib/profile/defaults';
 import { hullSpeedKt } from '@/lib/domain/polarModel';
 import { KNOWN_CLUBS, type KnownClub } from '@/lib/config/knownClubs';
+import { track } from '@/lib/analytics';
 import type { Caution, LocationKind } from '@/lib/profile/types';
 import { Card } from '@/components/ui/Card';
 import { Loading } from '@/components/ui/States';
@@ -79,7 +80,12 @@ export default function PerfilPage() {
             </Card>
           ))}
         </div>
-        <AddBoatForm onAdd={(name, lengthFt) => addBoat({ name, lengthFt })} />
+        <AddBoatForm
+          onAdd={(name, lengthFt) => {
+            addBoat({ name, lengthFt });
+            track('add_boat', { lengthFt });
+          }}
+        />
       </section>
 
       {/* LUGARES */}
@@ -117,14 +123,16 @@ export default function PerfilPage() {
           ))}
         </div>
         <AddKnownClubForm
-          onAdd={(club, kind) =>
-            addLocation({ name: club.name, lat: club.lat, lon: club.lon, kind, timezone: TIMEZONE })
-          }
+          onAdd={(club, kind) => {
+            addLocation({ name: club.name, lat: club.lat, lon: club.lon, kind, timezone: TIMEZONE });
+            track('add_known_club', { name: club.name, country: club.country });
+          }}
         />
         <AddLocationForm
-          onAdd={(name, lat, lon, kind) =>
-            addLocation({ name, lat, lon, kind, timezone: TIMEZONE })
-          }
+          onAdd={(name, lat, lon, kind) => {
+            addLocation({ name, lat, lon, kind, timezone: TIMEZONE });
+            track('add_location', { kind });
+          }}
         />
       </section>
 

@@ -14,6 +14,7 @@ import { OfflineBadge } from '@/components/common/OfflineBadge';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { formatDate } from '@/lib/format';
+import { track } from '@/lib/analytics';
 
 export default function DashboardPage() {
   const { profile, hydrated, activeLocation, activeBoat, setActiveLocation, setCaution } =
@@ -57,7 +58,13 @@ export default function DashboardPage() {
             value={activeLocation.id}
             onChange={setActiveLocation}
           />
-          <CautionPicker value={profile.caution} onChange={setCaution} />
+          <CautionPicker
+            value={profile.caution}
+            onChange={(c) => {
+              setCaution(c);
+              track('change_caution', { caution: c });
+            }}
+          />
           <OfflineBadge fetchedAt={data?.bundle.fetchedAt} />
         </div>
       </div>

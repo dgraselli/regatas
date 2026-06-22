@@ -7,21 +7,24 @@ import { DepartureRanker } from '@/components/crossing/DepartureRanker';
 import { LegTable } from '@/components/crossing/LegTable';
 import { RouteMap } from '@/components/crossing/RouteMap';
 import { LocationPicker } from '@/components/common/LocationPicker';
+import { BoatPicker } from '@/components/common/BoatPicker';
 import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { buildRoute } from '@/lib/config/routes';
-import { formatDate, formatHour, formatDuration } from '@/lib/format';
+import { formatDate, formatHour, formatDuration, compass } from '@/lib/format';
 
 export default function CrucePage() {
   const { profile, hydrated, activeBoat, activeLocation } = useProfile();
   const locations = profile.locations;
+  const boats = profile.boats;
 
   const [originId, setOriginId] = useState<string | null>(null);
   const [destId, setDestId] = useState<string | null>(null);
+  const [boatId, setBoatId] = useState<string | null>(null);
   const [selected, setSelected] = useState(0);
 
-  // Defaults: origen = amarra activa; destino = primer 'destino' distinto.
+  // Defaults: origen = amarra activa; destino = primer 'destino' distinto; barco activo.
   useEffect(() => {
     if (!hydrated) return;
     if (!originId) setOriginId(activeLocation?.id ?? locations[0]?.id ?? null);
@@ -29,18 +32,20 @@ export default function CrucePage() {
       const dest = locations.find((l) => l.kind === 'destino' && l.id !== activeLocation?.id);
       setDestId(dest?.id ?? locations.find((l) => l.id !== activeLocation?.id)?.id ?? null);
     }
-  }, [hydrated, activeLocation, locations, originId, destId]);
+    if (!boatId) setBoatId(activeBoat?.id ?? boats[0]?.id ?? null);
+  }, [hydrated, activeLocation, locations, boats, activeBoat, originId, destId, boatId]);
 
   const from = locations.find((l) => l.id === originId) ?? null;
   const to = locations.find((l) => l.id === destId) ?? null;
+  const boat = boats.find((b) => b.id === boatId) ?? activeBoat ?? boats[0] ?? null;
 
-  const { data, isLoading, isError, error } = useCrossingPlan(from, to, activeBoat);
+  const { data, isLoading, isError, error } = useCrossingPlan(from, to, boat);
   const candidate = data?.ranked[selected];
   const route = from && to ? buildRoute(from, to) : null;
 
   if (!hydrated) return <Loading />;
 
-  if (!activeBoat) {
+  if (boats.length === 0) {
     return (
       <Onboarding
         title="Asociá tu barco"
@@ -64,7 +69,7 @@ export default function CrucePage() {
         <h1 className="text-2xl font-bold text-slate-800">Planificador de cruce</h1>
         <p className="text-slate-500 text-sm">
           Mejor hora de salida según el viento, con la polar del{' '}
-          <strong>{activeBoat.name}</strong>
+          <strong>{boat?.name ?? 'barco'}</strong>
           {route ? ` (~${route.approxNm} NM)` : ''}. Se evalúa la derrota a distintas horas
           y se rankea por tiempo y seguridad.
         </p>
@@ -89,6 +94,16 @@ export default function CrucePage() {
             setSelected(0);
           }}
         />
+        {boats.length > 1 && (
+          <BoatPicker
+            boats={boats}
+            value={boatId}
+            onChange={(id) => {
+              setBoatId(id);
+              setSelected(0);
+            }}
+          />
+        )}
       </div>
 
       {from && to && from.id === to.id && (
@@ -120,9 +135,13 @@ export default function CrucePage() {
             <Card>
               <CardHeader
                 title={`Salir ${formatDate(candidate.departAt)} a las ${formatHour(candidate.departAt)}`}
-                subtitle={`Llegada estimada ${formatHour(candidate.arriveAt)} · duración ${formatDuration(
-                  candidate.totalHours,
-                )}`}
+                subtitle={
+                  candidate.completes
+                    ? `Rumbo ${candidate.course}° (${compass(candidate.course)}) · ${candidate.distanceNm} NM · llegada ~${formatHour(
+                        candidate.arriveAt,
+                      )} · ${formatDuration(candidate.totalHours)}`
+                    : `Rumbo ${candidate.course}° (${compass(candidate.course)}) · ${candidate.distanceNm} NM · no completa el cruce con este viento`
+                }
               />
               <div className="px-4 pb-4 pt-3 space-y-4">
                 {candidate.warnings.length > 0 && (

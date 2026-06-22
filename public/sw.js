@@ -1,8 +1,11 @@
-/* Service worker mínimo para PWA: cachea el app shell y aplica
-   stale-while-revalidate a las llamadas de pronóstico (Open-Meteo / INA),
-   de modo que el último pronóstico quede disponible offline. */
+/* Service worker para PWA.
+   - HTML/navegación: network-first → siempre trae el shell fresco (con los hashes
+     de chunks vigentes) cuando hay red; cae al caché solo offline. Esto evita el
+     bug de servir un index.html viejo que pide chunks de _next que ya no existen.
+   - Assets hasheados de _next (inmutables) e íconos: cache-first.
+   - Pronóstico (Open-Meteo / INA): stale-while-revalidate (disponible offline). */
 
-const CACHE = 'regatas-v1';
+const CACHE = 'regatas-v2';
 // Rutas relativas al scope del SW: en dev resuelven a la raíz; en GitHub Pages, a /regatas/.
 const SHELL = ['./', './alertas/', './cruce/', './perfil/', './manifest.webmanifest', './icons/icon.svg'];
 
@@ -26,6 +29,20 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
+  // Navegación / HTML: network-first (no servir un shell viejo con chunks caducos).
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(request, copy));
+          return res;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || caches.match('./'))),
+    );
+    return;
+  }
+
   if (isApi(request.url)) {
     // stale-while-revalidate
     event.respondWith(
@@ -43,8 +60,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // app shell: cache-first con fallback a red
-  event.respondWith(
-    caches.match(request).then((cached) => cached || fetch(request)),
-  );
+  // Resto (assets hasheados de _next, inmutables, e íconos): cache-first con fallback a red.
+  event.respondWith(caches.match(request).then((cached) => cached || fetch(request)));
 });

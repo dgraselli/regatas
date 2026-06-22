@@ -9,13 +9,15 @@ import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { AlertBanner } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
+import { CautionPicker } from '@/components/common/CautionPicker';
 import { OfflineBadge } from '@/components/common/OfflineBadge';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { formatDate } from '@/lib/format';
 
 export default function DashboardPage() {
-  const { profile, hydrated, activeLocation, activeBoat, setActiveLocation } = useProfile();
+  const { profile, hydrated, activeLocation, activeBoat, setActiveLocation, setCaution } =
+    useProfile();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const { data, isLoading, isError, error } = useForecast(activeLocation, profile.caution);
 
@@ -49,12 +51,13 @@ export default function DashboardPage() {
             {activeBoat ? ` para el ${activeBoat.name}` : ''}.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <LocationPicker
             locations={profile.locations}
             value={activeLocation.id}
             onChange={setActiveLocation}
           />
+          <CautionPicker value={profile.caution} onChange={setCaution} />
           <OfflineBadge fetchedAt={data?.bundle.fetchedAt} />
         </div>
       </div>

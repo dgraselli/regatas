@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { TIMEZONE } from '@/lib/profile/defaults';
 import { hullSpeedKt } from '@/lib/domain/polarModel';
+import { KNOWN_CLUBS, type KnownClub } from '@/lib/config/knownClubs';
 import type { Caution, LocationKind } from '@/lib/profile/types';
 import { Card } from '@/components/ui/Card';
 import { Loading } from '@/components/ui/States';
@@ -115,6 +116,11 @@ export default function PerfilPage() {
             </Card>
           ))}
         </div>
+        <AddKnownClubForm
+          onAdd={(club, kind) =>
+            addLocation({ name: club.name, lat: club.lat, lon: club.lon, kind, timezone: TIMEZONE })
+          }
+        />
         <AddLocationForm
           onAdd={(name, lat, lon, kind) =>
             addLocation({ name, lat, lon, kind, timezone: TIMEZONE })
@@ -233,6 +239,65 @@ function AddLocationForm({
       </Field>
       <button type="submit" className="btn-primary">
         Agregar lugar
+      </button>
+    </form>
+  );
+}
+
+function AddKnownClubForm({
+  onAdd,
+}: {
+  onAdd: (club: KnownClub, kind: LocationKind) => void;
+}) {
+  const [idx, setIdx] = useState('');
+  const [kind, setKind] = useState<LocationKind>('amarra');
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const i = Number(idx);
+    if (idx === '' || !Number.isInteger(i) || !KNOWN_CLUBS[i]) return;
+    onAdd(KNOWN_CLUBS[i], kind);
+    setIdx('');
+  };
+
+  return (
+    <form onSubmit={submit} className="flex gap-2 flex-wrap items-end">
+      <Field label="Agregar club conocido (Río de la Plata)">
+        <select value={idx} onChange={(e) => setIdx(e.target.value)} className="input w-72">
+          <option value="" disabled>
+            Elegí un club…
+          </option>
+          <optgroup label="Argentina 🇦🇷">
+            {KNOWN_CLUBS.map((c, i) =>
+              c.country === 'AR' ? (
+                <option key={i} value={i}>
+                  {c.name}
+                </option>
+              ) : null,
+            )}
+          </optgroup>
+          <optgroup label="Uruguay 🇺🇾">
+            {KNOWN_CLUBS.map((c, i) =>
+              c.country === 'UY' ? (
+                <option key={i} value={i}>
+                  {c.name}
+                </option>
+              ) : null,
+            )}
+          </optgroup>
+        </select>
+      </Field>
+      <Field label="Tipo">
+        <select value={kind} onChange={(e) => setKind(e.target.value as LocationKind)} className="input">
+          {KIND_OPTS.map((k) => (
+            <option key={k.value} value={k.value}>
+              {k.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+      <button type="submit" className="btn-primary" disabled={idx === ''}>
+        Agregar club
       </button>
     </form>
   );

@@ -21,6 +21,7 @@ const config: Config = {
         },
         semaforo: {
           verde: '#16a34a',
+          pocoViento: '#0891b2',
           amarillo: '#eab308',
           rojo: '#dc2626',
         },

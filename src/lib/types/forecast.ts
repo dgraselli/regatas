@@ -17,7 +17,7 @@ export interface HourlyPoint {
   seaLevelM?: number;
 }
 
-export type TrafficLevel = 'verde' | 'amarillo' | 'rojo';
+export type TrafficLevel = 'verde' | 'poco-viento' | 'amarillo' | 'rojo';
 
 export interface DayScore {
   /** Fecha YYYY-MM-DD en hora local. */

@@ -30,9 +30,10 @@ describe('scoring', () => {
     expect(s.level).toBe('rojo');
   });
 
-  it('viento flojo => amarillo', () => {
+  it('viento flojo => poco-viento (no precaución)', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 4, 8));
-    expect(s.level).toBe('amarillo');
+    expect(s.level).toBe('poco-viento');
+    expect(s.reasons.join(' ')).toMatch(/poco viento/i);
   });
 
   it('lluvia fuerte => rojo', () => {

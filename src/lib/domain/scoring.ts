@@ -75,13 +75,11 @@ export function scoreDay(
     if (order.indexOf(to) > order.indexOf(level)) level = to;
   };
 
-  // Viento
+  // Viento (fuerte = precaución / peligro). El viento flojo se trata aparte abajo.
   if (windMedianKt >= thresholds.dangerWind) {
     escalate('rojo', `Viento muy fuerte (~${windMedianKt} kt)`);
   } else if (windMedianKt >= thresholds.strongWind) {
     escalate('amarillo', `Viento fuerte (~${windMedianKt} kt)`);
-  } else if (windMedianKt < thresholds.idealWindMin) {
-    escalate('amarillo', `Viento flojo (~${windMedianKt} kt)`);
   }
 
   // Ráfagas
@@ -102,6 +100,13 @@ export function scoreDay(
   for (const alert of surgeOnDay) {
     const to: TrafficLevel = alert.severity >= 2 ? 'rojo' : 'amarillo';
     escalate(to, alert.message);
+  }
+
+  // Poco viento: no es peligro, es que probablemente no se pueda navegar a vela.
+  // Solo aplica si no hay otras precauciones/peligros (esos tienen prioridad).
+  if (level === 'verde' && windMedianKt < thresholds.idealWindMin) {
+    level = 'poco-viento';
+    reasons.push(`Poco viento (~${windMedianKt} kt)`);
   }
 
   if (level === 'verde' && reasons.length === 0) {

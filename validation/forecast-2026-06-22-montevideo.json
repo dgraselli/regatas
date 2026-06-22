@@ -1,0 +1,112 @@
+{
+  "capturedAt": "2026-06-22T09:14:31.553Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Montevideo",
+    "lat": -34.912,
+    "lon": -56.137
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12
+  },
+  "days": [
+    {
+      "date": "2026-06-22",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 19,
+        "windDirDominant": 262,
+        "precipTotalMm": 0.2
+      }
+    },
+    {
+      "date": "2026-06-23",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 17,
+        "gustPeakKt": 26,
+        "windDirDominant": 254,
+        "precipTotalMm": 0.3
+      }
+    },
+    {
+      "date": "2026-06-24",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 17,
+        "windDirDominant": 271,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-25",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 23,
+        "windDirDominant": 278,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-26",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 11,
+        "windDirDominant": 27,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-27",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 13,
+        "windDirDominant": 357,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-28",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.2 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 15,
+        "gustPeakKt": 24,
+        "windDirDominant": 224,
+        "precipTotalMm": 2.2
+      }
+    }
+  ],
+  "surge": []
+}

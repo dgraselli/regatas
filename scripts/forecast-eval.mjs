@@ -114,7 +114,8 @@ async function capture(lat, lon, name) {
     days, surge,
   };
   await mkdir('validation', { recursive: true });
-  const file = `validation/forecast-${dateOf(snap.capturedAt)}.json`;
+  const slug = name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const file = `validation/forecast-${dateOf(snap.capturedAt)}-${slug}.json`;
   await writeFile(file, JSON.stringify(snap, null, 2));
   console.log(`Snapshot guardado: ${file}`);
   console.log(`Lugar: ${name} (${lat}, ${lon}) · ${days.length} días`);

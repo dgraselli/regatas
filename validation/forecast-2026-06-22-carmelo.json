@@ -1,0 +1,112 @@
+{
+  "capturedAt": "2026-06-22T09:14:30.059Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12
+  },
+  "days": [
+    {
+      "date": "2026-06-22",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 13,
+        "windDirDominant": 237,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-23",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 16,
+        "windDirDominant": 267,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-24",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 12,
+        "windDirDominant": 290,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-25",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 11,
+        "windDirDominant": 274,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-26",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 11,
+        "windDirDominant": 30,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-27",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 10,
+        "windDirDominant": 8,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-28",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 17,
+        "windDirDominant": 217,
+        "precipTotalMm": 0
+      }
+    }
+  ],
+  "surge": []
+}

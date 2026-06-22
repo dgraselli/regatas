@@ -1,10 +1,10 @@
 {
-  "capturedAt": "2026-06-22T09:11:18.630Z",
+  "capturedAt": "2026-06-22T09:14:25.556Z",
   "source": "open-meteo-forecast",
   "location": {
-    "name": "La Plata",
-    "lat": -34.8399,
-    "lon": -57.9234
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
   },
   "thresholds": {
     "idealWindMin": 6,
@@ -24,8 +24,8 @@
       ],
       "metrics": {
         "windMedianKt": 7,
-        "gustPeakKt": 20,
-        "windDirDominant": 236,
+        "gustPeakKt": 21,
+        "windDirDominant": 238,
         "precipTotalMm": 0
       }
     },
@@ -33,12 +33,12 @@
       "date": "2026-06-23",
       "level": "amarillo",
       "reasons": [
-        "Ráfagas marcadas (27 kt)"
+        "Ráfagas marcadas (25 kt)"
       ],
       "metrics": {
-        "windMedianKt": 8,
-        "gustPeakKt": 27,
-        "windDirDominant": 257,
+        "windMedianKt": 7,
+        "gustPeakKt": 25,
+        "windDirDominant": 259,
         "precipTotalMm": 0
       }
     },
@@ -50,8 +50,8 @@
       ],
       "metrics": {
         "windMedianKt": 5,
-        "gustPeakKt": 17,
-        "windDirDominant": 275,
+        "gustPeakKt": 19,
+        "windDirDominant": 277,
         "precipTotalMm": 0
       }
     },
@@ -59,12 +59,12 @@
       "date": "2026-06-25",
       "level": "verde",
       "reasons": [
-        "Buenas condiciones (~7 kt)"
+        "Buenas condiciones (~6 kt)"
       ],
       "metrics": {
-        "windMedianKt": 7,
-        "gustPeakKt": 19,
-        "windDirDominant": 258,
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 261,
         "precipTotalMm": 0
       }
     },
@@ -76,8 +76,8 @@
       ],
       "metrics": {
         "windMedianKt": 6,
-        "gustPeakKt": 18,
-        "windDirDominant": 42,
+        "gustPeakKt": 19,
+        "windDirDominant": 41,
         "precipTotalMm": 0
       }
     },
@@ -85,12 +85,12 @@
       "date": "2026-06-27",
       "level": "poco-viento",
       "reasons": [
-        "Poco viento (~5 kt)"
+        "Poco viento (~3 kt)"
       ],
       "metrics": {
-        "windMedianKt": 5,
-        "gustPeakKt": 15,
-        "windDirDominant": 346,
+        "windMedianKt": 3,
+        "gustPeakKt": 14,
+        "windDirDominant": 349,
         "precipTotalMm": 0
       }
     },
@@ -98,12 +98,12 @@
       "date": "2026-06-28",
       "level": "amarillo",
       "reasons": [
-        "Ráfagas marcadas (28 kt)"
+        "Ráfagas marcadas (27 kt)"
       ],
       "metrics": {
         "windMedianKt": 9,
-        "gustPeakKt": 28,
-        "windDirDominant": 219,
+        "gustPeakKt": 27,
+        "windDirDominant": 220,
         "precipTotalMm": 0
       }
     }

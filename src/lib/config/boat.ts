@@ -23,13 +23,18 @@ export const SCORING: ScoringThresholds = {
   rainRed: 12,
 };
 
-/** Umbrales del semáforo ajustados al nivel de tolerancia al riesgo. */
+/**
+ * Umbrales del semáforo ajustados al nivel de tolerancia al riesgo. La tolerancia
+ * solo mueve los umbrales de viento fuerte / ráfagas / lluvia (cuánto "de más" se
+ * tolera). El umbral de viento mínimo (`idealWindMin`, que marca "poco viento") es
+ * constante: ser audaz no hace que haya viento donde no lo hay.
+ */
 export function scoringFor(caution: 'prudente' | 'normal' | 'audaz'): ScoringThresholds {
   if (caution === 'prudente') {
     return { ...SCORING, strongWind: 18, dangerWind: 24, gustYellow: 22, gustRed: 28, rainYellow: 1, rainRed: 8 };
   }
   if (caution === 'audaz') {
-    return { ...SCORING, idealWindMin: 5, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16 };
+    return { ...SCORING, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16 };
   }
   return SCORING;
 }

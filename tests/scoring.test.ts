@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { scoreDay } from '@/lib/domain/scoring';
+import { scoringFor } from '@/lib/config/boat';
 import type { HourlyPoint } from '@/lib/types/forecast';
 import type { SurgeAlert } from '@/lib/types/water';
 
@@ -34,6 +35,14 @@ describe('scoring', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 4, 8));
     expect(s.level).toBe('poco-viento');
     expect(s.reasons.join(' ')).toMatch(/poco viento/i);
+  });
+
+  it('poco viento sigue siendo poco-viento en cualquier perfil (incluido audaz)', () => {
+    const flojo = day('2026-06-18', 5, 9);
+    for (const caution of ['prudente', 'normal', 'audaz'] as const) {
+      const s = scoreDay('2026-06-18', flojo, scoringFor(caution));
+      expect(s.level).toBe('poco-viento');
+    }
   });
 
   it('lluvia fuerte => rojo', () => {

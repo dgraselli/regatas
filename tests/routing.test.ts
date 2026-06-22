@@ -29,7 +29,31 @@ describe('routing', () => {
     const plan = planCrossing(route, forecast(90, 14));
     expect(plan.ranked.length).toBeGreaterThan(0);
     expect(plan.best).not.toBeNull();
-    expect(plan.best!.legs.length).toBe(route.waypoints.length - 1);
+    expect(plan.best!.legs.length).toBeGreaterThan(0);
+  });
+
+  it('el cruce directo tiene un rumbo único y completa la distancia', () => {
+    const plan = planCrossing(route, forecast(90, 14));
+    const best = plan.best!;
+    expect(best.completes).toBe(true);
+    expect(best.course).toBeGreaterThanOrEqual(0);
+    expect(best.course).toBeLessThan(360);
+    // El último tramo acumula ~la distancia total del cruce.
+    const last = best.legs[best.legs.length - 1];
+    expect(last.cumulativeNm).toBeGreaterThanOrEqual(best.distanceNm - 0.5);
+    // Cada tramo dura como mucho 1 h.
+    expect(best.legs.every((l) => l.hours <= 1)).toBe(true);
+  });
+
+  it('ruta larga de proa no completa el cruce en el horizonte', () => {
+    // ~210 NM rumbo norte; viento del N (de proa) deja al barco bordejeando lento.
+    const longRoute = buildRoute(
+      { name: 'Sur', lat: -36.5, lon: -57.0 },
+      { name: 'Norte', lat: -33.0, lon: -57.0 },
+    );
+    const plan = planCrossing(longRoute, forecast(0, 6));
+    expect(plan.best!.completes).toBe(false);
+    expect(plan.best!.warnings.join(' ')).toMatch(/no completa/i);
   });
 
   it('viento de través favorable da ETA razonable (~3-6 h)', () => {

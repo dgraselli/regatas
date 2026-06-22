@@ -28,31 +28,17 @@ export function addHoursIso(iso: string, hours: number): string {
   )}:${p(d.getUTCMinutes())}`;
 }
 
-interface PrecomputedLeg {
-  fromName: string;
-  toName: string;
-  bearing: number;
-  distanceNm: number;
-}
+/** Tope de horas a simular para un cruce (evita bucles si el barco no avanza). */
+const MAX_SEGMENTS = 24;
 
-function precomputeLegs(route: Route): PrecomputedLeg[] {
-  const legs: PrecomputedLeg[] = [];
-  for (let i = 0; i < route.waypoints.length - 1; i++) {
-    const a = route.waypoints[i];
-    const b = route.waypoints[i + 1];
-    legs.push({
-      fromName: a.name,
-      toName: b.name,
-      bearing: Math.round(initialBearing(a.lat, a.lon, b.lat, b.lon)),
-      distanceNm: Math.round(haversineNm(a.lat, a.lon, b.lat, b.lon) * 10) / 10,
-    });
-  }
-  return legs;
-}
-
-/** Simula el cruce para una hora de salida dada (índice en el arreglo horario). */
+/**
+ * Simula el cruce directo (rumbo único) para una hora de salida dada, avanzando
+ * hora por hora con el viento de cada hora hasta cubrir la distancia. Cada tramo
+ * de la simulación es ~1 h de navegación sobre el mismo rumbo.
+ */
 function simulate(
-  legsGeo: PrecomputedLeg[],
+  course: number,
+  totalNm: number,
   hourly: HourlyPoint[],
   startIdx: number,
   polar: BoatPolar,
@@ -60,12 +46,14 @@ function simulate(
 ): DepartureCandidate {
   const legs: Leg[] = [];
   const warnings: string[] = [];
+  let remaining = totalNm;
   let elapsed = 0;
+  let completes = false;
 
-  for (const g of legsGeo) {
-    const idx = Math.min(hourly.length - 1, startIdx + Math.floor(elapsed));
+  for (let k = 0; k < MAX_SEGMENTS && remaining > 0.05; k++) {
+    const idx = Math.min(hourly.length - 1, startIdx + k);
     const fc = hourly[idx];
-    const twa = trueWindAngle(g.bearing, fc.windDir);
+    const twa = trueWindAngle(course, fc.windDir);
 
     let boatKt: number;
     if (twa < cfg.noGoAngle) {
@@ -88,25 +76,35 @@ function simulate(
       legWarnings.push('Mar de través con viento fuerte: navegación incómoda.');
     }
 
-    const hours = boatKt > 0.3 ? g.distanceNm / boatKt : 99;
+    // Avance del tramo: hasta 1 h, o lo que falte para llegar.
+    const dt = boatKt < 0.3 ? 1 : Math.min(1, remaining / boatKt);
+    const segNm = Math.round(boatKt * dt * 10) / 10;
+    remaining = Math.round((remaining - boatKt * dt) * 100) / 100;
+    if (remaining <= 0.05) {
+      completes = true;
+      remaining = 0;
+    }
+    elapsed += dt;
 
     legs.push({
-      fromName: g.fromName,
-      toName: g.toName,
-      bearing: g.bearing,
-      distanceNm: g.distanceNm,
+      time: fc.time,
       windDir: Math.round(fc.windDir),
       windKt: Math.round(fc.windKt),
       gustKt: Math.round(fc.gustKt),
       twa: Math.round(twa),
       pointOfSail: pointOfSail(twa, cfg.noGoAngle),
       boatKt,
-      hours: Math.round(hours * 100) / 100,
+      segmentNm: segNm,
+      cumulativeNm: Math.round((totalNm - remaining) * 10) / 10,
+      hours: Math.round(dt * 100) / 100,
       warnings: legWarnings,
     });
 
     warnings.push(...legWarnings);
-    elapsed += hours;
+  }
+
+  if (!completes) {
+    warnings.push('No completa el cruce en el horizonte simulado (viento muy flojo o de proa).');
   }
 
   const departAt = hourly[startIdx].time;
@@ -114,11 +112,12 @@ function simulate(
   const arriveAt = addHoursIso(departAt, totalHours);
   const arriveHour = hourOf(arriveAt);
   const arrivesAtNight =
-    arriveHour < DAYLIGHT.sunriseHour || arriveHour > DAYLIGHT.sunsetHour;
+    completes && (arriveHour < DAYLIGHT.sunriseHour || arriveHour > DAYLIGHT.sunsetHour);
 
-  // Costo: tiempo + penalizaciones por seguridad/confort.
+  // Costo: tiempo + penalizaciones por seguridad/confort. Los cruces que no
+  // completan quedan al fondo del ranking.
   const uniqueWarnings = Array.from(new Set(warnings));
-  let cost = totalHours;
+  let cost = completes ? totalHours : 1000;
   cost += uniqueWarnings.length * 1.5;
   if (arrivesAtNight) cost += 4;
 
@@ -129,6 +128,9 @@ function simulate(
     departAt,
     arriveAt,
     totalHours,
+    course,
+    distanceNm: Math.round(totalNm * 10) / 10,
+    completes,
     legs,
     warnings: candidateWarnings,
     cost: Math.round(cost * 100) / 100,
@@ -157,7 +159,11 @@ export function planCrossing(
   options: PlanOptions = {},
 ): CrossingPlan {
   const { stepHours = 3, horizonHours = 72, daylightOnly = true } = options;
-  const legsGeo = precomputeLegs(route);
+  // Cruce directo: un solo rumbo y distancia, de extremo a extremo de la ruta.
+  const from = route.waypoints[0];
+  const to = route.waypoints[route.waypoints.length - 1];
+  const course = Math.round(initialBearing(from.lat, from.lon, to.lat, to.lon));
+  const totalNm = Math.round(haversineNm(from.lat, from.lon, to.lat, to.lon) * 10) / 10;
 
   const candidates: DepartureCandidate[] = [];
   const maxIdx = Math.min(hourly.length - 1, horizonHours);
@@ -166,7 +172,7 @@ export function planCrossing(
     if (daylightOnly && (h < DAYLIGHT.sunriseHour || h > DAYLIGHT.sunsetHour - 2)) {
       continue;
     }
-    candidates.push(simulate(legsGeo, hourly, idx, polar, cfg));
+    candidates.push(simulate(course, totalNm, hourly, idx, polar, cfg));
   }
 
   const ranked = candidates.sort((a, b) => a.cost - b.cost);

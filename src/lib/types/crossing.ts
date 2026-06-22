@@ -7,13 +7,14 @@ export type PointOfSail =
   | 'aleta'
   | 'popa';
 
+/**
+ * Tramo de la simulación: un cruce directo tiene un solo rumbo, así que cada
+ * `Leg` representa un intervalo de ~1 hora de navegación sobre esa derrota,
+ * mostrando cómo evolucionan el viento y la velocidad durante el cruce.
+ */
 export interface Leg {
-  fromName: string;
-  toName: string;
-  /** Rumbo de la derrota en grados verdaderos. */
-  bearing: number;
-  /** Distancia del tramo en millas náuticas. */
-  distanceNm: number;
+  /** Hora local (ISO 'YYYY-MM-DDTHH:mm') del comienzo del tramo. */
+  time: string;
   /** Dirección del viento (de dónde viene) en el tramo, grados. */
   windDir: number;
   /** Intensidad del viento en el tramo (nudos). */
@@ -25,7 +26,11 @@ export interface Leg {
   pointOfSail: PointOfSail;
   /** Velocidad estimada del barco en el tramo (nudos). */
   boatKt: number;
-  /** Duración estimada del tramo en horas. */
+  /** Distancia recorrida en este tramo (millas náuticas). */
+  segmentNm: number;
+  /** Distancia acumulada al final del tramo (millas náuticas). */
+  cumulativeNm: number;
+  /** Duración del tramo en horas (≤ 1). */
   hours: number;
   /** Advertencias del tramo (en español). */
   warnings: string[];
@@ -38,6 +43,12 @@ export interface DepartureCandidate {
   arriveAt: string;
   /** Duración total en horas. */
   totalHours: number;
+  /** Rumbo constante de la derrota directa (grados verdaderos). */
+  course: number;
+  /** Distancia total del cruce (millas náuticas). */
+  distanceNm: number;
+  /** ¿Completa el cruce dentro del horizonte simulado? */
+  completes: boolean;
   legs: Leg[];
   warnings: string[];
   /** Costo usado para el ranking (menor es mejor). */

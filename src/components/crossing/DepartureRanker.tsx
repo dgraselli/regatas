@@ -37,7 +37,9 @@ export function DepartureRanker({
               Salir {formatHour(c.departAt)}
             </div>
             <div className="text-sm text-slate-600">
-              llega {formatHour(c.arriveAt)} · {formatDuration(c.totalHours)}
+              {c.completes
+                ? `llega ${formatHour(c.arriveAt)} · ${formatDuration(c.totalHours)}`
+                : 'no completa con este viento'}
             </div>
             <div className="mt-2 text-xs">
               {c.warnings.length === 0 ? (

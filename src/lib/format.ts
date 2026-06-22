@@ -23,9 +23,9 @@ export function formatDate(iso: string): string {
   return `${DOW[dow]} ${d} ${MON[m]}`;
 }
 
-/** 'YYYY-MM-DDTHH:mm' → 'HH:mm'. */
+/** 'YYYY-MM-DDTHH:mm' → 'HH:mm'. Tolera valores ausentes/ inválidos. */
 export function formatHour(iso: string): string {
-  return iso.slice(11, 16);
+  return typeof iso === 'string' ? iso.slice(11, 16) : '';
 }
 
 /** Horas decimales → 'Xh YYmin'. */

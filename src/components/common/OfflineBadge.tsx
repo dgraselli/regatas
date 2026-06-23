@@ -1,15 +1,13 @@
 'use client';
 
+import { useFreshness } from '@/lib/hooks/useFreshness';
+
 export function OfflineBadge({ fetchedAt }: { fetchedAt?: string }) {
-  if (!fetchedAt) return null;
-  let label = '';
-  try {
-    const d = new Date(fetchedAt);
-    label = d.toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short' });
-  } catch {
-    label = fetchedAt;
-  }
+  const f = useFreshness(fetchedAt);
+  if (!f) return null;
   return (
-    <span className="text-xs text-slate-400">Datos del {label}</span>
+    <span className={`text-xs ${f.stale ? 'text-red-600 font-medium' : 'text-slate-400'}`}>
+      Datos del {f.absLabel}
+    </span>
   );
 }

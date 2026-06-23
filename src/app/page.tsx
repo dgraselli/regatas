@@ -13,6 +13,7 @@ import { LocationPicker } from '@/components/common/LocationPicker';
 import { LocateButton } from '@/components/common/LocateButton';
 import { CautionPicker } from '@/components/common/CautionPicker';
 import { OfflineBadge } from '@/components/common/OfflineBadge';
+import { StaleForecastNotice } from '@/components/common/StaleForecastNotice';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { formatDate } from '@/lib/format';
@@ -22,7 +23,10 @@ export default function DashboardPage() {
   const { profile, hydrated, activeLocation, activeBoat, setActiveLocation, setCaution } =
     useProfile();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const { data, isLoading, isError, error } = useForecast(activeLocation, profile.caution);
+  const { data, isLoading, isError, isFetching, error } = useForecast(
+    activeLocation,
+    profile.caution,
+  );
 
   const days = data?.bundle.days ?? [];
   const activeDate = selectedDate ?? days[0]?.date ?? '';
@@ -73,10 +77,18 @@ export default function DashboardPage() {
       </div>
 
       {isLoading && <Loading label="Obteniendo pronóstico…" />}
-      {isError && <ErrorState message={(error as Error)?.message} />}
+      {/* Error duro solo si no hay ningún dato cacheado para mostrar. Si hay
+          datos viejos, el aviso prominente va dentro del bloque de abajo. */}
+      {isError && !data && <ErrorState message={(error as Error)?.message} />}
 
       {data && (
         <>
+          <StaleForecastNotice
+            fetchedAt={data.bundle.fetchedAt}
+            isError={isError}
+            isFetching={isFetching}
+          />
+
           {data.surge.length > 0 && (
             <div className="space-y-2">
               {data.surge.map((a, i) => (
@@ -103,7 +115,7 @@ export default function DashboardPage() {
                     </li>
                   ))}
                 </ul>
-                <HourlyWindChart points={hoursOfDay} />
+                <HourlyWindChart points={hoursOfDay} caution={profile.caution} />
               </div>
             </Card>
           )}

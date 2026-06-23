@@ -7,6 +7,7 @@ import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
 import { MetodologiaInfo } from '@/components/alerts/MetodologiaInfo';
 import { LocationPicker } from '@/components/common/LocationPicker';
+import { StaleForecastNotice } from '@/components/common/StaleForecastNotice';
 import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
@@ -65,7 +66,16 @@ export default function AlertasPage() {
       <section className="space-y-2">
         <h2 className="font-semibold text-slate-700">Eventos previstos</h2>
         {forecast.isLoading && <Loading />}
-        {forecast.isError && <ErrorState message={(forecast.error as Error)?.message} />}
+        {forecast.isError && !forecast.data && (
+          <ErrorState message={(forecast.error as Error)?.message} />
+        )}
+        {forecast.data && (
+          <StaleForecastNotice
+            fetchedAt={forecast.data.bundle.fetchedAt}
+            isError={forecast.isError}
+            isFetching={forecast.isFetching}
+          />
+        )}
         {forecast.data &&
           (forecast.data.surge.length > 0 ? (
             forecast.data.surge.map((a, i) => <AlertBanner key={i} alert={a} />)

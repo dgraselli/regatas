@@ -7,8 +7,10 @@ import { useProfile } from '@/lib/profile/ProfileContext';
 import { ForecastStrip } from '@/components/dashboard/ForecastStrip';
 import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
+import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
 import { AlertBanner } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
+import { LocateButton } from '@/components/common/LocateButton';
 import { CautionPicker } from '@/components/common/CautionPicker';
 import { OfflineBadge } from '@/components/common/OfflineBadge';
 import { Card, CardHeader } from '@/components/ui/Card';
@@ -58,6 +60,7 @@ export default function DashboardPage() {
             value={activeLocation.id}
             onChange={setActiveLocation}
           />
+          <LocateButton />
           <CautionPicker
             value={profile.caution}
             onChange={(c) => {
@@ -106,6 +109,8 @@ export default function DashboardPage() {
           )}
         </>
       )}
+
+      <MetodologiaPanel caution={profile.caution} />
     </div>
   );
 }

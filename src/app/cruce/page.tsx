@@ -83,12 +83,16 @@ export default function CrucePage() {
           value={originId}
           onChange={(id) => {
             setOriginId(id);
+            // Si el nuevo origen coincide con el destino, corré el destino a otro lugar.
+            if (id === destId) {
+              setDestId(locations.find((l) => l.id !== id)?.id ?? null);
+            }
             setSelected(0);
           }}
         />
         <LocationPicker
           label="Destino:"
-          locations={locations}
+          locations={locations.filter((l) => l.id !== originId)}
           value={destId}
           onChange={(id) => {
             setDestId(id);

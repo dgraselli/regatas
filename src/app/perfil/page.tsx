@@ -208,6 +208,7 @@ function AddLocationForm({
   const [name, setName] = useState('');
   const [coords, setCoords] = useState('');
   const [kind, setKind] = useState<LocationKind>('amarra');
+  const [geoStatus, setGeoStatus] = useState<'idle' | 'loading' | 'error' | 'unsupported'>('idle');
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -216,6 +217,24 @@ function AddLocationForm({
     onAdd(name.trim(), m[0], m[1], kind);
     setName('');
     setCoords('');
+  };
+
+  const useMyLocation = () => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGeoStatus('unsupported');
+      return;
+    }
+    setGeoStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(5);
+        const lon = pos.coords.longitude.toFixed(5);
+        setCoords(`${lat}, ${lon}`);
+        setGeoStatus('idle');
+      },
+      () => setGeoStatus('error'),
+      { timeout: 8000, maximumAge: 10 * 60 * 1000 },
+    );
   };
 
   return (
@@ -229,12 +248,30 @@ function AddLocationForm({
         />
       </Field>
       <Field label="Coordenadas (lat, lon)">
-        <input
-          value={coords}
-          onChange={(e) => setCoords(e.target.value)}
-          placeholder="-34.8399, -57.9234"
-          className="input w-56"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            value={coords}
+            onChange={(e) => setCoords(e.target.value)}
+            placeholder="-34.8399, -57.9234"
+            className="input w-56"
+          />
+          <button
+            type="button"
+            onClick={useMyLocation}
+            disabled={geoStatus === 'loading'}
+            className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700 hover:border-mar-500 disabled:opacity-50"
+          >
+            📍 {geoStatus === 'loading' ? 'Ubicando…' : 'Mi ubicación'}
+          </button>
+        </div>
+        {geoStatus === 'error' && (
+          <span className="mt-1 block text-xs text-amber-600">No se pudo obtener tu ubicación.</span>
+        )}
+        {geoStatus === 'unsupported' && (
+          <span className="mt-1 block text-xs text-amber-600">
+            Tu navegador no permite geolocalización.
+          </span>
+        )}
       </Field>
       <Field label="Tipo">
         <select value={kind} onChange={(e) => setKind(e.target.value as LocationKind)} className="input">

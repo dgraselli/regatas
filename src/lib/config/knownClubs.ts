@@ -27,8 +27,11 @@ export const KNOWN_CLUBS: KnownClub[] = [
   { name: 'Yacht Club Argentino (Dársena Norte)', lat: -34.585, lon: -58.363, country: 'AR' },
   { name: 'Yacht Club Puerto Madero', lat: -34.61, lon: -58.363, country: 'AR' },
   { name: 'Club Náutico Quilmes', lat: -34.71, lon: -58.25, country: 'AR' },
+  // La Plata (Ensenada / Berisso / Punta Lara)
+  { name: 'Club Universitario de La Plata (Punta Lara)', lat: -34.808, lon: -57.987, country: 'AR' },
   { name: 'Club Náutico Ensenada', lat: -34.86, lon: -57.91, country: 'AR' },
   { name: 'Club de Regatas La Plata (Ensenada)', lat: -34.858, lon: -57.905, country: 'AR' },
+  { name: 'Club Náutico Ciudad de Berisso', lat: -34.867, lon: -57.858, country: 'AR' },
 
   // Uruguay — oeste → este
   { name: 'Yacht Club Nueva Palmira', lat: -33.895, lon: -58.408, country: 'UY' },

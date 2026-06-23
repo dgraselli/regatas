@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Providers } from './providers';
 import { NavBar } from '@/components/common/NavBar';
+import { BetaBanner } from '@/components/common/BetaBanner';
 import { Analytics } from '@/components/common/Analytics';
 import { FeedbackButton } from '@/components/common/FeedbackButton';
 import { APP_VERSION } from '@/lib/version';
@@ -28,6 +29,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="min-h-screen flex flex-col">
             <NavBar />
+            {/* TEMPORAL — quitar al salir de etapa de pruebas */}
+            <BetaBanner />
             <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-6">{children}</main>
             <footer className="text-center text-xs text-slate-400 py-6 space-y-1">
               <p>

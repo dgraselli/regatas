@@ -5,7 +5,6 @@ import { useCrossingPlan } from '@/lib/hooks/useCrossingPlan';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { DepartureRanker } from '@/components/crossing/DepartureRanker';
 import { LegTable } from '@/components/crossing/LegTable';
-import { RouteMap } from '@/components/crossing/RouteMap';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { BoatPicker } from '@/components/common/BoatPicker';
 import { Onboarding } from '@/components/common/Onboarding';
@@ -120,24 +119,17 @@ export default function CrucePage() {
 
       {data && data.ranked.length > 0 && (
         <>
-          <div className="grid md:grid-cols-[1fr_auto] gap-4 items-start">
-            <Card className="p-4">
-              <h2 className="font-semibold text-slate-700 mb-2">Opciones de salida</h2>
-              <DepartureRanker
-                candidates={data.ranked}
-                selectedIndex={selected}
-                onSelect={(i) => {
-                  setSelected(i);
-                  track('crossing_select_departure', { index: i });
-                }}
-              />
-            </Card>
-            {route && (
-              <Card className="p-4 flex justify-center">
-                <RouteMap route={route} />
-              </Card>
-            )}
-          </div>
+          <Card className="p-4">
+            <h2 className="font-semibold text-slate-700 mb-2">Opciones de salida</h2>
+            <DepartureRanker
+              candidates={data.ranked}
+              selectedIndex={selected}
+              onSelect={(i) => {
+                setSelected(i);
+                track('crossing_select_departure', { index: i });
+              }}
+            />
+          </Card>
 
           {candidate && (
             <Card>

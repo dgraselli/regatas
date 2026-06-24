@@ -57,6 +57,12 @@ export function HourlyWindChart({
   // kt → coordenada vertical (escala fija, recortando lo que supere MAX_KT).
   const y = (kt: number) => height - (Math.min(kt, MAX_KT) / MAX_KT) * height;
 
+  // Visibilidad: marcamos solo las horas con visibilidad reducida (neblina) o niebla.
+  const hasNeblina = points.some(
+    (p) => p.visibilityM != null && p.visibilityM <= t.fogYellowM && p.visibilityM > t.fogRedM,
+  );
+  const hasNiebla = points.some((p) => p.visibilityM != null && p.visibilityM <= t.fogRedM);
+
   return (
     <div ref={wrapRef} className="w-full overflow-x-auto">
       <svg width={width} height={height + 28} className="text-mar-500 max-w-none">
@@ -69,6 +75,25 @@ export function HourlyWindChart({
             </text>
           </g>
         ))}
+
+        {/* Bandas de visibilidad reducida (detrás de las barras): solo en las horas
+            con neblina/niebla, para identificar de un vistazo cuándo cae la visibilidad. */}
+        {points.map((p, i) => {
+          const v = p.visibilityM;
+          if (v == null || v > t.fogYellowM) return null;
+          const niebla = v <= t.fogRedM;
+          return (
+            <rect
+              key={`vis-${p.time}`}
+              x={padLeft + i * slot}
+              y={0}
+              width={slot}
+              height={height}
+              className={niebla ? 'fill-red-300' : 'fill-amber-300'}
+              opacity={0.3}
+            />
+          );
+        })}
 
         {/* Barras: ráfaga (claro) detrás, viento (oscuro) adelante */}
         {points.map((p, i) => {
@@ -111,6 +136,16 @@ export function HourlyWindChart({
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-4 border-t-2 border-dashed border-red-500" /> Peligro ({red} kt)
         </span>
+        {hasNeblina && (
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-sm bg-amber-300/60" /> Visibilidad reducida
+          </span>
+        )}
+        {hasNiebla && (
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block w-3 h-3 rounded-sm bg-red-300/60" /> Niebla
+          </span>
+        )}
       </div>
     </div>
   );

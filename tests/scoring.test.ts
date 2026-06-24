@@ -15,9 +15,22 @@ function day(date: string, wind: number, gust: number, rain = 0, dir = 270): Hou
   }));
 }
 
-/** Día con viento ideal y una visibilidad mínima dada en horas de luz. */
+/** Día con viento ideal y una visibilidad mínima dada en TODAS las horas de luz. */
 function foggyDay(date: string, visM: number, wind = 12): HourlyPoint[] {
   return day(date, wind, wind + 4).map((p) => ({ ...p, visibilityM: visM }));
+}
+
+/** Día con niebla (visM) desde la madrugada hasta `untilHour`, despejado después. */
+function dayWithMorningFog(
+  date: string,
+  visM: number,
+  untilHour: number,
+  wind = 12,
+): HourlyPoint[] {
+  return day(date, wind, wind + 4).map((p) => {
+    const h = Number(p.time.slice(11, 13));
+    return { ...p, visibilityM: h >= 5 && h <= untilHour ? visM : 20000 };
+  });
 }
 
 describe('scoring', () => {
@@ -74,11 +87,22 @@ describe('scoring', () => {
     expect(s.reasons).toContain('Sudestada severa');
   });
 
-  it('niebla (visibilidad muy baja) => rojo', () => {
+  it('niebla densa todo el día => rojo', () => {
     const s = scoreDay('2026-06-18', foggyDay('2026-06-18', 600));
     expect(s.level).toBe('rojo');
     expect(s.reasons.join(' ')).toMatch(/niebla/i);
     expect(s.metrics.visibilityMinM).toBe(600);
+  });
+
+  it('niebla densa solo a la mañana que despeja => amarillo, no rojo', () => {
+    const s = scoreDay('2026-06-18', dayWithMorningFog('2026-06-18', 500, 9));
+    expect(s.level).toBe('amarillo');
+    expect(s.reasons.join(' ')).toMatch(/navegable después/i);
+  });
+
+  it('niebla densa casi todo el día (sin ventana después) => rojo', () => {
+    const s = scoreDay('2026-06-18', dayWithMorningFog('2026-06-18', 500, 17));
+    expect(s.level).toBe('rojo');
   });
 
   it('visibilidad reducida => amarillo', () => {

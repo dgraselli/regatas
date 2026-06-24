@@ -3,6 +3,13 @@ import type { ScoringThresholds } from '@/lib/types/config';
 import type { SurgeAlert } from '@/lib/types/water';
 import { SCORING, DAYLIGHT } from '@/lib/config/boat';
 
+/**
+ * Horas de luz despejadas que deben quedar DESPUÉS de la niebla para considerar
+ * que el día sigue siendo navegable (saliendo más tarde). Si quedan al menos
+ * tantas, la niebla matinal no marca el día como "no recomendable".
+ */
+const FOG_NAVIGABLE_WINDOW_H = 4;
+
 function hourOf(iso: string): number {
   // iso local 'YYYY-MM-DDTHH:mm' -> HH
   return Number(iso.slice(11, 13));
@@ -105,13 +112,34 @@ export function scoreDay(
     escalate('amarillo', `Algo de lluvia (${precipTotalMm} mm)`);
   }
 
-  // Niebla / visibilidad reducida. El pronóstico de niebla es poco confiable, así
-  // que se comunica como "posible" y siempre con la salvedad de verificar in situ.
-  if (visibilityMinM != null) {
-    if (visibilityMinM <= thresholds.fogRedM) {
-      escalate('rojo', `Posible niebla (visibilidad ${formatVis(visibilityMinM)})`);
-    } else if (visibilityMinM <= thresholds.fogYellowM) {
-      escalate('amarillo', `Visibilidad reducida (${formatVis(visibilityMinM)}, posible neblina)`);
+  // Niebla / visibilidad reducida. Es un problema de HORARIO más que un peligro de
+  // todo el día: si despeja temprano y queda una ventana navegable después, el día
+  // baja solo a precaución (con el horario en la nota), no a "no recomendable".
+  // El pronóstico de niebla es poco confiable; siempre se comunica como "posible".
+  const foggy = usable.filter(
+    (p) => p.visibilityM != null && p.visibilityM <= thresholds.fogYellowM,
+  );
+  if (foggy.length > 0) {
+    const minVis = Math.round(Math.min(...foggy.map((p) => p.visibilityM as number)));
+    const dense = minVis <= thresholds.fogRedM; // niebla, no solo neblina
+    const lastFoggyHour = Math.max(...foggy.map((p) => hourOf(p.time)));
+    const clearHoursAfter = usable.filter(
+      (p) =>
+        hourOf(p.time) > lastFoggyHour &&
+        (p.visibilityM == null || p.visibilityM > thresholds.fogYellowM),
+    ).length;
+    const clearsEarly = clearHoursAfter >= FOG_NAVIGABLE_WINDOW_H;
+
+    if (clearsEarly) {
+      const desc = dense ? 'Niebla a primera hora' : 'Visibilidad reducida temprano';
+      escalate(
+        'amarillo',
+        `${desc} (visibilidad mín ${formatVis(minVis)}); despeja ~${lastFoggyHour + 1}h, navegable después`,
+      );
+    } else if (dense) {
+      escalate('rojo', `Niebla buena parte del día (visibilidad mín ${formatVis(minVis)})`);
+    } else {
+      escalate('amarillo', `Visibilidad reducida (${formatVis(minVis)}, posible neblina)`);
     }
   }
 

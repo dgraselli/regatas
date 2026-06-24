@@ -2,13 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
+import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { Onboarding } from '@/components/common/Onboarding';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { ForecastStrip } from '@/components/dashboard/ForecastStrip';
 import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
+import { TideSummary } from '@/components/dashboard/TideSummary';
 import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
-import { AlertBanner, FogAlertBanner } from '@/components/alerts/AlertBanner';
+import { FogAlertBanner } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { LocateButton } from '@/components/common/LocateButton';
 import { CautionPicker } from '@/components/common/CautionPicker';
@@ -23,6 +25,7 @@ export default function DashboardPage() {
   const { profile, hydrated, activeLocation, activeBoat, setActiveLocation, setCaution } =
     useProfile();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const water = useWaterLevel(activeLocation);
   const { data, isLoading, isError, isFetching, error } = useForecast(
     activeLocation,
     profile.caution,
@@ -89,11 +92,10 @@ export default function DashboardPage() {
             isFetching={isFetching}
           />
 
-          {(data.surge.length > 0 || data.fog.length > 0) && (
+          <TideSummary status={water.data} surge={data.surge} />
+
+          {data.fog.length > 0 && (
             <div className="space-y-2">
-              {data.surge.map((a, i) => (
-                <AlertBanner key={`s${i}`} alert={a} />
-              ))}
               {data.fog.map((a, i) => (
                 <FogAlertBanner key={`f${i}`} alert={a} />
               ))}

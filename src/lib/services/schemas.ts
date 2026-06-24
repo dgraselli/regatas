@@ -13,6 +13,7 @@ export const openMeteoForecastSchema = z.object({
     wind_direction_10m: z.array(z.number()),
     precipitation: z.array(z.number()),
     visibility: z.array(z.number().nullable()).optional(),
+    cloud_cover: z.array(z.number().nullable()).optional(),
   }),
 });
 export type OpenMeteoForecast = z.infer<typeof openMeteoForecastSchema>;

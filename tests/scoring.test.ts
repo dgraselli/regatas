@@ -33,6 +33,19 @@ function dayWithMorningFog(
   });
 }
 
+/** Día con nubosidad dada (%) y `rainHours` horas de lluvia desde las 08. */
+function dayClouds(date: string, cloudPct: number, rainHours = 0): HourlyPoint[] {
+  return Array.from({ length: 24 }, (_, h) => ({
+    time: `${date}T${String(h).padStart(2, '0')}:00`,
+    windKt: 12,
+    gustKt: 16,
+    windDir: 270,
+    precipMm: h >= 8 && h < 8 + rainHours ? 1 : 0,
+    tempC: 15,
+    cloudCoverPct: cloudPct,
+  }));
+}
+
 describe('scoring', () => {
   it('día ideal => verde', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16));
@@ -127,5 +140,18 @@ describe('scoring', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16));
     expect(s.level).toBe('verde');
     expect(s.metrics.visibilityMinM).toBeUndefined();
+  });
+
+  it('condición del cielo según nubosidad y lluvia', () => {
+    expect(scoreDay('2026-06-18', dayClouds('2026-06-18', 10)).condition).toBe('soleado');
+    expect(scoreDay('2026-06-18', dayClouds('2026-06-18', 50)).condition).toBe('parcial');
+    expect(scoreDay('2026-06-18', dayClouds('2026-06-18', 90)).condition).toBe('nublado');
+    // lluvia 2 horas => parcial; muchas horas => total.
+    expect(scoreDay('2026-06-18', dayClouds('2026-06-18', 80, 2)).condition).toBe('lluvia-parcial');
+    expect(scoreDay('2026-06-18', dayClouds('2026-06-18', 80, 9)).condition).toBe('lluvia');
+  });
+
+  it('sin dato de nubes ni lluvia => condición indefinida (sin ícono)', () => {
+    expect(scoreDay('2026-06-18', day('2026-06-18', 12, 16)).condition).toBeUndefined();
   });
 });

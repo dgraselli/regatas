@@ -16,7 +16,3 @@ export function TrafficLight({ level, size = 'md' }: { level: TrafficLevel; size
     </span>
   );
 }
-
-export function levelDot(level: TrafficLevel) {
-  return CONFIG[level].emoji;
-}

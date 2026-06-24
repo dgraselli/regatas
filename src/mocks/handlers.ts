@@ -36,17 +36,19 @@ interface DayPattern {
   tempBase: number;
   /** Si está, hay niebla matinal con esta visibilidad mínima (m). */
   fogVisM?: number;
+  /** Nubosidad media del día (0..100 %). */
+  cloud: number;
 }
 
 // Patrón por día (índice 0 = hoy).
 const PATTERN: DayPattern[] = [
-  { baseWind: 11, gustExtra: 5, dir: 270, rain: 0, tempBase: 15 }, // verde
-  { baseWind: 23, gustExtra: 6, dir: 135, rain: 3, tempBase: 14 }, // sudestada (SE)
-  { baseWind: 30, gustExtra: 9, dir: 200, rain: 1, tempBase: 12 }, // rojo ventoso
-  { baseWind: 7, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fogVisM: 3000 }, // neblina => amarillo
-  { baseWind: 22, gustExtra: 5, dir: 315, rain: 0, tempBase: 13 }, // bajante (NW)
-  { baseWind: 19, gustExtra: 6, dir: 180, rain: 0, tempBase: 15 }, // amarillo
-  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fogVisM: 500 }, // niebla => rojo
+  { baseWind: 11, gustExtra: 5, dir: 270, rain: 0, tempBase: 15, cloud: 10 }, // verde · soleado
+  { baseWind: 23, gustExtra: 6, dir: 135, rain: 3, tempBase: 14, cloud: 95 }, // sudestada · lluvia
+  { baseWind: 30, gustExtra: 9, dir: 200, rain: 1, tempBase: 12, cloud: 80 }, // rojo · lluvia parcial
+  { baseWind: 7, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fogVisM: 3000, cloud: 85 }, // neblina · nublado
+  { baseWind: 22, gustExtra: 5, dir: 315, rain: 0, tempBase: 13, cloud: 45 }, // bajante · parcial
+  { baseWind: 19, gustExtra: 6, dir: 180, rain: 0, tempBase: 15, cloud: 75 }, // amarillo · nublado
+  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fogVisM: 500, cloud: 20 }, // niebla · soleado
 ];
 
 function buildSeries() {
@@ -58,6 +60,7 @@ function buildSeries() {
   const precip: number[] = [];
   const temp: number[] = [];
   const vis: number[] = [];
+  const cloud: number[] = [];
   const seaLevel: number[] = [];
 
   const CLEAR_VIS = 24000; // visibilidad "despejada" en metros
@@ -82,6 +85,8 @@ function buildSeries() {
         else if (h === 10) v = Math.round((p.fogVisM + CLEAR_VIS) / 2);
       }
       vis.push(v);
+      // Nubosidad: base del día + leve variación diurna, acotada a 0..100.
+      cloud.push(Math.max(0, Math.min(100, Math.round(p.cloud + Math.sin((h / 24) * Math.PI * 2) * 8))));
       // Nivel del mar: sube con sudestada (día 1), baja con bajante (día 4).
       const tide = Math.sin((h / 12) * Math.PI) * 0.3; // marea astronómica chica
       let surge = 0;
@@ -91,7 +96,7 @@ function buildSeries() {
     }
   }
 
-  return { time, wind, gust, dir, precip, temp, vis, seaLevel };
+  return { time, wind, gust, dir, precip, temp, vis, cloud, seaLevel };
 }
 
 export function mockForecast(lat: number, lon: number): OpenMeteoForecast {
@@ -108,6 +113,7 @@ export function mockForecast(lat: number, lon: number): OpenMeteoForecast {
       wind_direction_10m: s.dir,
       precipitation: s.precip,
       visibility: s.vis,
+      cloud_cover: s.cloud,
     },
   };
 }

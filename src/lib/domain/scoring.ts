@@ -1,4 +1,4 @@
-import type { HourlyPoint, DayScore, TrafficLevel } from '@/lib/types/forecast';
+import type { HourlyPoint, DayScore, TrafficLevel, SkyCondition } from '@/lib/types/forecast';
 import type { ScoringThresholds } from '@/lib/types/config';
 import type { SurgeAlert } from '@/lib/types/water';
 import { SCORING, DAYLIGHT } from '@/lib/config/boat';
@@ -22,6 +22,29 @@ function dateOf(iso: string): string {
 /** Visibilidad legible: metros por debajo de 1 km, km con un decimal por encima. */
 function formatVis(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+/** mm por hora a partir de los cuales se cuenta una hora como "con lluvia". */
+const PRECIP_HOUR_MM = 0.2;
+
+/**
+ * Condición del cielo del día (para el ícono de la tarjeta), a partir de las
+ * horas de luz: primero la lluvia (parcial/total según cuántas horas llueve) y,
+ * si está seco, la nubosidad media. Devuelve undefined si no hay dato de nubes
+ * y no llueve (no podemos distinguir soleado de nublado).
+ */
+function skyCondition(hours: HourlyPoint[]): SkyCondition | undefined {
+  if (hours.length === 0) return undefined;
+  const precipHours = hours.filter((p) => p.precipMm >= PRECIP_HOUR_MM).length;
+  if (precipHours / hours.length >= 0.5) return 'lluvia';
+  if (precipHours > 0) return 'lluvia-parcial';
+
+  const clouds = hours.map((p) => p.cloudCoverPct).filter((v): v is number => v != null);
+  if (clouds.length === 0) return undefined;
+  const avg = clouds.reduce((s, c) => s + c, 0) / clouds.length;
+  if (avg < 30) return 'soleado';
+  if (avg < 70) return 'parcial';
+  return 'nublado';
 }
 
 function median(values: number[]): number {
@@ -163,6 +186,7 @@ export function scoreDay(
   return {
     date,
     level,
+    condition: skyCondition(usable),
     reasons,
     metrics: {
       windMedianKt,

@@ -1,9 +1,18 @@
 'use client';
 
-import type { DayScore } from '@/lib/types/forecast';
-import { TrafficLight, levelDot } from './TrafficLight';
+import type { DayScore, SkyCondition } from '@/lib/types/forecast';
+import { TrafficLight } from './TrafficLight';
 import { WindArrow } from '@/components/common/WindArrow';
 import { formatDate } from '@/lib/format';
+
+/** Ícono representativo del cielo del día (arriba a la derecha de la tarjeta). */
+const CONDITION: Record<SkyCondition, { emoji: string; label: string }> = {
+  soleado: { emoji: '☀️', label: 'Soleado' },
+  parcial: { emoji: '⛅', label: 'Parcialmente nublado' },
+  nublado: { emoji: '☁️', label: 'Nublado' },
+  'lluvia-parcial': { emoji: '🌦️', label: 'Precipitación parcial' },
+  lluvia: { emoji: '🌧️', label: 'Precipitación' },
+};
 
 export function DayCard({
   day,
@@ -21,9 +30,17 @@ export function DayCard({
         selected ? 'border-mar-500 ring-2 ring-mar-200 bg-white' : 'border-slate-200 bg-white hover:border-mar-300'
       }`}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-2">
         <span className="font-medium text-slate-700">{formatDate(day.date)}</span>
-        <span aria-hidden>{levelDot(day.level)}</span>
+        {day.condition && (
+          <span
+            className="text-2xl leading-none"
+            title={CONDITION[day.condition].label}
+            aria-label={CONDITION[day.condition].label}
+          >
+            {CONDITION[day.condition].emoji}
+          </span>
+        )}
       </div>
       <div className="mt-2">
         <TrafficLight level={day.level} size="sm" />
@@ -35,9 +52,17 @@ export function DayCard({
         </span>
         <WindArrow deg={day.metrics.windDirDominant} />
       </div>
-      <div className="mt-1 text-xs text-slate-400">
-        {day.metrics.tempMinC}–{day.metrics.tempMaxC}°C
-        {day.metrics.precipTotalMm > 0 && ` · ${day.metrics.precipTotalMm} mm`}
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400">
+        <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
+          <span aria-hidden className="text-[10px]">🌡️</span>
+          {day.metrics.tempMinC}–{day.metrics.tempMaxC}°C
+        </span>
+        {day.metrics.precipTotalMm > 0 && (
+          <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
+            <span aria-hidden className="text-[10px]">🌧️</span>
+            {day.metrics.precipTotalMm} mm
+          </span>
+        )}
       </div>
     </button>
   );

@@ -16,7 +16,7 @@ export async function fetchForecast(
     latitude: String(lat),
     longitude: String(lon),
     hourly:
-      'temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,visibility',
+      'temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,visibility,cloud_cover',
     wind_speed_unit: 'kn',
     timezone: 'America/Argentina/Buenos_Aires',
     forecast_days: String(forecastDays),

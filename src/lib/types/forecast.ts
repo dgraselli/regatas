@@ -15,16 +15,28 @@ export interface HourlyPoint {
   tempC: number;
   /** Visibilidad horizontal en metros, si está disponible. Bajo = posible niebla. */
   visibilityM?: number;
+  /** Nubosidad total (0..100 %), si está disponible. */
+  cloudCoverPct?: number;
   /** Nivel del mar respecto al MSL (m), si está disponible (Marine API). */
   seaLevelM?: number;
 }
 
 export type TrafficLevel = 'verde' | 'poco-viento' | 'amarillo' | 'rojo';
 
+/** Condición del cielo del día, para el ícono representativo de la tarjeta. */
+export type SkyCondition =
+  | 'soleado'
+  | 'parcial'
+  | 'nublado'
+  | 'lluvia-parcial'
+  | 'lluvia';
+
 export interface DayScore {
   /** Fecha YYYY-MM-DD en hora local. */
   date: string;
   level: TrafficLevel;
+  /** Condición del cielo (soleado/nublado/lluvia) en horas de luz, si hay dato. */
+  condition?: SkyCondition;
   /** Motivos legibles (en español) que explican el nivel. */
   reasons: string[];
   metrics: {

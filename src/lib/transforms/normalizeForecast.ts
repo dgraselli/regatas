@@ -29,6 +29,7 @@ export function normalizeForecast(
     precipMm: h.precipitation[i],
     tempC: h.temperature_2m[i],
     visibilityM: h.visibility?.[i] ?? undefined,
+    cloudCoverPct: h.cloud_cover?.[i] ?? undefined,
     seaLevelM: seaLevelByTime.get(time),
   }));
 }

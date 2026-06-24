@@ -13,6 +13,8 @@ export interface HourlyPoint {
   precipMm: number;
   /** Temperatura en °C. */
   tempC: number;
+  /** Visibilidad horizontal en metros, si está disponible. Bajo = posible niebla. */
+  visibilityM?: number;
   /** Nivel del mar respecto al MSL (m), si está disponible (Marine API). */
   seaLevelM?: number;
 }
@@ -32,6 +34,8 @@ export interface DayScore {
     precipTotalMm: number;
     tempMinC: number;
     tempMaxC: number;
+    /** Visibilidad mínima del día (m) en horas de luz, si hay dato. */
+    visibilityMinM?: number;
   };
 }
 

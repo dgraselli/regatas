@@ -12,6 +12,11 @@ function dateOf(iso: string): string {
   return iso.slice(0, 10);
 }
 
+/** Visibilidad legible: metros por debajo de 1 km, km con un decimal por encima. */
+function formatVis(m: number): string {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
 function median(values: number[]): number {
   if (values.length === 0) return 0;
   const s = [...values].sort((a, b) => a - b);
@@ -62,6 +67,10 @@ export function scoreDay(
   const gustPeakKt = Math.round(Math.max(0, ...usable.map((p) => p.gustKt)));
   const windDirDominant = Math.round(circularMean(usable.map((p) => p.windDir)));
   const precipTotalMm = Math.round(usable.reduce((s, p) => s + p.precipMm, 0) * 10) / 10;
+  const visVals = usable
+    .map((p) => p.visibilityM)
+    .filter((v): v is number => v != null);
+  const visibilityMinM = visVals.length ? Math.round(Math.min(...visVals)) : undefined;
   const temps = points.map((p) => p.tempC);
   const tempMinC = Math.round(Math.min(...temps));
   const tempMaxC = Math.round(Math.max(...temps));
@@ -96,6 +105,16 @@ export function scoreDay(
     escalate('amarillo', `Algo de lluvia (${precipTotalMm} mm)`);
   }
 
+  // Niebla / visibilidad reducida. El pronóstico de niebla es poco confiable, así
+  // que se comunica como "posible" y siempre con la salvedad de verificar in situ.
+  if (visibilityMinM != null) {
+    if (visibilityMinM <= thresholds.fogRedM) {
+      escalate('rojo', `Posible niebla (visibilidad ${formatVis(visibilityMinM)})`);
+    } else if (visibilityMinM <= thresholds.fogYellowM) {
+      escalate('amarillo', `Visibilidad reducida (${formatVis(visibilityMinM)}, posible neblina)`);
+    }
+  }
+
   // Surge meteorológico
   for (const alert of surgeOnDay) {
     const to: TrafficLevel = alert.severity >= 2 ? 'rojo' : 'amarillo';
@@ -124,6 +143,7 @@ export function scoreDay(
       precipTotalMm,
       tempMinC,
       tempMaxC,
+      visibilityMinM,
     },
   };
 }

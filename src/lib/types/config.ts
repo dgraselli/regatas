@@ -59,6 +59,10 @@ export interface ScoringThresholds {
   rainYellow: number;
   /** Lluvia (mm/día) que penaliza a rojo. */
   rainRed: number;
+  /** Visibilidad (m) que vuelve el día amarillo (visibilidad reducida / neblina). */
+  fogYellowM: number;
+  /** Visibilidad (m) que vuelve el día rojo (niebla). */
+  fogRedM: number;
 }
 
 export interface SurgeThresholds {

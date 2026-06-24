@@ -7,6 +7,11 @@ import type { Caution } from '@/lib/profile/types';
  * (que dependen del nivel de tolerancia elegido) para no quedar desactualizado
  * respecto del código.
  */
+/** Visibilidad legible: metros por debajo de 1 km, km por encima. */
+function vis(m: number): string {
+  return m < 1000 ? `${m} m` : `${m / 1000} km`;
+}
+
 export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) {
   const t = scoringFor(caution);
   return (
@@ -21,8 +26,8 @@ export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) 
           <h3 className="mb-1 font-semibold text-slate-700">Fuentes de datos</h3>
           <ul className="space-y-1">
             <li>
-              <span className="text-slate-300">•</span> <strong>Viento, ráfagas, lluvia y
-              temperatura:</strong>{' '}
+              <span className="text-slate-300">•</span> <strong>Viento, ráfagas, lluvia,
+              temperatura y visibilidad:</strong>{' '}
               <a className="underline" href="https://open-meteo.com" target="_blank" rel="noreferrer">
                 Open-Meteo
               </a>{' '}
@@ -52,11 +57,13 @@ export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) 
             </li>
             <li>
               <span className="text-slate-300">•</span> 🟡 <strong>Amarillo</strong> (precaución):
-              viento ≥ {t.strongWind} kt, ráfagas ≥ {t.gustYellow} kt o lluvia ≥ {t.rainYellow} mm.
+              viento ≥ {t.strongWind} kt, ráfagas ≥ {t.gustYellow} kt, lluvia ≥ {t.rainYellow} mm
+              o visibilidad ≤ {vis(t.fogYellowM)} (posible neblina).
             </li>
             <li>
               <span className="text-slate-300">•</span> 🔴 <strong>Rojo</strong> (mejor no salir):
-              viento ≥ {t.dangerWind} kt, ráfagas ≥ {t.gustRed} kt o lluvia ≥ {t.rainRed} mm.
+              viento ≥ {t.dangerWind} kt, ráfagas ≥ {t.gustRed} kt, lluvia ≥ {t.rainRed} mm
+              o visibilidad ≤ {vis(t.fogRedM)} (posible niebla).
             </li>
             <li>
               <span className="text-slate-300">•</span> 💤 <strong>Poco viento:</strong> menos de{' '}
@@ -67,6 +74,11 @@ export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) 
             Una <strong>alerta de marea meteorológica</strong> (sudestada / bajante) activa ese día
             también baja el color. El detalle de cómo se calcula esa alerta está en la pestaña{' '}
             <strong>Alertas</strong>.
+          </p>
+          <p className="mt-2 text-xs text-slate-400">
+            El pronóstico de <strong>niebla</strong> es poco confiable (sobre todo la niebla
+            matinal y la que se forma sobre el agua): tomá el aviso como “posible” y confirmá la
+            visibilidad real antes de salir.
           </p>
         </div>
 

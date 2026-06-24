@@ -21,6 +21,8 @@ export const SCORING: ScoringThresholds = {
   gustRed: 33,
   rainYellow: 2,
   rainRed: 12,
+  fogYellowM: 4000,
+  fogRedM: 1000,
 };
 
 /**
@@ -31,10 +33,10 @@ export const SCORING: ScoringThresholds = {
  */
 export function scoringFor(caution: 'prudente' | 'normal' | 'audaz'): ScoringThresholds {
   if (caution === 'prudente') {
-    return { ...SCORING, strongWind: 18, dangerWind: 24, gustYellow: 22, gustRed: 28, rainYellow: 1, rainRed: 8 };
+    return { ...SCORING, strongWind: 18, dangerWind: 24, gustYellow: 22, gustRed: 28, rainYellow: 1, rainRed: 8, fogYellowM: 6000, fogRedM: 2000 };
   }
   if (caution === 'audaz') {
-    return { ...SCORING, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16 };
+    return { ...SCORING, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16, fogYellowM: 2000, fogRedM: 500 };
   }
   return SCORING;
 }

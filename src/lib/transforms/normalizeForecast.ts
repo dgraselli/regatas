@@ -28,6 +28,7 @@ export function normalizeForecast(
     windDir: h.wind_direction_10m[i],
     precipMm: h.precipitation[i],
     tempC: h.temperature_2m[i],
+    visibilityM: h.visibility?.[i] ?? undefined,
     seaLevelM: seaLevelByTime.get(time),
   }));
 }

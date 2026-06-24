@@ -34,6 +34,8 @@ interface DayPattern {
   dir: number;
   rain: number;
   tempBase: number;
+  /** Si está, hay niebla matinal con esta visibilidad mínima (m). */
+  fogVisM?: number;
 }
 
 // Patrón por día (índice 0 = hoy).
@@ -41,10 +43,10 @@ const PATTERN: DayPattern[] = [
   { baseWind: 11, gustExtra: 5, dir: 270, rain: 0, tempBase: 15 }, // verde
   { baseWind: 23, gustExtra: 6, dir: 135, rain: 3, tempBase: 14 }, // sudestada (SE)
   { baseWind: 30, gustExtra: 9, dir: 200, rain: 1, tempBase: 12 }, // rojo ventoso
-  { baseWind: 7, gustExtra: 4, dir: 90, rain: 0, tempBase: 16 }, // verde flojo
+  { baseWind: 7, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fogVisM: 3000 }, // neblina => amarillo
   { baseWind: 22, gustExtra: 5, dir: 315, rain: 0, tempBase: 13 }, // bajante (NW)
   { baseWind: 19, gustExtra: 6, dir: 180, rain: 0, tempBase: 15 }, // amarillo
-  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17 }, // verde
+  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fogVisM: 500 }, // niebla => rojo
 ];
 
 function buildSeries() {
@@ -55,7 +57,10 @@ function buildSeries() {
   const dir: number[] = [];
   const precip: number[] = [];
   const temp: number[] = [];
+  const vis: number[] = [];
   const seaLevel: number[] = [];
+
+  const CLEAR_VIS = 24000; // visibilidad "despejada" en metros
 
   for (let day = 0; day < DAYS; day++) {
     const p = PATTERN[day];
@@ -70,6 +75,13 @@ function buildSeries() {
       dir.push(p.dir);
       precip.push(h >= 8 && h <= 16 ? p.rain : 0);
       temp.push(Math.round((p.tempBase + Math.sin(((h - 9) / 24) * Math.PI * 2) * 4) * 10) / 10);
+      // Niebla matinal: visibilidad baja entre las 5 y las 9, se disipa hacia las 11.
+      let v = CLEAR_VIS;
+      if (p.fogVisM != null) {
+        if (h >= 5 && h <= 9) v = p.fogVisM;
+        else if (h === 10) v = Math.round((p.fogVisM + CLEAR_VIS) / 2);
+      }
+      vis.push(v);
       // Nivel del mar: sube con sudestada (día 1), baja con bajante (día 4).
       const tide = Math.sin((h / 12) * Math.PI) * 0.3; // marea astronómica chica
       let surge = 0;
@@ -79,7 +91,7 @@ function buildSeries() {
     }
   }
 
-  return { time, wind, gust, dir, precip, temp, seaLevel };
+  return { time, wind, gust, dir, precip, temp, vis, seaLevel };
 }
 
 export function mockForecast(lat: number, lon: number): OpenMeteoForecast {
@@ -95,6 +107,7 @@ export function mockForecast(lat: number, lon: number): OpenMeteoForecast {
       wind_gusts_10m: s.gust,
       wind_direction_10m: s.dir,
       precipitation: s.precip,
+      visibility: s.vis,
     },
   };
 }

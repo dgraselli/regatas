@@ -15,6 +15,11 @@ function day(date: string, wind: number, gust: number, rain = 0, dir = 270): Hou
   }));
 }
 
+/** Día con viento ideal y una visibilidad mínima dada en horas de luz. */
+function foggyDay(date: string, visM: number, wind = 12): HourlyPoint[] {
+  return day(date, wind, wind + 4).map((p) => ({ ...p, visibilityM: visM }));
+}
+
 describe('scoring', () => {
   it('día ideal => verde', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16));
@@ -67,5 +72,36 @@ describe('scoring', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, surge);
     expect(s.level).toBe('rojo');
     expect(s.reasons).toContain('Sudestada severa');
+  });
+
+  it('niebla (visibilidad muy baja) => rojo', () => {
+    const s = scoreDay('2026-06-18', foggyDay('2026-06-18', 600));
+    expect(s.level).toBe('rojo');
+    expect(s.reasons.join(' ')).toMatch(/niebla/i);
+    expect(s.metrics.visibilityMinM).toBe(600);
+  });
+
+  it('visibilidad reducida => amarillo', () => {
+    const s = scoreDay('2026-06-18', foggyDay('2026-06-18', 3000));
+    expect(s.level).toBe('amarillo');
+    expect(s.reasons.join(' ')).toMatch(/visibilidad reducida/i);
+  });
+
+  it('buena visibilidad no penaliza', () => {
+    const s = scoreDay('2026-06-18', foggyDay('2026-06-18', 20000));
+    expect(s.level).toBe('verde');
+  });
+
+  it('la sensibilidad a la niebla sigue la tolerancia', () => {
+    // 1500 m: el prudente lo ve peligroso (rojo), el normal lo ve reducido (amarillo).
+    const niebla = foggyDay('2026-06-18', 1500);
+    expect(scoreDay('2026-06-18', niebla, scoringFor('prudente')).level).toBe('rojo');
+    expect(scoreDay('2026-06-18', niebla, scoringFor('normal')).level).toBe('amarillo');
+  });
+
+  it('sin dato de visibilidad no rompe ni penaliza', () => {
+    const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16));
+    expect(s.level).toBe('verde');
+    expect(s.metrics.visibilityMinM).toBeUndefined();
   });
 });

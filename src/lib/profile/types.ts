@@ -16,6 +16,10 @@ export interface SavedLocation {
   lon: number;
   kind: LocationKind;
   timezone: string;
+  /** Nivel de agua mínimo seguro de la amarra (m), opcional. Por debajo, riesgo de varar. */
+  safeLevelMinM?: number;
+  /** Nivel de agua máximo seguro de la amarra (m), opcional. Por encima, agua muy alta. */
+  safeLevelMaxM?: number;
 }
 
 /** Nivel de tolerancia al riesgo, ajusta los umbrales del semáforo. */

@@ -30,6 +30,7 @@ export default function PerfilPage() {
     removeBoat,
     setActiveBoat,
     addLocation,
+    updateLocation,
     removeLocation,
     setActiveLocation,
     setCaution,
@@ -97,28 +98,36 @@ export default function PerfilPage() {
         </p>
         <div className="space-y-2">
           {profile.locations.map((l) => (
-            <Card key={l.id} className="p-3 flex items-center justify-between gap-3">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="radio"
-                  name="activeLocation"
-                  checked={profile.activeLocationId === l.id}
-                  onChange={() => setActiveLocation(l.id)}
-                  className="accent-mar-600"
-                />
-                <span>
-                  <span className="font-medium text-slate-800">{l.name}</span>
-                  <span className="text-slate-400 text-sm">
-                    {' '}· {l.kind} · {l.lat.toFixed(4)}, {l.lon.toFixed(4)}
+            <Card key={l.id} className="p-3">
+              <div className="flex items-center justify-between gap-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="activeLocation"
+                    checked={profile.activeLocationId === l.id}
+                    onChange={() => setActiveLocation(l.id)}
+                    className="accent-mar-600"
+                  />
+                  <span>
+                    <span className="font-medium text-slate-800">{l.name}</span>
+                    <span className="text-slate-400 text-sm">
+                      {' '}· {l.kind} · {l.lat.toFixed(4)}, {l.lon.toFixed(4)}
+                    </span>
                   </span>
-                </span>
-              </label>
-              <button
-                onClick={() => removeLocation(l.id)}
-                className="text-sm text-red-500 hover:text-red-700"
-              >
-                Eliminar
-              </button>
+                </label>
+                <button
+                  onClick={() => removeLocation(l.id)}
+                  className="text-sm text-red-500 hover:text-red-700"
+                >
+                  Eliminar
+                </button>
+              </div>
+              <LocationLevels
+                location={l}
+                onSave={(min, max) =>
+                  updateLocation(l.id, { safeLevelMinM: min, safeLevelMaxM: max })
+                }
+              />
             </Card>
           ))}
         </div>
@@ -345,6 +354,62 @@ function AddKnownClubForm({
         Agregar club
       </button>
     </form>
+  );
+}
+
+function LocationLevels({
+  location,
+  onSave,
+}: {
+  location: { safeLevelMinM?: number; safeLevelMaxM?: number };
+  onSave: (min: number | undefined, max: number | undefined) => void;
+}) {
+  const [min, setMin] = useState(location.safeLevelMinM?.toString() ?? '');
+  const [max, setMax] = useState(location.safeLevelMaxM?.toString() ?? '');
+  const defined = location.safeLevelMinM != null || location.safeLevelMaxM != null;
+
+  const commit = () => {
+    const parse = (s: string) => {
+      const n = Number(s);
+      return s.trim() !== '' && Number.isFinite(n) ? n : undefined;
+    };
+    onSave(parse(min), parse(max));
+  };
+
+  return (
+    <details className="mt-2">
+      <summary className="cursor-pointer text-xs text-mar-700 marker:content-none">
+        ▾ Niveles seguros de la amarra (opcional){defined ? ' · definidos' : ''}
+      </summary>
+      <div className="mt-2 flex gap-3 items-end flex-wrap">
+        <Field label="Mínimo (m)">
+          <input
+            type="number"
+            step="0.1"
+            value={min}
+            onChange={(e) => setMin(e.target.value)}
+            onBlur={commit}
+            placeholder="ej: 0.6"
+            className="input w-28"
+          />
+        </Field>
+        <Field label="Máximo (m)">
+          <input
+            type="number"
+            step="0.1"
+            value={max}
+            onChange={(e) => setMax(e.target.value)}
+            onBlur={commit}
+            placeholder="ej: 2.4"
+            className="input w-28"
+          />
+        </Field>
+        <p className="text-xs text-slate-400 max-w-sm">
+          Referidos al mismo nivel que muestra el INA. Si los definís, el panel avisa cuando
+          el agua queda por debajo del mínimo (riesgo de varar) o por encima del máximo.
+        </p>
+      </div>
+    </details>
   );
 }
 

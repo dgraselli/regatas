@@ -92,7 +92,12 @@ export default function DashboardPage() {
             isFetching={isFetching}
           />
 
-          <TideSummary status={water.data} surge={data.surge} />
+          <TideSummary
+            status={water.data}
+            surge={data.surge}
+            safeMinM={activeLocation.safeLevelMinM}
+            safeMaxM={activeLocation.safeLevelMaxM}
+          />
 
           {data.fog.length > 0 && (
             <div className="space-y-2">

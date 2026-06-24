@@ -3,7 +3,7 @@
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { useProfile } from '@/lib/profile/ProfileContext';
-import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
+import { AlertBanner, NoAlerts, FogAlertBanner, NoFogAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
 import { MetodologiaInfo } from '@/components/alerts/MetodologiaInfo';
 import { LocationPicker } from '@/components/common/LocationPicker';
@@ -31,10 +31,10 @@ export default function AlertasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Alertas de marea</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Alertas</h1>
           <p className="text-slate-500 text-sm">
-            Sudestadas (sube el agua, riesgo de inundar el club) y bajantes (baja el agua,
-            riesgo de varadura), estimadas según viento y nivel observado.
+            Marea meteorológica (sudestadas y bajantes) y niebla / visibilidad reducida,
+            estimadas a partir del pronóstico de tu zona.
           </p>
         </div>
         <LocationPicker
@@ -63,26 +63,39 @@ export default function AlertasPage() {
         </div>
       </Card>
 
-      <section className="space-y-2">
-        <h2 className="font-semibold text-slate-700">Eventos previstos</h2>
-        {forecast.isLoading && <Loading />}
-        {forecast.isError && !forecast.data && (
-          <ErrorState message={(forecast.error as Error)?.message} />
-        )}
-        {forecast.data && (
-          <StaleForecastNotice
-            fetchedAt={forecast.data.bundle.fetchedAt}
-            isError={forecast.isError}
-            isFetching={forecast.isFetching}
-          />
-        )}
-        {forecast.data &&
-          (forecast.data.surge.length > 0 ? (
-            forecast.data.surge.map((a, i) => <AlertBanner key={i} alert={a} />)
-          ) : (
-            <NoAlerts />
-          ))}
-      </section>
+      {forecast.isLoading && <Loading />}
+      {forecast.isError && !forecast.data && (
+        <ErrorState message={(forecast.error as Error)?.message} />
+      )}
+      {forecast.data && (
+        <StaleForecastNotice
+          fetchedAt={forecast.data.bundle.fetchedAt}
+          isError={forecast.isError}
+          isFetching={forecast.isFetching}
+        />
+      )}
+
+      {forecast.data && (
+        <>
+          <section className="space-y-2">
+            <h2 className="font-semibold text-slate-700">Marea meteorológica</h2>
+            {forecast.data.surge.length > 0 ? (
+              forecast.data.surge.map((a, i) => <AlertBanner key={i} alert={a} />)
+            ) : (
+              <NoAlerts />
+            )}
+          </section>
+
+          <section className="space-y-2">
+            <h2 className="font-semibold text-slate-700">Visibilidad / niebla</h2>
+            {forecast.data.fog.length > 0 ? (
+              forecast.data.fog.map((a, i) => <FogAlertBanner key={i} alert={a} />)
+            ) : (
+              <NoFogAlerts />
+            )}
+          </section>
+        </>
+      )}
 
       <MetodologiaInfo stationName={water.data?.stationName} />
     </div>

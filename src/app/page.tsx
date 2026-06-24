@@ -8,7 +8,7 @@ import { ForecastStrip } from '@/components/dashboard/ForecastStrip';
 import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
-import { AlertBanner } from '@/components/alerts/AlertBanner';
+import { AlertBanner, FogAlertBanner } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { LocateButton } from '@/components/common/LocateButton';
 import { CautionPicker } from '@/components/common/CautionPicker';
@@ -89,10 +89,13 @@ export default function DashboardPage() {
             isFetching={isFetching}
           />
 
-          {data.surge.length > 0 && (
+          {(data.surge.length > 0 || data.fog.length > 0) && (
             <div className="space-y-2">
               {data.surge.map((a, i) => (
-                <AlertBanner key={i} alert={a} />
+                <AlertBanner key={`s${i}`} alert={a} />
+              ))}
+              {data.fog.map((a, i) => (
+                <FogAlertBanner key={`f${i}`} alert={a} />
               ))}
             </div>
           )}

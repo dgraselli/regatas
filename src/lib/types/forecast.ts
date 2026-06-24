@@ -46,3 +46,24 @@ export interface ForecastBundle {
   hourly: HourlyPoint[];
   days: DayScore[];
 }
+
+/**
+ * Alerta de niebla / visibilidad reducida: una ventana de horas consecutivas con
+ * visibilidad baja. Análoga a las alertas de marea, pero centrada en visibilidad.
+ */
+export interface FogAlert {
+  /** ISO timestamp local de inicio de la ventana. */
+  startsAt: string;
+  /** ISO timestamp local de fin de la ventana. */
+  endsAt: string;
+  /** Duración en horas. */
+  durationH: number;
+  /** 1 = visibilidad reducida (neblina), 2 = niebla. */
+  severity: 1 | 2;
+  /** Visibilidad mínima de la ventana (m). */
+  minVisibilityM: number;
+  /** Confianza 0..1 (la niebla es poco confiable, así que es baja a propósito). */
+  confidence: number;
+  /** Mensaje legible en español. */
+  message: string;
+}

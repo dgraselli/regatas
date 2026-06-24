@@ -1,8 +1,13 @@
-import { SURGE } from '@/lib/config/boat';
+import { SURGE, SCORING } from '@/lib/config/boat';
 import { compass } from '@/lib/format';
 
 function sectorLabel([from, to]: [number, number]): string {
   return `${compass(from)}–${compass(to)} (${from}°–${to}°)`;
+}
+
+/** Visibilidad legible: metros por debajo de 1 km, km por encima. */
+function visLabel(m: number): string {
+  return m < 1000 ? `${m} m` : `${m / 1000} km`;
 }
 
 /**
@@ -68,6 +73,20 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
             intensidad del viento. Además, si el nivel del mar pronosticado (Open-Meteo Marine)
             acompaña la tendencia esperada, sube la <strong>confianza</strong> de la alerta; si la
             contradice, baja.
+          </p>
+        </div>
+
+        <div>
+          <h3 className="mb-1 font-semibold text-slate-700">Cómo se detecta la niebla</h3>
+          <p>
+            Open-Meteo también pronostica la <strong>visibilidad</strong> hora por hora. La app
+            agrupa las horas seguidas con visibilidad baja y arma una ventana:{' '}
+            <strong>visibilidad reducida</strong> (neblina) por debajo de{' '}
+            {visLabel(SCORING.fogYellowM)} y <strong>niebla</strong> por debajo de{' '}
+            {visLabel(SCORING.fogRedM)} (los umbrales se ajustan con tu tolerancia). El{' '}
+            pronóstico de niebla es <strong>poco confiable</strong> —sobre todo la matinal y la
+            que se forma sobre el agua—, por eso la confianza es baja y conviene tomarla como
+            “posible” y confirmar la visibilidad real antes de salir.
           </p>
         </div>
 

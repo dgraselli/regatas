@@ -1,5 +1,5 @@
 import type { BoatPolar, RoutingConfig, ScoringThresholds, RoutePoint } from '@/lib/types/config';
-import type { ForecastBundle } from '@/lib/types/forecast';
+import type { ForecastBundle, FogAlert } from '@/lib/types/forecast';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
 import type { CrossingPlan } from '@/lib/types/crossing';
 import { fetchForecast } from '@/lib/services/openMeteoForecast';
@@ -9,6 +9,7 @@ import { normalizeForecast } from '@/lib/transforms/normalizeForecast';
 import { normalizeWaterLevel } from '@/lib/transforms/normalizeWaterLevel';
 import { scoreDays } from '@/lib/domain/scoring';
 import { detectSurge } from '@/lib/domain/surge';
+import { detectFog } from '@/lib/domain/fog';
 import { planCrossing } from '@/lib/domain/routing';
 import { buildRoute } from '@/lib/config/routes';
 import { nearestStation } from '@/lib/config/inaStations';
@@ -22,17 +23,18 @@ export interface ForecastPoint {
   timezone?: string;
 }
 
-/** Pronóstico normalizado + días puntuados + alertas de surge para un lugar. */
+/** Pronóstico normalizado + días puntuados + alertas de surge y niebla para un lugar. */
 export async function getForecastBundle(
   loc: ForecastPoint,
   thresholds?: ScoringThresholds,
-): Promise<{ bundle: ForecastBundle; surge: SurgeAlert[] }> {
+): Promise<{ bundle: ForecastBundle; surge: SurgeAlert[]; fog: FogAlert[] }> {
   const [forecast, marine] = await Promise.all([
     fetchForecast(loc.lat, loc.lon),
     fetchMarine(loc.lat, loc.lon),
   ]);
   const hourly = normalizeForecast(forecast, marine);
   const surge = detectSurge(hourly);
+  const fog = detectFog(hourly, thresholds);
   const days = scoreDays(hourly, thresholds, surge);
   const fetchedAt = new Date().toISOString();
 
@@ -50,6 +52,7 @@ export async function getForecastBundle(
       days,
     },
     surge,
+    fog,
   };
 }
 

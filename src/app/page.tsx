@@ -19,6 +19,7 @@ import { StaleForecastNotice } from '@/components/common/StaleForecastNotice';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { formatDate } from '@/lib/format';
+import { reasonIcon } from '@/lib/reasonIcon';
 import { track } from '@/lib/analytics';
 
 export default function DashboardPage() {
@@ -29,6 +30,7 @@ export default function DashboardPage() {
   const { data, isLoading, isError, isFetching, error } = useForecast(
     activeLocation,
     profile.caution,
+    profile.lowWindKt,
   );
 
   const days = data?.bundle.days ?? [];
@@ -120,12 +122,18 @@ export default function DashboardPage() {
                 <ul className="mb-4 space-y-1">
                   {selectedDay.reasons.map((r, i) => (
                     <li key={i} className="text-sm text-slate-600 flex gap-2">
-                      <span className="text-slate-300">•</span>
+                      <span aria-hidden className="w-4 shrink-0 text-center">
+                        {reasonIcon(r)}
+                      </span>
                       {r}
                     </li>
                   ))}
                 </ul>
-                <HourlyWindChart points={hoursOfDay} caution={profile.caution} />
+                <HourlyWindChart
+                  points={hoursOfDay}
+                  caution={profile.caution}
+                  lowWindKt={profile.lowWindKt}
+                />
               </div>
             </Card>
           )}

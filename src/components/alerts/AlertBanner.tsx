@@ -52,23 +52,62 @@ const FOG_STYLES: Record<number, string> = {
   2: 'bg-red-50 border-red-300 text-red-900',
 };
 
-export function FogAlertBanner({ alert }: { alert: FogAlert }) {
+/**
+ * Lista consolidada de alertas de niebla: una sola tarjeta con una fila por
+ * ventana, en vez de un banner grande por día. Compacta y comparable de un
+ * vistazo. El borde toma el color de la severidad más alta.
+ */
+export function FogAlertList({ alerts }: { alerts: FogAlert[] }) {
+  if (alerts.length === 0) return null;
+
+  const maxSeverity = Math.max(...alerts.map((a) => a.severity)) as 1 | 2;
+  const hasNiebla = alerts.some((a) => a.severity === 2);
+  const hasNeblina = alerts.some((a) => a.severity === 1);
+  const title =
+    hasNiebla && hasNeblina
+      ? 'Niebla / visibilidad reducida'
+      : hasNiebla
+        ? 'Niebla'
+        : 'Visibilidad reducida';
+
   return (
-    <div className={`rounded-lg border px-4 py-3 ${FOG_STYLES[alert.severity]}`}>
-      <div className="flex items-center justify-between gap-2">
+    <div className={`rounded-lg border ${FOG_STYLES[maxSeverity]}`}>
+      <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
         <span className="font-semibold">
-          🌫️ {alert.severity === 2 ? 'Niebla' : 'Visibilidad reducida'}
-        </span>
-        <span className="text-xs opacity-80">
-          confianza {Math.round(alert.confidence * 100)}%
+          🌫️ {title}
+          {alerts.length > 1 && (
+            <span className="ml-1 font-normal opacity-70">
+              · {alerts.length} ventanas
+            </span>
+          )}
         </span>
       </div>
-      <p className="text-sm mt-1">{alert.message}</p>
-      <p className="text-xs mt-2 opacity-80">
-        {formatDate(alert.startsAt)} {formatHour(alert.startsAt)} →{' '}
-        {formatDate(alert.endsAt)} {formatHour(alert.endsAt)} · visibilidad mín{' '}
-        {visLabel(alert.minVisibilityM)}
-      </p>
+      <ul className="divide-y divide-current/10">
+        {alerts.map((a, i) => {
+          const sameDay = a.startsAt.slice(0, 10) === a.endsAt.slice(0, 10);
+          return (
+            <li
+              key={i}
+              className="flex items-baseline justify-between gap-3 px-4 py-2 text-sm"
+            >
+              <span className="min-w-0">
+                <span className="font-medium">{formatDate(a.startsAt)}</span>{' '}
+                <span className="opacity-80">
+                  {formatHour(a.startsAt)}–
+                  {sameDay ? '' : `${formatDate(a.endsAt)} `}
+                  {formatHour(a.endsAt)}
+                </span>
+              </span>
+              <span className="flex shrink-0 items-center gap-2 text-xs">
+                <span className="rounded bg-current/10 px-1.5 py-0.5 font-medium">
+                  {a.severity === 2 ? 'niebla' : 'neblina'}
+                </span>
+                <span className="opacity-80">vis. {visLabel(a.minVisibilityM)}</span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

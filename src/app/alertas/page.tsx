@@ -3,7 +3,7 @@
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { useProfile } from '@/lib/profile/ProfileContext';
-import { AlertBanner, NoAlerts, FogAlertBanner, NoFogAlerts } from '@/components/alerts/AlertBanner';
+import { AlertBanner, NoAlerts, FogAlertList, NoFogAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
 import { MetodologiaInfo } from '@/components/alerts/MetodologiaInfo';
 import { LocationPicker } from '@/components/common/LocationPicker';
@@ -89,7 +89,7 @@ export default function AlertasPage() {
           <section className="space-y-2">
             <h2 className="font-semibold text-slate-700">Visibilidad / niebla</h2>
             {forecast.data.fog.length > 0 ? (
-              forecast.data.fog.map((a, i) => <FogAlertBanner key={i} alert={a} />)
+              <FogAlertList alerts={forecast.data.fog} />
             ) : (
               <NoFogAlerts />
             )}

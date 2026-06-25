@@ -10,7 +10,7 @@ import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { TideSummary } from '@/components/dashboard/TideSummary';
 import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
-import { FogAlertBanner } from '@/components/alerts/AlertBanner';
+import { FogAlertList } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { LocateButton } from '@/components/common/LocateButton';
 import { CautionPicker } from '@/components/common/CautionPicker';
@@ -101,13 +101,7 @@ export default function DashboardPage() {
             safeMaxM={activeLocation.safeLevelMaxM}
           />
 
-          {data.fog.length > 0 && (
-            <div className="space-y-2">
-              {data.fog.map((a, i) => (
-                <FogAlertBanner key={`f${i}`} alert={a} />
-              ))}
-            </div>
-          )}
+          {data.fog.length > 0 && <FogAlertList alerts={data.fog} />}
 
           <ForecastStrip days={days} selectedDate={activeDate} onSelect={setSelectedDate} />
 

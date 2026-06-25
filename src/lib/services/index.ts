@@ -75,6 +75,7 @@ export async function getCrossingPlan(
   to: RoutePoint,
   polar: BoatPolar,
   routingCfg: RoutingConfig,
+  thresholds?: ScoringThresholds,
 ): Promise<CrossingPlan> {
   const route = buildRoute(from, to);
   const mid = route.waypoints[Math.floor(route.waypoints.length / 2)];
@@ -83,5 +84,5 @@ export async function getCrossingPlan(
     fetchMarine(mid.lat, mid.lon),
   ]);
   const hourly = normalizeForecast(forecast, marine);
-  return planCrossing(route, hourly, polar, routingCfg);
+  return planCrossing(route, hourly, polar, routingCfg, { thresholds });
 }

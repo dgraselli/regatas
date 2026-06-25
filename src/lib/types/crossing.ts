@@ -1,5 +1,7 @@
 /** Modelo de dominio del planificador de cruce. */
 
+import type { TrafficLevel } from '@/lib/types/forecast';
+
 export type PointOfSail =
   | 'en irons' // dentro de la zona muerta (hay que virar)
   | 'ceñida'
@@ -49,6 +51,8 @@ export interface DepartureCandidate {
   distanceNm: number;
   /** ¿Completa el cruce dentro del horizonte simulado? */
   completes: boolean;
+  /** Semáforo de seguridad de esta salida (misma escala que el panel del día). */
+  level: TrafficLevel;
   legs: Leg[];
   warnings: string[];
   /** Costo usado para el ranking (menor es mejor). */

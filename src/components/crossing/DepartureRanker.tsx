@@ -1,29 +1,32 @@
 'use client';
 
 import type { DepartureCandidate } from '@/lib/types/crossing';
+import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { formatDate, formatHour, formatDuration } from '@/lib/format';
 
 export function DepartureRanker({
   candidates,
   selectedIndex,
+  bestIndex,
   onSelect,
 }: {
   candidates: DepartureCandidate[];
   selectedIndex: number;
+  bestIndex: number;
   onSelect: (i: number) => void;
 }) {
   return (
     <div className="flex gap-3 overflow-x-auto pb-2">
-      {candidates.slice(0, 8).map((c, i) => {
+      {candidates.map((c, i) => {
         const selected = i === selectedIndex;
-        const best = i === 0;
+        const best = i === bestIndex && c.level !== 'rojo';
         return (
           <button
             key={c.departAt}
             onClick={() => onSelect(i)}
             className={`min-w-[160px] text-left rounded-xl border p-3 transition-all ${
               selected ? 'border-mar-500 ring-2 ring-mar-200' : 'border-slate-200 hover:border-mar-300'
-            } bg-white`}
+            } ${c.level === 'rojo' ? 'bg-red-50/40' : 'bg-white'}`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-400">{formatDate(c.departAt)}</span>
@@ -36,7 +39,10 @@ export function DepartureRanker({
             <div className="mt-1 text-lg font-semibold text-slate-800">
               Salir {formatHour(c.departAt)}
             </div>
-            <div className="text-sm text-slate-600">
+            <div className="mt-1">
+              <TrafficLight level={c.level} size="sm" />
+            </div>
+            <div className="mt-1 text-sm text-slate-600">
               {c.completes
                 ? `llega ${formatHour(c.arriveAt)} · ${formatDuration(c.totalHours)}`
                 : 'no completa con este viento'}

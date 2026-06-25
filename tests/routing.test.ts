@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { planCrossing, addHoursIso } from '@/lib/domain/routing';
 import { buildRoute } from '@/lib/config/routes';
+import { scoringFor } from '@/lib/config/boat';
 import type { HourlyPoint } from '@/lib/types/forecast';
 
 const route = buildRoute(
@@ -17,6 +18,20 @@ function forecast(dir: number, wind: number): HourlyPoint[] {
     precipMm: 0,
     tempC: 15,
   }));
+}
+
+/** Igual que `forecast` pero con timestamps que avanzan de verdad (necesario
+ *  para los eventos de marea, que se solapan por hora real). */
+function forecastSeq(dir: number, wind: number): HourlyPoint[] {
+  const start = Date.UTC(2026, 5, 18, 0, 0);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return Array.from({ length: 80 }, (_, i) => {
+    const d = new Date(start + i * 3600_000);
+    const time = `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())}T${p(
+      d.getUTCHours(),
+    )}:00`;
+    return { time, windKt: wind, gustKt: wind + 4, windDir: dir, precipMm: 0, tempC: 15 };
+  });
 }
 
 describe('routing', () => {
@@ -66,6 +81,66 @@ describe('routing', () => {
     const plan = planCrossing(route, forecast(90, 32));
     const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
     expect(allWarnings).toMatch(/rizos/i);
+  });
+
+  it('visibilidad baja agrega advertencia de niebla', () => {
+    const foggy = forecast(90, 14).map((p) => ({ ...p, visibilityM: 600 }));
+    const plan = planCrossing(route, foggy);
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).toMatch(/niebla/i);
+  });
+
+  it('buena visibilidad no agrega advertencia de niebla', () => {
+    const clear = forecast(90, 14).map((p) => ({ ...p, visibilityM: 20000 }));
+    const plan = planCrossing(route, clear);
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).not.toMatch(/niebla|visibilidad reducida/i);
+  });
+
+  it('sudestada en la ventana agrega advertencia de marea', () => {
+    // Viento del SE (135°) sostenido y fuerte (≥18 kt) => sudestada.
+    const plan = planCrossing(route, forecastSeq(135, 20));
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).toMatch(/sudestada|agua alta/i);
+  });
+
+  it('cada salida trae su semáforo; condiciones seguras => verde', () => {
+    const plan = planCrossing(route, forecast(100, 14));
+    expect(plan.best!.level).toBe('verde');
+  });
+
+  it('ráfagas peligrosas marcan las salidas como rojo', () => {
+    const plan = planCrossing(route, forecast(90, 32)); // ráfagas 36 ≥ gustRed
+    expect(plan.ranked.every((c) => c.level === 'rojo')).toBe(true);
+    expect(plan.best!.level).toBe('rojo');
+  });
+
+  it('el mejor (best) evita las salidas rojas si hay opciones seguras', () => {
+    // Mezcla: viento flojo/seguro las primeras horas, tormenta después.
+    const mixed = forecast(100, 14).map((p, i) =>
+      i >= 30 ? { ...p, windKt: 34, gustKt: 40 } : p,
+    );
+    const plan = planCrossing(route, mixed);
+    expect(plan.best!.level).not.toBe('rojo');
+  });
+
+  it('el cruce respeta la tolerancia (prudente más estricto que normal)', () => {
+    const fc = forecast(90, 26); // ráfagas ~30 kt
+    const normal = planCrossing(route, fc, undefined, undefined, {
+      thresholds: scoringFor('normal'),
+    });
+    const prudente = planCrossing(route, fc, undefined, undefined, {
+      thresholds: scoringFor('prudente'),
+    });
+    expect(normal.ranked.some((c) => c.level === 'amarillo')).toBe(true);
+    expect(prudente.ranked.every((c) => c.level === 'rojo')).toBe(true);
+  });
+
+  it('las salidas se devuelven en orden cronológico', () => {
+    const plan = planCrossing(route, forecastSeq(100, 14));
+    const times = plan.ranked.map((c) => c.departAt);
+    const sorted = [...times].sort((a, b) => a.localeCompare(b));
+    expect(times).toEqual(sorted);
   });
 
   it('rumbo en zona muerta penaliza el costo frente a través', () => {

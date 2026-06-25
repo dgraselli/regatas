@@ -1,16 +1,31 @@
-import type { HourlyPoint } from '@/lib/types/forecast';
-import type { Route, BoatPolar, RoutingConfig } from '@/lib/types/config';
+import type { HourlyPoint, TrafficLevel } from '@/lib/types/forecast';
+import type { Route, BoatPolar, RoutingConfig, ScoringThresholds } from '@/lib/types/config';
 import type {
   Leg,
   DepartureCandidate,
   CrossingPlan,
 } from '@/lib/types/crossing';
-import { DEFAULT_POLAR, ROUTING, DAYLIGHT } from '@/lib/config/boat';
+import type { SurgeAlert } from '@/lib/types/water';
+import { DEFAULT_POLAR, ROUTING, DAYLIGHT, SCORING } from '@/lib/config/boat';
 import { haversineNm, initialBearing, trueWindAngle } from '@/lib/domain/geo';
 import { boatSpeed } from '@/lib/domain/polar';
 import { pointOfSail } from '@/lib/domain/pointOfSail';
+import { detectSurge } from '@/lib/domain/surge';
 
 const hourOf = (iso: string) => Number(iso.slice(11, 13));
+
+/** Visibilidad legible: metros por debajo de 1 km, km con un decimal por encima. */
+const formatVis = (m: number) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
+
+/** Penalización de costo por nivel: garantiza verde < amarillo < rojo en el ranking. */
+const LEVEL_COST: Record<TrafficLevel, number> = { verde: 0, 'poco-viento': 0, amarillo: 20, rojo: 200 };
+
+const median = (a: number[]) => {
+  if (!a.length) return 0;
+  const s = [...a].sort((x, y) => x - y);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
 
 /** Suma horas a un ISO local 'YYYY-MM-DDTHH:mm' preservando la hora de pared. */
 export function addHoursIso(iso: string, hours: number): string {
@@ -43,16 +58,22 @@ function simulate(
   startIdx: number,
   polar: BoatPolar,
   cfg: RoutingConfig,
+  surge: SurgeAlert[],
+  thresholds: ScoringThresholds,
 ): DepartureCandidate {
   const legs: Leg[] = [];
   const warnings: string[] = [];
   let remaining = totalNm;
   let elapsed = 0;
   let completes = false;
+  let minVisM: number | undefined;
 
   for (let k = 0; k < MAX_SEGMENTS && remaining > 0.05; k++) {
     const idx = Math.min(hourly.length - 1, startIdx + k);
     const fc = hourly[idx];
+    if (fc.visibilityM != null) {
+      minVisM = minVisM === undefined ? fc.visibilityM : Math.min(minVisM, fc.visibilityM);
+    }
     const twa = trueWindAngle(course, fc.windDir);
 
     let boatKt: number;
@@ -100,7 +121,9 @@ function simulate(
       warnings: legWarnings,
     });
 
-    warnings.push(...legWarnings);
+    // La ráfaga por-hora queda en el tramo (LegTable); al resumen del candidato va
+    // una sola advertencia de ráfaga con el máximo (se agrega después del bucle).
+    warnings.push(...legWarnings.filter((w) => !w.startsWith('Ráfagas de')));
   }
 
   if (!completes) {
@@ -114,10 +137,63 @@ function simulate(
   const arrivesAtNight =
     completes && (arriveHour < DAYLIGHT.sunriseHour || arriveHour > DAYLIGHT.sunsetHour);
 
-  // Costo: tiempo + penalizaciones por seguridad/confort. Los cruces que no
-  // completan quedan al fondo del ranking.
+  // Niebla / visibilidad: prioriza el aviso a la salida (clave para zarpar de la
+  // amarra) y, si no, marca la visibilidad reducida durante el cruce.
+  const departVisM = hourly[startIdx].visibilityM;
+  if (departVisM != null && departVisM <= thresholds.fogYellowM) {
+    warnings.push(
+      departVisM <= thresholds.fogRedM
+        ? `Posible niebla a la salida (visibilidad ${formatVis(departVisM)}): cuidado al zarpar.`
+        : `Visibilidad reducida a la salida (${formatVis(departVisM)}).`,
+    );
+  } else if (minVisM != null && minVisM <= thresholds.fogYellowM) {
+    warnings.push(
+      minVisM <= thresholds.fogRedM
+        ? `Posible niebla durante el cruce (visibilidad mín ${formatVis(minVisM)}).`
+        : `Visibilidad reducida durante el cruce (mín ${formatVis(minVisM)}).`,
+    );
+  }
+
+  // Marea meteorológica (sudestada/bajante) que toca la ventana del cruce.
+  const overlapSurge = surge.filter((a) => a.startsAt <= arriveAt && a.endsAt >= departAt);
+  for (const a of overlapSurge) {
+    warnings.push(
+      a.type === 'sudestada'
+        ? 'Sudestada (agua alta) prevista durante el cruce: ojo al entrar/salir de la amarra.'
+        : 'Bajante (agua baja) prevista durante el cruce: riesgo de varadura al entrar/salir.',
+    );
+  }
+
+  // Semáforo de seguridad de ESTA salida: mismos umbrales que el panel del día,
+  // pero evaluados en la ventana real del cruce (ráfaga pico, viento, niebla y
+  // marea de esa franja). Así una salida peligrosa queda marcada, no disfrazada.
+  const order: TrafficLevel[] = ['verde', 'amarillo', 'rojo'];
+  let level: TrafficLevel = 'verde';
+  const escLevel = (to: TrafficLevel) => {
+    if (order.indexOf(to) > order.indexOf(level)) level = to;
+  };
+  const peakGust = legs.length ? Math.max(...legs.map((l) => l.gustKt)) : 0;
+  const windMed = legs.length ? median(legs.map((l) => l.windKt)) : 0;
+  if (windMed >= thresholds.dangerWind) escLevel('rojo');
+  else if (windMed >= thresholds.strongWind) escLevel('amarillo');
+  if (peakGust >= thresholds.gustRed) escLevel('rojo');
+  else if (peakGust >= thresholds.gustYellow) escLevel('amarillo');
+  if (minVisM != null) {
+    if (minVisM <= thresholds.fogRedM) escLevel('rojo');
+    else if (minVisM <= thresholds.fogYellowM) escLevel('amarillo');
+  }
+  for (const a of overlapSurge) escLevel(a.severity >= 2 ? 'rojo' : 'amarillo');
+
+  // Una sola advertencia de ráfaga, con el máximo del cruce (no una por hora).
+  if (peakGust >= cfg.reefGust) {
+    warnings.push(`Ráfagas de hasta ${peakGust} kt: conviene tomar rizos.`);
+  }
+
+  // Costo: nivel (verde<amarillo<rojo) + tiempo + penalizaciones. Los cruces que
+  // no completan quedan al fondo del ranking.
   const uniqueWarnings = Array.from(new Set(warnings));
   let cost = completes ? totalHours : 1000;
+  cost += LEVEL_COST[level];
   cost += uniqueWarnings.length * 1.5;
   if (arrivesAtNight) cost += 4;
 
@@ -131,6 +207,7 @@ function simulate(
     course,
     distanceNm: Math.round(totalNm * 10) / 10,
     completes,
+    level,
     legs,
     warnings: candidateWarnings,
     cost: Math.round(cost * 100) / 100,
@@ -145,6 +222,8 @@ export interface PlanOptions {
   horizonHours?: number;
   /** Solo considerar salidas en horario diurno. */
   daylightOnly?: boolean;
+  /** Umbrales del semáforo (según la tolerancia del usuario). Default: normal. */
+  thresholds?: ScoringThresholds;
 }
 
 /**
@@ -158,12 +237,16 @@ export function planCrossing(
   cfg: RoutingConfig = ROUTING,
   options: PlanOptions = {},
 ): CrossingPlan {
-  const { stepHours = 3, horizonHours = 72, daylightOnly = true } = options;
+  // Horizonte de salidas = todo el pronóstico (7 días), igual que el panel.
+  const { stepHours = 3, horizonHours = 24 * 7, daylightOnly = true, thresholds = SCORING } = options;
   // Cruce directo: un solo rumbo y distancia, de extremo a extremo de la ruta.
   const from = route.waypoints[0];
   const to = route.waypoints[route.waypoints.length - 1];
   const course = Math.round(initialBearing(from.lat, from.lon, to.lat, to.lon));
   const totalNm = Math.round(haversineNm(from.lat, from.lon, to.lat, to.lon) * 10) / 10;
+
+  // Eventos de marea meteorológica del horizonte (se reusan para cada salida).
+  const surge = detectSurge(hourly);
 
   const candidates: DepartureCandidate[] = [];
   const maxIdx = Math.min(hourly.length - 1, horizonHours);
@@ -172,14 +255,21 @@ export function planCrossing(
     if (daylightOnly && (h < DAYLIGHT.sunriseHour || h > DAYLIGHT.sunsetHour - 2)) {
       continue;
     }
-    candidates.push(simulate(course, totalNm, hourly, idx, polar, cfg));
+    candidates.push(simulate(course, totalNm, hourly, idx, polar, cfg, surge, thresholds));
   }
 
-  const ranked = candidates.sort((a, b) => a.cost - b.cost);
+  // `best` = la salida recomendada (menor costo: nivel + tiempo + penalizaciones);
+  // ante igual costo gana la más temprana. `ranked` se muestra en orden
+  // CRONOLÓGICO (por hora de salida), no por costo.
+  const best =
+    [...candidates].sort(
+      (a, b) => a.cost - b.cost || a.departAt.localeCompare(b.departAt),
+    )[0] ?? null;
+  const ranked = candidates.sort((a, b) => a.departAt.localeCompare(b.departAt));
   return {
     routeId: route.id,
     routeName: route.name,
-    best: ranked[0] ?? null,
+    best,
     ranked,
     computedAt: hourly[0]?.time ?? '',
   };

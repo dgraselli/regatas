@@ -7,6 +7,7 @@ import { DepartureRanker } from '@/components/crossing/DepartureRanker';
 import { LegTable } from '@/components/crossing/LegTable';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { BoatPicker } from '@/components/common/BoatPicker';
+import { CautionPicker } from '@/components/common/CautionPicker';
 import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
@@ -15,32 +16,44 @@ import { formatDate, formatHour, formatDuration, compass } from '@/lib/format';
 import { track } from '@/lib/analytics';
 
 export default function CrucePage() {
-  const { profile, hydrated, activeBoat, activeLocation } = useProfile();
+  const { profile, hydrated, activeBoat, activeLocation, setCaution, setCrossingSelection } =
+    useProfile();
   const locations = profile.locations;
   const boats = profile.boats;
 
   const [originId, setOriginId] = useState<string | null>(null);
   const [destId, setDestId] = useState<string | null>(null);
   const [boatId, setBoatId] = useState<string | null>(null);
-  const [selected, setSelected] = useState(0);
+  // null = mostrar la salida recomendada (best); si no, el índice elegido en la lista.
+  const [selected, setSelected] = useState<number | null>(null);
 
-  // Defaults: origen = amarra activa; destino = primer 'destino' distinto; barco activo.
+  // Defaults: primero la última selección guardada (si sigue existiendo); si no,
+  // origen = amarra activa, destino = primer 'destino' distinto, barco activo.
   useEffect(() => {
     if (!hydrated) return;
-    if (!originId) setOriginId(activeLocation?.id ?? locations[0]?.id ?? null);
-    if (!destId) {
-      const dest = locations.find((l) => l.kind === 'destino' && l.id !== activeLocation?.id);
-      setDestId(dest?.id ?? locations.find((l) => l.id !== activeLocation?.id)?.id ?? null);
+    const saved = profile.crossing;
+    const validLoc = (id?: string | null) => (id && locations.some((l) => l.id === id) ? id : null);
+    const validBoat = (id?: string | null) => (id && boats.some((b) => b.id === id) ? id : null);
+    if (!originId) {
+      setOriginId(validLoc(saved?.originId) ?? activeLocation?.id ?? locations[0]?.id ?? null);
     }
-    if (!boatId) setBoatId(activeBoat?.id ?? boats[0]?.id ?? null);
-  }, [hydrated, activeLocation, locations, boats, activeBoat, originId, destId, boatId]);
+    if (!destId) {
+      const savedDest = validLoc(saved?.destId);
+      const dest = locations.find((l) => l.kind === 'destino' && l.id !== activeLocation?.id);
+      setDestId(savedDest ?? dest?.id ?? locations.find((l) => l.id !== activeLocation?.id)?.id ?? null);
+    }
+    if (!boatId) setBoatId(validBoat(saved?.boatId) ?? activeBoat?.id ?? boats[0]?.id ?? null);
+  }, [hydrated, profile.crossing, activeLocation, locations, boats, activeBoat, originId, destId, boatId]);
 
   const from = locations.find((l) => l.id === originId) ?? null;
   const to = locations.find((l) => l.id === destId) ?? null;
   const boat = boats.find((b) => b.id === boatId) ?? activeBoat ?? boats[0] ?? null;
 
-  const { data, isLoading, isError, error } = useCrossingPlan(from, to, boat);
-  const candidate = data?.ranked[selected];
+  const { data, isLoading, isError, error } = useCrossingPlan(from, to, boat, profile.caution);
+  // La lista va en orden cronológico; el "mejor" (best) puede estar en cualquier lugar.
+  const bestIndex = data ? data.ranked.findIndex((c) => c.departAt === data.best?.departAt) : -1;
+  const effIndex = selected ?? (bestIndex >= 0 ? bestIndex : 0);
+  const candidate = data?.ranked[effIndex];
   const route = from && to ? buildRoute(from, to) : null;
 
   if (!hydrated) return <Loading />;
@@ -82,11 +95,14 @@ export default function CrucePage() {
           value={originId}
           onChange={(id) => {
             setOriginId(id);
+            setCrossingSelection({ originId: id });
             // Si el nuevo origen coincide con el destino, corré el destino a otro lugar.
             if (id === destId) {
-              setDestId(locations.find((l) => l.id !== id)?.id ?? null);
+              const newDest = locations.find((l) => l.id !== id)?.id ?? null;
+              setDestId(newDest);
+              setCrossingSelection({ destId: newDest });
             }
-            setSelected(0);
+            setSelected(null);
           }}
         />
         <LocationPicker
@@ -95,7 +111,8 @@ export default function CrucePage() {
           value={destId}
           onChange={(id) => {
             setDestId(id);
-            setSelected(0);
+            setCrossingSelection({ destId: id });
+            setSelected(null);
           }}
         />
         {boats.length > 1 && (
@@ -104,10 +121,19 @@ export default function CrucePage() {
             value={boatId}
             onChange={(id) => {
               setBoatId(id);
-              setSelected(0);
+              setCrossingSelection({ boatId: id });
+              setSelected(null);
             }}
           />
         )}
+        <CautionPicker
+          value={profile.caution}
+          onChange={(c) => {
+            setCaution(c);
+            track('change_caution', { caution: c, where: 'cruce' });
+            setSelected(null);
+          }}
+        />
       </div>
 
       {from && to && from.id === to.id && (
@@ -123,7 +149,8 @@ export default function CrucePage() {
             <h2 className="font-semibold text-slate-700 mb-2">Opciones de salida</h2>
             <DepartureRanker
               candidates={data.ranked}
-              selectedIndex={selected}
+              selectedIndex={effIndex}
+              bestIndex={bestIndex}
               onSelect={(i) => {
                 setSelected(i);
                 track('crossing_select_departure', { index: i });

@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/alertas', label: 'Alertas' },
   { href: '/cruce', label: 'Cruce' },
   { href: '/perfil', label: 'Mi perfil' },
+  { href: '/ayuda', label: 'Ayuda' },
 ];
 
 export function NavBar() {

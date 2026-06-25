@@ -9,7 +9,13 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { Boat, Profile, SavedLocation, Caution } from '@/lib/profile/types';
+import type {
+  Boat,
+  Profile,
+  SavedLocation,
+  Caution,
+  CrossingSelection,
+} from '@/lib/profile/types';
 import { DEFAULT_PROFILE, PROFILE_VERSION } from '@/lib/profile/defaults';
 
 const STORAGE_KEY = 'regatas-profile';
@@ -47,6 +53,8 @@ interface ProfileContextValue {
   removeLocation: (id: string) => void;
   setActiveLocation: (id: string | null) => void;
   setCaution: (c: Caution) => void;
+  setLowWind: (kt: number) => void;
+  setCrossingSelection: (patch: CrossingSelection) => void;
 }
 
 const Ctx = createContext<ProfileContextValue | null>(null);
@@ -144,6 +152,14 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setProfile((p) => ({ ...p, caution: c }));
   }, []);
 
+  const setLowWind = useCallback((kt: number) => {
+    setProfile((p) => ({ ...p, lowWindKt: kt }));
+  }, []);
+
+  const setCrossingSelection = useCallback((patch: CrossingSelection) => {
+    setProfile((p) => ({ ...p, crossing: { ...p.crossing, ...patch } }));
+  }, []);
+
   const activeBoat = useMemo(
     () => profile.boats.find((b) => b.id === profile.activeBoatId) ?? null,
     [profile.boats, profile.activeBoatId],
@@ -167,6 +183,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     removeLocation,
     setActiveLocation,
     setCaution,
+    setLowWind,
+    setCrossingSelection,
   };
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

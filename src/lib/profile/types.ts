@@ -25,6 +25,16 @@ export interface SavedLocation {
 /** Nivel de tolerancia al riesgo, ajusta los umbrales del semáforo. */
 export type Caution = 'prudente' | 'normal' | 'audaz';
 
+/** Umbral de "poco viento" (kt) por defecto si el usuario no lo configuró. */
+export const DEFAULT_LOW_WIND_KT = 6;
+
+/** Última selección del planificador de cruce (para recordarla entre sesiones). */
+export interface CrossingSelection {
+  originId?: string | null;
+  destId?: string | null;
+  boatId?: string | null;
+}
+
 export interface Profile {
   version: number;
   boats: Boat[];
@@ -33,4 +43,8 @@ export interface Profile {
   /** Lugar de referencia del panel (típicamente la amarra). */
   activeLocationId: string | null;
   caution: Caution;
+  /** Umbral de "poco viento" (kt) configurable; debajo, no se puede navegar a vela. */
+  lowWindKt?: number;
+  /** Salida/destino/barco recordados del cruce. */
+  crossing?: CrossingSelection;
 }

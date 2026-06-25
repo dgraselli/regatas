@@ -9,6 +9,8 @@ const CONFIG: Record<TrafficLevel, { bg: string; text: string; label: string; em
 
 export function TrafficLight({ level, size = 'md' }: { level: TrafficLevel; size?: 'sm' | 'md' }) {
   const c = CONFIG[level];
+  // Defensa ante datos viejos/cacheados sin un nivel válido: no romper la página.
+  if (!c) return null;
   const pad = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm';
   return (
     <span className={`inline-flex items-center gap-1 rounded-full font-medium ${c.bg} ${c.text} ${pad}`}>

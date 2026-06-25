@@ -56,7 +56,7 @@ export function Providers({ children }: { children: ReactNode }) {
       // `buster` invalida el caché persistido cuando cambia la forma de los datos
       // (subir esta versión descarta cachés viejos incompatibles). Ver tipos de
       // forecast/crossing/water.
-      persistOptions={{ persister, buster: 'schema-5' }}
+      persistOptions={{ persister, buster: 'schema-8' }}
     >
       <ProfileProvider>{children}</ProfileProvider>
     </PersistQueryClientProvider>

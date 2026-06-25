@@ -1,0 +1,112 @@
+{
+  "capturedAt": "2026-06-24T20:49:34.144Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12
+  },
+  "days": [
+    {
+      "date": "2026-06-24",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 16,
+        "windDirDominant": 286,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-25",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 21,
+        "windDirDominant": 261,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-26",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 17,
+        "windDirDominant": 23,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-27",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 10,
+        "windDirDominant": 26,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-28",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 16,
+        "windDirDominant": 184,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-29",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 15,
+        "windDirDominant": 292,
+        "precipTotalMm": 0
+      }
+    },
+    {
+      "date": "2026-06-30",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 15,
+        "windDirDominant": 336,
+        "precipTotalMm": 0
+      }
+    }
+  ],
+  "surge": []
+}

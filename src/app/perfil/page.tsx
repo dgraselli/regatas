@@ -6,7 +6,7 @@ import { TIMEZONE } from '@/lib/profile/defaults';
 import { hullSpeedKt } from '@/lib/domain/polarModel';
 import { KNOWN_CLUBS, type KnownClub } from '@/lib/config/knownClubs';
 import { track } from '@/lib/analytics';
-import type { Caution, LocationKind } from '@/lib/profile/types';
+import { type Caution, type LocationKind, DEFAULT_LOW_WIND_KT } from '@/lib/profile/types';
 import { Card } from '@/components/ui/Card';
 import { Loading } from '@/components/ui/States';
 
@@ -34,6 +34,7 @@ export default function PerfilPage() {
     removeLocation,
     setActiveLocation,
     setCaution,
+    setLowWind,
   } = useProfile();
 
   if (!hydrated) return <Loading />;
@@ -165,6 +166,42 @@ export default function PerfilPage() {
           ))}
         </div>
       </section>
+
+      {/* POCO VIENTO */}
+      <section className="space-y-3">
+        <h2 className="font-semibold text-slate-700">Umbral de poco viento</h2>
+        <p className="text-xs text-slate-400">
+          Por debajo de este viento se marca <strong>“poco viento”</strong> (probablemente no
+          se pueda navegar a vela). También es la línea azul del gráfico.
+        </p>
+        <LowWindForm value={profile.lowWindKt} onSave={setLowWind} />
+      </section>
+    </div>
+  );
+}
+
+function LowWindForm({ value, onSave }: { value?: number; onSave: (kt: number) => void }) {
+  const [kt, setKt] = useState((value ?? DEFAULT_LOW_WIND_KT).toString());
+
+  const commit = () => {
+    const n = Number(kt);
+    if (Number.isFinite(n) && n >= 1 && n <= 25) onSave(Math.round(n));
+    else setKt((value ?? DEFAULT_LOW_WIND_KT).toString());
+  };
+
+  return (
+    <div className="flex gap-2 items-end">
+      <Field label="Poco viento (kt)">
+        <input
+          type="number"
+          min={1}
+          max={25}
+          value={kt}
+          onChange={(e) => setKt(e.target.value)}
+          onBlur={commit}
+          className="input w-28"
+        />
+      </Field>
     </div>
   );
 }

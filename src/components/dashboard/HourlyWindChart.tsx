@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { HourlyPoint } from '@/lib/types/forecast';
-import type { Caution } from '@/lib/profile/types';
+import { type Caution, DEFAULT_LOW_WIND_KT } from '@/lib/profile/types';
 import { scoringFor } from '@/lib/config/boat';
 import { formatHour, compass } from '@/lib/format';
 
@@ -18,9 +18,11 @@ const TICKS = [0, 10, 20, 30, 40];
 export function HourlyWindChart({
   points,
   caution = 'normal',
+  lowWindKt,
 }: {
   points: HourlyPoint[];
   caution?: Caution;
+  lowWindKt?: number;
 }) {
   // Mide el ancho disponible para que el gráfico se ajuste al contenedor.
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,7 @@ export function HourlyWindChart({
   const t = scoringFor(caution);
   const yellow = t.gustYellow;
   const red = t.gustRed;
+  const lowWind = lowWindKt ?? DEFAULT_LOW_WIND_KT; // umbral de "poco viento"
 
   const padLeft = 22;
   const gap = 4;
@@ -62,10 +65,12 @@ export function HourlyWindChart({
     (p) => p.visibilityM != null && p.visibilityM <= t.fogYellowM && p.visibilityM > t.fogRedM,
   );
   const hasNiebla = points.some((p) => p.visibilityM != null && p.visibilityM <= t.fogRedM);
+  // La línea de "poco viento" solo se dibuja si alguna hora cae por debajo del umbral.
+  const hasLowWind = points.some((p) => p.windKt < lowWind);
 
   return (
     <div ref={wrapRef} className="w-full overflow-x-auto">
-      <svg width={width} height={height + 28} className="text-mar-500 max-w-none">
+      <svg width={width} height={height + 34} className="text-mar-500 max-w-none">
         {/* Eje Y: grilla y escala fija de referencia */}
         {TICKS.map((kt) => (
           <g key={kt}>
@@ -95,7 +100,7 @@ export function HourlyWindChart({
           );
         })}
 
-        {/* Barras: ráfaga (claro) detrás, viento (oscuro) adelante */}
+        {/* Barras + hora + flecha de dirección (hacia dónde sopla) en cada hora */}
         {points.map((p, i) => {
           const x = padLeft + i * slot + (slot - gap - barW) / 2;
           const cx = x + barW / 2;
@@ -110,16 +115,19 @@ export function HourlyWindChart({
                   {formatHour(p.time)}
                 </text>
               )}
-              {i % labelEvery === 0 && (
-                <text x={cx} y={height + 24} textAnchor="middle" className="fill-slate-300 text-[8px]">
-                  {compass(p.windDir)}
-                </text>
-              )}
+              {/* Flecha: windDir es DE DÓNDE viene; apunta hacia dónde sopla (+180). */}
+              <g transform={`translate(${cx} ${height + 23}) rotate(${p.windDir + 180})`}>
+                <title>{`Viento del ${compass(p.windDir)}`}</title>
+                <path d="M0,-5 L3.4,5 L0,2 L-3.4,5 Z" className="fill-mar-500" />
+              </g>
             </g>
           );
         })}
 
         {/* Líneas de umbral por encima de las barras, para que se lean claras */}
+        {hasLowWind && (
+          <line x1={padLeft} y1={y(lowWind)} x2={width} y2={y(lowWind)} className="stroke-blue-500" strokeWidth={1.5} strokeDasharray="5 3" />
+        )}
         <line x1={padLeft} y1={y(yellow)} x2={width} y2={y(yellow)} className="stroke-amber-400" strokeWidth={1.5} strokeDasharray="5 3" />
         <line x1={padLeft} y1={y(red)} x2={width} y2={y(red)} className="stroke-red-500" strokeWidth={1.5} strokeDasharray="5 3" />
       </svg>
@@ -130,6 +138,11 @@ export function HourlyWindChart({
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded-sm bg-mar-200" /> Ráfagas (kt)
         </span>
+        {hasLowWind && (
+          <span className="inline-flex items-center gap-1">
+            <span className="inline-block w-4 border-t-2 border-dashed border-blue-500" /> Poco viento ({lowWind} kt)
+          </span>
+        )}
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-4 border-t-2 border-dashed border-amber-400" /> Precaución ({yellow} kt)
         </span>

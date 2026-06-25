@@ -154,4 +154,11 @@ describe('scoring', () => {
   it('sin dato de nubes ni lluvia => condición indefinida (sin ícono)', () => {
     expect(scoreDay('2026-06-18', day('2026-06-18', 12, 16)).condition).toBeUndefined();
   });
+
+  it('el umbral de poco viento configurable mueve la frontera', () => {
+    const wind8 = day('2026-06-18', 8, 12);
+    expect(scoreDay('2026-06-18', wind8, scoringFor('normal')).level).toBe('verde');
+    const masExigente = { ...scoringFor('normal'), idealWindMin: 10 };
+    expect(scoreDay('2026-06-18', wind8, masExigente).level).toBe('poco-viento');
+  });
 });

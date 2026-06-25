@@ -14,7 +14,7 @@ import { Loading, ErrorState } from '@/components/ui/States';
 
 export default function AlertasPage() {
   const { profile, hydrated, activeLocation, setActiveLocation } = useProfile();
-  const forecast = useForecast(activeLocation, profile.caution);
+  const forecast = useForecast(activeLocation, profile.caution, profile.lowWindKt);
   const water = useWaterLevel(activeLocation);
 
   if (!hydrated) return <Loading />;

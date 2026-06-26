@@ -107,10 +107,42 @@ describe('scoring', () => {
     expect(s.metrics.visibilityMinM).toBe(600);
   });
 
-  it('niebla densa solo a la mañana que despeja => amarillo, no rojo', () => {
-    const s = scoreDay('2026-06-18', dayWithMorningFog('2026-06-18', 500, 9));
-    expect(s.level).toBe('amarillo');
+  it('niebla densa CORTA (≤2 h) a la mañana que despeja => no degrada, marca temporal', () => {
+    // Niebla h7–8 (2 h) y despejado el resto.
+    const s = scoreDay('2026-06-18', dayWithMorningFog('2026-06-18', 500, 8));
+    expect(s.level).toBe('verde');
+    expect(s.partialFog).toEqual({ dense: true, when: 'manana' });
     expect(s.reasons.join(' ')).toMatch(/navegable después/i);
+  });
+
+  it('niebla densa de varias horas (>2 h) que despeja => precaución igual', () => {
+    // Niebla h7–11 (5 h), luego despeja: hay ventana navegable pero degrada.
+    const s = scoreDay('2026-06-18', dayWithMorningFog('2026-06-18', 500, 11));
+    expect(s.level).toBe('amarillo');
+    expect(s.partialFog).toBeUndefined();
+    expect(s.reasons.join(' ')).toMatch(/niebla a primera hora/i);
+  });
+
+  it('neblina liviana por la tarde (ventana navegable antes) => no degrada, marca tarde', () => {
+    const points = foggyDay('2026-06-18', 20000).map((p) => {
+      const h = Number(p.time.slice(11, 13));
+      return { ...p, visibilityM: h >= 15 ? 3000 : 20000 };
+    });
+    const s = scoreDay('2026-06-18', points);
+    expect(s.level).toBe('verde');
+    expect(s.partialFog).toEqual({ dense: false, when: 'tarde' });
+    expect(s.reasons.join(' ')).toMatch(/por la tarde/i);
+  });
+
+  it('niebla densa de varias horas por la tarde => precaución', () => {
+    const points = foggyDay('2026-06-18', 20000).map((p) => {
+      const h = Number(p.time.slice(11, 13));
+      return { ...p, visibilityM: h >= 15 ? 500 : 20000 };
+    });
+    const s = scoreDay('2026-06-18', points);
+    expect(s.level).toBe('amarillo');
+    expect(s.partialFog).toBeUndefined();
+    expect(s.reasons.join(' ')).toMatch(/niebla por la tarde/i);
   });
 
   it('niebla densa casi todo el día (sin ventana después) => rojo', () => {

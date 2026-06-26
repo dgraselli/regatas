@@ -37,6 +37,13 @@ export interface DayScore {
   level: TrafficLevel;
   /** Condición del cielo (soleado/nublado/lluvia) en horas de luz, si hay dato. */
   condition?: SkyCondition;
+  /**
+   * Hubo niebla/neblina solo en parte del día, con una ventana navegable antes o
+   * después: NO degrada el nivel, pero se marca en la tarjeta indicando la densidad
+   * (`dense` = niebla cerrada vs neblina) y el momento (`'manana'` = a primera hora;
+   * `'tarde'` = por la tarde).
+   */
+  partialFog?: { dense: boolean; when: 'manana' | 'tarde' };
   /** Motivos legibles (en español) que explican el nivel. */
   reasons: string[];
   metrics: {

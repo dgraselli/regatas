@@ -70,12 +70,93 @@ export default function AyudaPage() {
           </ul>
           <p>
             Abajo de cada tarjeta ves la condición del cielo (☀️ ⛅ ☁️ 🌧️), temperatura y lluvia.
+            Si la tarjeta dice <strong>«Niebla temporal a primera hora»</strong> o <strong>«Neblina
+            temporal por la tarde»</strong>, hubo niebla solo en parte del día (queda una ventana
+            navegable): dice «niebla» si es cerrada y «neblina» si es liviana, y el momento en que
+            aparece. En cambio, la <strong>niebla cerrada que dura más de 2 horas baja el día a
+            precaución</strong> aunque después despeje, y si cubre toda la jornada lo marca como no
+            recomendable.
             Al elegir un día se despliegan los <strong>motivos</strong> (con íconos: 🌬️ viento, 💨
             ráfagas, 🌧️ lluvia, 🌫️ niebla, 🌊 sudestada…) y el <strong>gráfico por hora</strong>:
             barras de viento y ráfagas, <strong>flechas</strong> que muestran hacia dónde sopla,
             líneas de umbral (precaución / peligro / poco viento) y bandas cuando baja la
             visibilidad. Arriba aparece un <strong>resumen de marea</strong> (nivel observado y si se
             prevé agua muy alta o muy baja para entrar/salir de la amarra).
+          </p>
+        </Section>
+      </Card>
+
+      <Card className="p-4">
+        <Section title="Criterios del semáforo">
+          <p>
+            El color del día es el del <strong>factor más exigente</strong>, mirando solo las{' '}
+            <strong>horas de luz</strong> (7–19 h). El viento se evalúa por la <strong>mediana</strong>{' '}
+            del día y las ráfagas por el <strong>pico</strong>. Valores para tolerancia{' '}
+            <em>normal</em>:
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-left text-slate-500 border-b border-slate-200">
+                  <th className="py-1 pr-3 font-medium">Factor</th>
+                  <th className="py-1 pr-3 font-medium">🟡 Precaución</th>
+                  <th className="py-1 font-medium">🔴 No recomendable</th>
+                </tr>
+              </thead>
+              <tbody className="align-top">
+                <tr className="border-b border-slate-100">
+                  <td className="py-1 pr-3">Viento sostenido (mediana)</td>
+                  <td className="py-1 pr-3">≥ 22 kt</td>
+                  <td className="py-1">≥ 28 kt</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-1 pr-3">Ráfagas (pico)</td>
+                  <td className="py-1 pr-3">≥ 25 kt</td>
+                  <td className="py-1">≥ 33 kt</td>
+                </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-1 pr-3">Lluvia (total del día)</td>
+                  <td className="py-1 pr-3">≥ 2 mm</td>
+                  <td className="py-1">≥ 12 mm</td>
+                </tr>
+                <tr>
+                  <td className="py-1 pr-3">Marea (sudestada / bajante)</td>
+                  <td className="py-1 pr-3">evento moderado</td>
+                  <td className="py-1">evento fuerte</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="font-medium text-slate-700">Niebla / visibilidad</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <strong>Niebla cerrada</strong> = visibilidad ≤ 1 km; <strong>neblina</strong>{' '}
+              (visibilidad reducida) = ≤ 4 km.
+            </li>
+            <li>
+              🟢 <strong>No degrada</strong> (se marca «temporal»): niebla cerrada <strong>≤ 2 h</strong>{' '}
+              o neblina liviana, siempre que despeje y quede una <strong>ventana navegable</strong>{' '}
+              (≥ 4 h de luz despejadas antes o después).
+            </li>
+            <li>
+              🟡 <strong>Precaución</strong>: niebla cerrada de <strong>más de 2 h</strong> aunque
+              después despeje; o neblina que cubre toda la jornada.
+            </li>
+            <li>
+              🔴 <strong>No recomendable</strong>: niebla cerrada que cubre toda la jornada (sin
+              ventana navegable).
+            </li>
+          </ul>
+          <p>
+            💤 <strong>Poco viento</strong>: si el día sería verde pero la mediana de viento queda por
+            debajo de tu <strong>umbral de poco viento</strong> (default 6 kt), se marca aparte —
+            probablemente no se pueda navegar a vela.
+          </p>
+          <p className="text-xs text-slate-400">
+            La <strong>tolerancia</strong> (prudente / normal / audaz) corre estos umbrales: el
+            prudente es más estricto (p. ej. viento fuerte desde 18 kt, niebla desde 6 km) y el audaz
+            más permisivo (viento fuerte desde 26 kt, niebla desde 2 km). El umbral de «poco viento»
+            no cambia con la tolerancia: ser audaz no crea viento donde no lo hay.
           </p>
         </Section>
       </Card>

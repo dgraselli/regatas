@@ -5,6 +5,13 @@ import { TrafficLight } from './TrafficLight';
 import { WindArrow } from '@/components/common/WindArrow';
 import { formatDate } from '@/lib/format';
 
+/** Texto de niebla temporal: "niebla" si es cerrada, "neblina" si es liviana. */
+function partialFogLabel(pf: NonNullable<DayScore['partialFog']>): string {
+  const noun = pf.dense ? 'Niebla' : 'Neblina';
+  const when = pf.when === 'manana' ? 'a primera hora' : 'por la tarde';
+  return `${noun} temporal ${when}`;
+}
+
 /** Ícono representativo del cielo del día (arriba a la derecha de la tarjeta). */
 const CONDITION: Record<SkyCondition, { emoji: string; label: string }> = {
   soleado: { emoji: '☀️', label: 'Soleado' },
@@ -45,6 +52,14 @@ export function DayCard({
       <div className="mt-2">
         <TrafficLight level={day.level} size="sm" />
       </div>
+      {day.partialFog && (
+        <p
+          className="mt-1.5 text-xs font-medium text-slate-500"
+          title="Niebla solo en parte del día: queda una ventana navegable"
+        >
+          {partialFogLabel(day.partialFog)}
+        </p>
+      )}
       <div className="mt-3 flex items-center justify-between text-sm text-slate-600">
         <span>
           {day.metrics.windMedianKt} kt

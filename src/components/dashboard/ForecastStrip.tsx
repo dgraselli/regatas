@@ -13,7 +13,7 @@ export function ForecastStrip({
   onSelect: (date: string) => void;
 }) {
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2">
+    <div className="flex items-start gap-3 overflow-x-auto pb-2">
       {days.map((d) => (
         <DayCard
           key={d.date}

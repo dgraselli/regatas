@@ -12,7 +12,7 @@ import type {
  */
 
 const HOURS_PER_DAY = 24;
-const DAYS = 7;
+const DAYS = 7; // = PATTERN.length
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
@@ -34,21 +34,22 @@ interface DayPattern {
   dir: number;
   rain: number;
   tempBase: number;
-  /** Si está, hay niebla matinal con esta visibilidad mínima (m). */
-  fogVisM?: number;
+  /** Ventana de niebla: horas (inclusive) y visibilidad mínima (m) en ese rango. */
+  fog?: { from: number; to: number; visM: number };
   /** Nubosidad media del día (0..100 %). */
   cloud: number;
 }
 
-// Patrón por día (índice 0 = hoy).
+// Patrón por día (índice 0 = hoy). Solo hay 7 días (forecast_days=7), así que los
+// casos de niebla viven dentro de esa ventana para que se vean en el panel.
 const PATTERN: DayPattern[] = [
   { baseWind: 11, gustExtra: 5, dir: 270, rain: 0, tempBase: 15, cloud: 10 }, // verde · soleado
   { baseWind: 23, gustExtra: 6, dir: 135, rain: 3, tempBase: 14, cloud: 95 }, // sudestada · lluvia
-  { baseWind: 30, gustExtra: 9, dir: 200, rain: 1, tempBase: 12, cloud: 80 }, // rojo · lluvia parcial
-  { baseWind: 7, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fogVisM: 3000, cloud: 85 }, // neblina · nublado
+  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fog: { from: 7, to: 8, visM: 500 }, cloud: 20 }, // niebla densa CORTA (2 h) → "Niebla temporal a primera hora" (verde)
+  { baseWind: 10, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fog: { from: 7, to: 9, visM: 3000 }, cloud: 85 }, // neblina liviana → "Neblina temporal a primera hora" (verde)
   { baseWind: 22, gustExtra: 5, dir: 315, rain: 0, tempBase: 13, cloud: 45 }, // bajante · parcial
-  { baseWind: 19, gustExtra: 6, dir: 180, rain: 0, tempBase: 15, cloud: 75 }, // amarillo · nublado
-  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fogVisM: 500, cloud: 20 }, // niebla · soleado
+  { baseWind: 12, gustExtra: 5, dir: 270, rain: 0, tempBase: 16, fog: { from: 15, to: 19, visM: 600 }, cloud: 30 }, // niebla densa LARGA (5 h) por la tarde → precaución (amarillo)
+  { baseWind: 10, gustExtra: 4, dir: 250, rain: 0, tempBase: 17, fog: { from: 15, to: 19, visM: 3000 }, cloud: 60 }, // neblina liviana → "Neblina temporal por la tarde" (verde)
 ];
 
 function buildSeries() {
@@ -78,11 +79,10 @@ function buildSeries() {
       dir.push(p.dir);
       precip.push(h >= 8 && h <= 16 ? p.rain : 0);
       temp.push(Math.round((p.tempBase + Math.sin(((h - 9) / 24) * Math.PI * 2) * 4) * 10) / 10);
-      // Niebla matinal: visibilidad baja entre las 5 y las 9, se disipa hacia las 11.
+      // Niebla en la ventana [from, to]; despejado fuera de ella.
       let v = CLEAR_VIS;
-      if (p.fogVisM != null) {
-        if (h >= 5 && h <= 9) v = p.fogVisM;
-        else if (h === 10) v = Math.round((p.fogVisM + CLEAR_VIS) / 2);
+      if (p.fog != null) {
+        if (h >= p.fog.from && h <= p.fog.to) v = p.fog.visM;
       }
       vis.push(v);
       // Nubosidad: base del día + leve variación diurna, acotada a 0..100.

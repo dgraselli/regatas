@@ -73,7 +73,7 @@ export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) 
           <p className="mt-2">
             Una <strong>alerta de marea meteorológica</strong> (sudestada / bajante) activa ese día
             también baja el color. El detalle de cómo se calcula esa alerta está en la pestaña{' '}
-            <strong>Alertas</strong>.
+            <strong>Mareas</strong>.
           </p>
           <p className="mt-2 text-xs text-slate-400">
             El pronóstico de <strong>niebla</strong> es poco confiable (sobre todo la niebla

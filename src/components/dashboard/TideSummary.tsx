@@ -65,7 +65,7 @@ const NOTE_COLOR: Record<LevelNote['tone'], string> = {
  * Resumen de marea para el panel: nivel observado actual + tendencia, y —si se
  * prevé sudestada/bajante— un aviso de agua alta/baja en clave de entrada/salida
  * de amarra. Si la amarra activa tiene niveles seguros definidos, además evalúa
- * el nivel observado contra ellos. Es lo glanceable; el detalle vive en Alertas.
+ * el nivel observado contra ellos. Es lo glanceable; el detalle vive en Mareas.
  */
 export function TideSummary({
   status,

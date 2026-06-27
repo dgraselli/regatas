@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
 import { formatDate, formatHour } from '@/lib/format';
 
@@ -87,7 +88,11 @@ export function TideSummary({
   if (!last && events.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-4 py-3">
+    <Link
+      href="/mareas"
+      aria-label="Ver detalle en Mareas"
+      className="block rounded-lg border border-slate-200 bg-white px-4 py-3 transition hover:border-mar-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-mar-400"
+    >
       {last && (
         <div className="flex items-baseline justify-between gap-2 flex-wrap">
           <div className="flex items-baseline gap-2">
@@ -120,6 +125,8 @@ export function TideSummary({
           </p>
         );
       })}
-    </div>
+
+      <p className="text-xs text-mar-600 mt-2">Ver detalle en Mareas →</p>
+    </Link>
   );
 }

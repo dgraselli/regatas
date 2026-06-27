@@ -162,21 +162,25 @@ export default function AyudaPage() {
       </Card>
 
       <Card className="p-4">
-        <Section title="Alertas">
+        <Section title="Mareas">
           <p>
-            Dos tipos de eventos a partir del pronóstico de tu zona:
+            La pestaña <strong>Mareas</strong> reúne lo relativo al nivel del agua en tu zona:
           </p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              <strong>Marea meteorológica</strong>: <em>sudestada</em> (sube el agua, riesgo de
-              inundar el club) y <em>bajante</em> (baja el agua, riesgo de varadura), con su ventana
-              horaria. Además se muestra el <strong>nivel de agua observado</strong> del INA.
+              <strong>Nivel de agua observado</strong> del INA (estación más cercana): un dato{' '}
+              <em>medido</em>, no un pronóstico.
             </li>
             <li>
-              <strong>Visibilidad / niebla</strong>: ventanas de visibilidad reducida, con el
-              horario en que conviene esperar a que levante.
+              <strong>Marea meteorológica</strong>: <em>sudestada</em> (sube el agua, riesgo de
+              inundar el club) y <em>bajante</em> (baja el agua, riesgo de varadura), con su ventana
+              horaria.
             </li>
           </ul>
+          <p className="text-xs text-slate-400">
+            Las alertas de <strong>niebla / visibilidad reducida</strong> aparecen en el{' '}
+            <strong>panel</strong>, junto al pronóstico del día.
+          </p>
         </Section>
       </Card>
 

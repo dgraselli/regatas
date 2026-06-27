@@ -3,7 +3,7 @@
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { useProfile } from '@/lib/profile/ProfileContext';
-import { AlertBanner, NoAlerts, FogAlertList, NoFogAlerts } from '@/components/alerts/AlertBanner';
+import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
 import { MetodologiaInfo } from '@/components/alerts/MetodologiaInfo';
 import { LocationPicker } from '@/components/common/LocationPicker';
@@ -12,7 +12,7 @@ import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 
-export default function AlertasPage() {
+export default function MareasPage() {
   const { profile, hydrated, activeLocation, setActiveLocation } = useProfile();
   const forecast = useForecast(activeLocation, profile.caution, profile.lowWindKt);
   const water = useWaterLevel(activeLocation);
@@ -22,7 +22,7 @@ export default function AlertasPage() {
     return (
       <Onboarding
         title="Configurá tu lugar"
-        body="Agregá tu amarra para ver alertas de sudestada y bajante en tu zona."
+        body="Agregá tu amarra para ver el nivel del agua y las alertas de sudestada y bajante en tu zona."
       />
     );
   }
@@ -31,10 +31,10 @@ export default function AlertasPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Alertas</h1>
+          <h1 className="text-2xl font-bold text-slate-800">Mareas</h1>
           <p className="text-slate-500 text-sm">
-            Marea meteorológica (sudestadas y bajantes) y niebla / visibilidad reducida,
-            estimadas a partir del pronóstico de tu zona.
+            Nivel del agua observado y marea meteorológica (sudestadas y bajantes) en tu zona.
+            Las alertas de niebla están en el panel.
           </p>
         </div>
         <LocationPicker
@@ -76,25 +76,14 @@ export default function AlertasPage() {
       )}
 
       {forecast.data && (
-        <>
-          <section className="space-y-2">
-            <h2 className="font-semibold text-slate-700">Marea meteorológica</h2>
-            {forecast.data.surge.length > 0 ? (
-              forecast.data.surge.map((a, i) => <AlertBanner key={i} alert={a} />)
-            ) : (
-              <NoAlerts />
-            )}
-          </section>
-
-          <section className="space-y-2">
-            <h2 className="font-semibold text-slate-700">Visibilidad / niebla</h2>
-            {forecast.data.fog.length > 0 ? (
-              <FogAlertList alerts={forecast.data.fog} />
-            ) : (
-              <NoFogAlerts />
-            )}
-          </section>
-        </>
+        <section className="space-y-2">
+          <h2 className="font-semibold text-slate-700">Marea meteorológica</h2>
+          {forecast.data.surge.length > 0 ? (
+            forecast.data.surge.map((a, i) => <AlertBanner key={i} alert={a} />)
+          ) : (
+            <NoAlerts />
+          )}
+        </section>
       )}
 
       <MetodologiaInfo stationName={water.data?.stationName} />

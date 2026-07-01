@@ -1,5 +1,5 @@
 import { scoringFor, DAYLIGHT } from '@/lib/config/boat';
-import type { Caution } from '@/lib/profile/types';
+import type { Caution, Propulsion } from '@/lib/profile/types';
 
 /**
  * Bloque desplegable del panel que explica de dónde salen los datos y cómo se
@@ -12,8 +12,15 @@ function vis(m: number): string {
   return m < 1000 ? `${m} m` : `${m / 1000} km`;
 }
 
-export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) {
+export function MetodologiaPanel({
+  caution = 'normal',
+  propulsion = 'vela',
+}: {
+  caution?: Caution;
+  propulsion?: Propulsion;
+}) {
   const t = scoringFor(caution);
+  const isMotor = propulsion === 'motor';
   return (
     <details className="group rounded-xl border border-slate-100 bg-white shadow-sm">
       <summary className="flex cursor-pointer items-center justify-between px-4 py-3 text-sm font-medium text-mar-700 marker:content-none">
@@ -48,12 +55,17 @@ export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) 
             {DAYLIGHT.sunriseHour}:00 a {DAYLIGHT.sunsetHour}:00). Se toma el{' '}
             <strong>viento mediano</strong>, la <strong>ráfaga máxima</strong> y la{' '}
             <strong>lluvia total</strong> de esas horas, y se asigna el peor color que
-            corresponda según tus umbrales (tolerancia: <strong>{caution}</strong>):
+            corresponda según tus umbrales (tolerancia: <strong>{caution}</strong>
+            {isMotor ? ', barco a motor' : ''}):
           </p>
           <ul className="space-y-1">
             <li>
-              <span className="text-slate-300">•</span> 🟢 <strong>Verde:</strong> viento entre{' '}
-              {t.idealWindMin} y {t.idealWindMax} kt, sin ráfagas ni lluvia que molesten.
+              <span className="text-slate-300">•</span> 🟢 <strong>Verde:</strong>{' '}
+              {isMotor ? (
+                <>viento hasta ~{t.idealWindMax} kt, sin ráfagas ni lluvia que molesten (el agua tranquila también es buen día para motor).</>
+              ) : (
+                <>viento entre {t.idealWindMin} y {t.idealWindMax} kt, sin ráfagas ni lluvia que molesten.</>
+              )}
             </li>
             <li>
               <span className="text-slate-300">•</span> 🟡 <strong>Amarillo</strong> (precaución):
@@ -65,10 +77,13 @@ export function MetodologiaPanel({ caution = 'normal' }: { caution?: Caution }) 
               viento ≥ {t.dangerWind} kt, ráfagas ≥ {t.gustRed} kt, lluvia ≥ {t.rainRed} mm
               o visibilidad ≤ {vis(t.fogRedM)} (posible niebla).
             </li>
-            <li>
-              <span className="text-slate-300">•</span> 💤 <strong>Poco viento:</strong> menos de{' '}
-              {t.idealWindMin} kt — no es peligro, pero probablemente no se pueda navegar a vela.
-            </li>
+            {!isMotor && (
+              <li>
+                <span className="text-slate-300">•</span> 💤 <strong>Poco viento:</strong> menos de{' '}
+                {t.idealWindMin} kt — no es peligro, pero probablemente no se pueda navegar a vela.
+                (A motor no aplica: el agua tranquila es ideal.)
+              </li>
+            )}
           </ul>
           <p className="mt-2">
             Una <strong>alerta de marea meteorológica</strong> (sudestada / bajante) activa ese día

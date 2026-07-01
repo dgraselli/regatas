@@ -4,6 +4,9 @@ import { generatePolar, deriveRouting } from '@/lib/domain/polarModel';
 /** Eslora por defecto al crear un barco nuevo (pies). */
 export const DEFAULT_LENGTH_FT = 23;
 
+/** Velocidad de crucero por defecto de una embarcación a motor (nudos). */
+export const DEFAULT_CRUISE_KT = 12;
+
 /**
  * Polar y parámetros de navegación por defecto, derivados de la eslora.
  * Cada barco del usuario genera los suyos a partir de su eslora; estos sirven

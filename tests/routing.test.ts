@@ -149,4 +149,23 @@ describe('routing', () => {
     const reach = planCrossing(route, forecast(100, 14));
     expect(upwind.best!.totalHours).toBeGreaterThan(reach.best!.totalHours);
   });
+
+  it('a motor la velocidad de crucero es constante y no depende del ángulo al viento', () => {
+    const opts = { propulsion: 'motor' as const, cruiseKt: 12 };
+    // Viento de proa (0°) vs de través (100°): a motor el ETA debe ser el mismo.
+    const upwind = planCrossing(route, forecast(0, 14), undefined, undefined, opts);
+    const reach = planCrossing(route, forecast(100, 14), undefined, undefined, opts);
+    expect(upwind.best!.completes).toBe(true);
+    expect(upwind.best!.totalHours).toBeCloseTo(reach.best!.totalHours, 1);
+    // Cada tramo navega a la velocidad de crucero.
+    expect(upwind.best!.legs.every((l) => l.boatKt === 12)).toBe(true);
+  });
+
+  it('a motor no aparece la advertencia de rizos (concepto de vela)', () => {
+    const opts = { propulsion: 'motor' as const, cruiseKt: 12 };
+    const plan = planCrossing(route, forecast(90, 32), undefined, undefined, opts);
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).not.toMatch(/rizos/i);
+    expect(allWarnings).toMatch(/mar formado/i);
+  });
 });

@@ -1,8 +1,8 @@
 # Regatas — guía para Claude Code
 
 App web + PWA (Next.js 14 App Router + TypeScript + Tailwind) que evalúa si conviene
-navegar a vela en el Río de la Plata, con alertas de marea meteorológica (sudestada /
-bajante) y un planificador de cruce entre dos puntos según el viento.
+navegar a vela o motor en el Río de la Plata, con alertas de marea meteorológica
+(sudestada / bajante) y un planificador de cruce entre dos puntos según el viento.
 
 **El plan completo, el estado y el roadmap están en [`docs/PLAN.md`](docs/PLAN.md). Leelo
 antes de seguir.**
@@ -54,6 +54,11 @@ reconstruir.
 
 ## Features actuales (resumen)
 
+- **Vela / motor**: cada barco tiene `propulsion` (`'vela'|'motor'`, default vela) y, a
+  motor, `cruiseKt`. A **vela** el poco viento penaliza (`poco-viento`); a **motor** no (agua
+  tranquila = ideal) y el cruce se calcula a **velocidad de crucero constante**, no con la
+  polar. Se hila por `scoreDay/scoreDays` (5º arg) y `planCrossing` (opción `propulsion`/
+  `cruiseKt`). El picker de barco (panel y cruce) **solo aparece con >1 barco**.
 - **Panel**: semáforo por día (viento/ráfagas/lluvia/niebla/marea), ícono de cielo
   (☀️⛅☁️🌧️) por tarjeta, motivos con íconos, resumen de marea (nivel observado + agua
   alta/baja para la amarra), y gráfico horario (barras viento/ráfagas, **flechas de
@@ -64,8 +69,9 @@ reconstruir.
 - **Cruce**: considera niebla y marea, da **semáforo por salida**, lista en **orden
   cronológico**, evalúa **7 días**, usa la **tolerancia** del usuario y **recuerda** la
   selección salida/destino/barco.
-- **Perfil**: barcos, lugares (con niveles seguros de amarra), tolerancia, y **umbral de
-  poco viento** configurable (`lowWindKt`, default 6).
+- **Perfil**: barcos (**propulsión vela/motor** + eslora, y vel. de crucero si es motor),
+  lugares (con niveles seguros de amarra), tolerancia, y **umbral de poco viento**
+  configurable (`lowWindKt`, default 6).
 - Datos: Open-Meteo (forecast: viento, ráfagas, dir, lluvia, temp, **visibility**,
   **cloud_cover**; marine: nivel del mar/olas) e INA (nivel observado). SMN/SHN: solo
   referencia, no se consultan (ver memoria/PLAN).

@@ -1,10 +1,22 @@
 /** Perfil del usuario, guardado en el navegador (localStorage). Sin registro. */
 
+import type { Propulsion } from '@/lib/types/config';
+
+export type { Propulsion };
+
 export interface Boat {
   id: string;
   name: string;
   /** Eslora en pies; de acá se genera la polar aproximada. */
   lengthFt: number;
+  /**
+   * Tipo de propulsión. Ausente = 'vela' (compatibilidad con perfiles viejos).
+   * A vela el poco viento penaliza; a motor no (el agua tranquila es ideal) y el
+   * cruce se calcula a velocidad de crucero constante, no con la polar.
+   */
+  propulsion?: Propulsion;
+  /** Velocidad de crucero a motor (kt). Solo aplica si `propulsion === 'motor'`. */
+  cruiseKt?: number;
 }
 
 export type LocationKind = 'amarra' | 'destino' | 'punto';

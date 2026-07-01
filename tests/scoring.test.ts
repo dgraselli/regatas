@@ -193,4 +193,26 @@ describe('scoring', () => {
     const masExigente = { ...scoringFor('normal'), idealWindMin: 10 };
     expect(scoreDay('2026-06-18', wind8, masExigente).level).toBe('poco-viento');
   });
+
+  it('a motor el poco viento NO penaliza: agua tranquila => verde', () => {
+    const flojo = day('2026-06-18', 3, 6);
+    expect(scoreDay('2026-06-18', flojo, scoringFor('normal'), [], 'motor').level).toBe('verde');
+    const s = scoreDay('2026-06-18', flojo, scoringFor('normal'), [], 'motor');
+    expect(s.reasons.join(' ')).toMatch(/agua tranquila|buen día para motor/i);
+  });
+
+  it('a motor el viento fuerte y las ráfagas siguen penalizando', () => {
+    expect(scoreDay('2026-06-18', day('2026-06-18', 23, 27), undefined, [], 'motor').level).toBe(
+      'amarillo',
+    );
+    expect(scoreDay('2026-06-18', day('2026-06-18', 30, 40), undefined, [], 'motor').level).toBe(
+      'rojo',
+    );
+  });
+
+  it('a motor la niebla y la marea siguen penalizando igual que a vela', () => {
+    expect(scoreDay('2026-06-18', foggyDay('2026-06-18', 600), undefined, [], 'motor').level).toBe(
+      'rojo',
+    );
+  });
 });

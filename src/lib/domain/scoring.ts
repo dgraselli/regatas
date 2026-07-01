@@ -1,5 +1,5 @@
 import type { HourlyPoint, DayScore, TrafficLevel, SkyCondition } from '@/lib/types/forecast';
-import type { ScoringThresholds } from '@/lib/types/config';
+import type { ScoringThresholds, Propulsion } from '@/lib/types/config';
 import type { SurgeAlert } from '@/lib/types/water';
 import { SCORING, DAYLIGHT } from '@/lib/config/boat';
 
@@ -94,6 +94,7 @@ export function scoreDay(
   points: HourlyPoint[],
   thresholds: ScoringThresholds = SCORING,
   surgeOnDay: SurgeAlert[] = [],
+  propulsion: Propulsion = 'vela',
 ): DayScore {
   const daylight = points.filter(
     (p) => hourOf(p.time) >= DAYLIGHT.sunriseHour && hourOf(p.time) <= DAYLIGHT.sunsetHour,
@@ -208,14 +209,19 @@ export function scoreDay(
   }
 
   // Poco viento: no es peligro, es que probablemente no se pueda navegar a vela.
-  // Solo aplica si no hay otras precauciones/peligros (esos tienen prioridad).
-  if (level === 'verde' && windMedianKt < thresholds.idealWindMin) {
+  // Solo aplica si no hay otras precauciones/peligros (esos tienen prioridad) y
+  // solo a VELA: a motor el poco viento (agua tranquila) es justo lo ideal.
+  if (propulsion === 'vela' && level === 'verde' && windMedianKt < thresholds.idealWindMin) {
     level = 'poco-viento';
     reasons.push(`Poco viento (~${windMedianKt} kt)`);
   }
 
   if (level === 'verde' && reasons.length === 0) {
-    reasons.push(`Buenas condiciones (~${windMedianKt} kt, sin lluvia)`);
+    reasons.push(
+      propulsion === 'motor' && windMedianKt < thresholds.idealWindMin
+        ? `Agua tranquila (~${windMedianKt} kt), buen día para motor`
+        : `Buenas condiciones (~${windMedianKt} kt, sin lluvia)`,
+    );
   }
 
   return {
@@ -241,6 +247,7 @@ export function scoreDays(
   hourly: HourlyPoint[],
   thresholds: ScoringThresholds = SCORING,
   surgeAlerts: SurgeAlert[] = [],
+  propulsion: Propulsion = 'vela',
 ): DayScore[] {
   const byDay = groupByDay(hourly);
   const days: DayScore[] = [];
@@ -248,7 +255,7 @@ export function scoreDays(
     const surgeOnDay = surgeAlerts.filter(
       (a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date,
     );
-    days.push(scoreDay(date, points, thresholds, surgeOnDay));
+    days.push(scoreDay(date, points, thresholds, surgeOnDay, propulsion));
   }
   return days.sort((a, b) => a.date.localeCompare(b.date));
 }

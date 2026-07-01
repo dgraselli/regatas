@@ -1,4 +1,10 @@
-import type { BoatPolar, RoutingConfig, ScoringThresholds, RoutePoint } from '@/lib/types/config';
+import type {
+  BoatPolar,
+  RoutingConfig,
+  ScoringThresholds,
+  RoutePoint,
+  Propulsion,
+} from '@/lib/types/config';
 import type { ForecastBundle, FogAlert } from '@/lib/types/forecast';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
 import type { CrossingPlan } from '@/lib/types/crossing';
@@ -27,6 +33,7 @@ export interface ForecastPoint {
 export async function getForecastBundle(
   loc: ForecastPoint,
   thresholds?: ScoringThresholds,
+  propulsion: Propulsion = 'vela',
 ): Promise<{ bundle: ForecastBundle; surge: SurgeAlert[]; fog: FogAlert[] }> {
   const [forecast, marine] = await Promise.all([
     fetchForecast(loc.lat, loc.lon),
@@ -35,7 +42,7 @@ export async function getForecastBundle(
   const hourly = normalizeForecast(forecast, marine);
   const surge = detectSurge(hourly);
   const fog = detectFog(hourly, thresholds);
-  const days = scoreDays(hourly, thresholds, surge);
+  const days = scoreDays(hourly, thresholds, surge, propulsion);
   const fetchedAt = new Date().toISOString();
 
   return {
@@ -76,6 +83,8 @@ export async function getCrossingPlan(
   polar: BoatPolar,
   routingCfg: RoutingConfig,
   thresholds?: ScoringThresholds,
+  propulsion: Propulsion = 'vela',
+  cruiseKt?: number,
 ): Promise<CrossingPlan> {
   const route = buildRoute(from, to);
   const mid = route.waypoints[Math.floor(route.waypoints.length / 2)];
@@ -84,5 +93,5 @@ export async function getCrossingPlan(
     fetchMarine(mid.lat, mid.lon),
   ]);
   const hourly = normalizeForecast(forecast, marine);
-  return planCrossing(route, hourly, polar, routingCfg, { thresholds });
+  return planCrossing(route, hourly, polar, routingCfg, { thresholds, propulsion, cruiseKt });
 }

@@ -1,5 +1,8 @@
 /** Definiciones de configuración: clubs, rutas y barco. */
 
+/** Tipo de propulsión de la embarcación. Cambia el scoring y el cálculo del cruce. */
+export type Propulsion = 'vela' | 'motor';
+
 export interface Club {
   id: string;
   name: string;

@@ -24,7 +24,7 @@ export function BoatPicker({
       >
         {boats.map((b) => (
           <option key={b.id} value={b.id}>
-            {b.name} ({b.lengthFt}′)
+            {(b.propulsion ?? 'vela') === 'motor' ? '🛥️' : '⛵'} {b.name} ({b.lengthFt}′)
           </option>
         ))}
       </select>

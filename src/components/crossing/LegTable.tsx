@@ -1,11 +1,13 @@
 'use client';
 
 import type { Leg } from '@/lib/types/crossing';
+import type { Propulsion } from '@/lib/types/config';
 import { formatHour } from '@/lib/format';
 import { WindArrow } from '@/components/common/WindArrow';
-import { pointOfSailLabel } from '@/lib/domain/pointOfSail';
+import { pointOfSailLabel, seaSectorLabel } from '@/lib/domain/pointOfSail';
 
-export function LegTable({ legs }: { legs: Leg[] }) {
+export function LegTable({ legs, propulsion = 'vela' }: { legs: Leg[]; propulsion?: Propulsion }) {
+  const isMotor = propulsion === 'motor';
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -13,7 +15,7 @@ export function LegTable({ legs }: { legs: Leg[] }) {
           <tr className="text-left text-slate-500 border-b border-slate-200">
             <th className="py-2 pr-3 font-medium">Hora</th>
             <th className="py-2 px-3 font-medium">Viento</th>
-            <th className="py-2 px-3 font-medium">Amura</th>
+            <th className="py-2 px-3 font-medium">{isMotor ? 'Mar' : 'Amura'}</th>
             <th className="py-2 px-3 font-medium">Vel.</th>
             <th className="py-2 pl-3 font-medium">Avance</th>
           </tr>
@@ -31,7 +33,9 @@ export function LegTable({ legs }: { legs: Leg[] }) {
                 )}
               </td>
               <td className="py-2 px-3">
-                <span className="text-slate-700">{pointOfSailLabel(leg.pointOfSail)}</span>
+                <span className="text-slate-700">
+                  {isMotor ? seaSectorLabel(leg.pointOfSail) : pointOfSailLabel(leg.pointOfSail)}
+                </span>
                 <div className="text-xs text-slate-400">TWA {leg.twa}°</div>
               </td>
               <td className="py-2 px-3 text-slate-600">{leg.boatKt} kt</td>

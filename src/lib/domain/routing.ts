@@ -1,12 +1,18 @@
 import type { HourlyPoint, TrafficLevel } from '@/lib/types/forecast';
-import type { Route, BoatPolar, RoutingConfig, ScoringThresholds } from '@/lib/types/config';
+import type {
+  Route,
+  BoatPolar,
+  RoutingConfig,
+  ScoringThresholds,
+  Propulsion,
+} from '@/lib/types/config';
 import type {
   Leg,
   DepartureCandidate,
   CrossingPlan,
 } from '@/lib/types/crossing';
 import type { SurgeAlert } from '@/lib/types/water';
-import { DEFAULT_POLAR, ROUTING, DAYLIGHT, SCORING } from '@/lib/config/boat';
+import { DEFAULT_POLAR, ROUTING, DAYLIGHT, SCORING, DEFAULT_CRUISE_KT } from '@/lib/config/boat';
 import { haversineNm, initialBearing, trueWindAngle } from '@/lib/domain/geo';
 import { boatSpeed } from '@/lib/domain/polar';
 import { pointOfSail } from '@/lib/domain/pointOfSail';
@@ -46,6 +52,9 @@ export function addHoursIso(iso: string, hours: number): string {
 /** Tope de horas a simular para un cruce (evita bucles si el barco no avanza). */
 const MAX_SEGMENTS = 24;
 
+/** Ráfaga (kt) a partir de la cual se advierte mar formado a una embarcación a motor. */
+const MOTOR_ROUGH_GUST = 25;
+
 /**
  * Simula el cruce directo (rumbo único) para una hora de salida dada, avanzando
  * hora por hora con el viento de cada hora hasta cubrir la distancia. Cada tramo
@@ -60,7 +69,10 @@ function simulate(
   cfg: RoutingConfig,
   surge: SurgeAlert[],
   thresholds: ScoringThresholds,
+  propulsion: Propulsion,
+  cruiseKt: number,
 ): DepartureCandidate {
+  const isMotor = propulsion === 'motor';
   const legs: Leg[] = [];
   const warnings: string[] = [];
   let remaining = totalNm;
@@ -76,8 +88,12 @@ function simulate(
     }
     const twa = trueWindAngle(course, fc.windDir);
 
+    // A motor la velocidad es de crucero (constante), independiente del ángulo al
+    // viento. A vela sale de la polar, con penalización si el rumbo cae en zona muerta.
     let boatKt: number;
-    if (twa < cfg.noGoAngle) {
+    if (isMotor) {
+      boatKt = cruiseKt;
+    } else if (twa < cfg.noGoAngle) {
       // Zona muerta: hay que ceñir/virar. Progreso reducido sobre el rumbo deseado.
       boatKt =
         Math.round(boatSpeed(polar, cfg.noGoAngle, fc.windKt) * cfg.tackingEfficiency * 10) /
@@ -87,14 +103,20 @@ function simulate(
     }
 
     const legWarnings: string[] = [];
-    if (fc.gustKt >= cfg.reefGust) {
-      legWarnings.push(`Ráfagas de ${Math.round(fc.gustKt)} kt: conviene tomar rizos.`);
-    }
-    if (twa < cfg.noGoAngle) {
-      legWarnings.push('Rumbo en zona muerta: requiere bordejear (virar repetido).');
-    }
-    if (twa >= 70 && twa <= 110 && fc.windKt >= 22) {
-      legWarnings.push('Mar de través con viento fuerte: navegación incómoda.');
+    if (isMotor) {
+      if (fc.gustKt >= MOTOR_ROUGH_GUST) {
+        legWarnings.push(`Ráfagas de ${Math.round(fc.gustKt)} kt: mar formado, navegación dura.`);
+      }
+    } else {
+      if (fc.gustKt >= cfg.reefGust) {
+        legWarnings.push(`Ráfagas de ${Math.round(fc.gustKt)} kt: conviene tomar rizos.`);
+      }
+      if (twa < cfg.noGoAngle) {
+        legWarnings.push('Rumbo en zona muerta: requiere bordejear (virar repetido).');
+      }
+      if (twa >= 70 && twa <= 110 && fc.windKt >= 22) {
+        legWarnings.push('Mar de través con viento fuerte: navegación incómoda.');
+      }
     }
 
     // Avance del tramo: hasta 1 h, o lo que falte para llegar.
@@ -127,7 +149,11 @@ function simulate(
   }
 
   if (!completes) {
-    warnings.push('No completa el cruce en el horizonte simulado (viento muy flojo o de proa).');
+    warnings.push(
+      isMotor
+        ? 'No completa el cruce en el horizonte simulado (distancia muy larga para la velocidad de crucero).'
+        : 'No completa el cruce en el horizonte simulado (viento muy flojo o de proa).',
+    );
   }
 
   const departAt = hourly[startIdx].time;
@@ -185,7 +211,11 @@ function simulate(
   for (const a of overlapSurge) escLevel(a.severity >= 2 ? 'rojo' : 'amarillo');
 
   // Una sola advertencia de ráfaga, con el máximo del cruce (no una por hora).
-  if (peakGust >= cfg.reefGust) {
+  if (isMotor) {
+    if (peakGust >= MOTOR_ROUGH_GUST) {
+      warnings.push(`Ráfagas de hasta ${peakGust} kt: mar formado, navegación dura.`);
+    }
+  } else if (peakGust >= cfg.reefGust) {
     warnings.push(`Ráfagas de hasta ${peakGust} kt: conviene tomar rizos.`);
   }
 
@@ -224,6 +254,10 @@ export interface PlanOptions {
   daylightOnly?: boolean;
   /** Umbrales del semáforo (según la tolerancia del usuario). Default: normal. */
   thresholds?: ScoringThresholds;
+  /** Tipo de propulsión del barco. Default: 'vela'. */
+  propulsion?: Propulsion;
+  /** Velocidad de crucero (kt) cuando `propulsion === 'motor'`. */
+  cruiseKt?: number;
 }
 
 /**
@@ -238,7 +272,14 @@ export function planCrossing(
   options: PlanOptions = {},
 ): CrossingPlan {
   // Horizonte de salidas = todo el pronóstico (7 días), igual que el panel.
-  const { stepHours = 3, horizonHours = 24 * 7, daylightOnly = true, thresholds = SCORING } = options;
+  const {
+    stepHours = 3,
+    horizonHours = 24 * 7,
+    daylightOnly = true,
+    thresholds = SCORING,
+    propulsion = 'vela',
+    cruiseKt = DEFAULT_CRUISE_KT,
+  } = options;
   // Cruce directo: un solo rumbo y distancia, de extremo a extremo de la ruta.
   const from = route.waypoints[0];
   const to = route.waypoints[route.waypoints.length - 1];
@@ -255,7 +296,9 @@ export function planCrossing(
     if (daylightOnly && (h < DAYLIGHT.sunriseHour || h > DAYLIGHT.sunsetHour - 2)) {
       continue;
     }
-    candidates.push(simulate(course, totalNm, hourly, idx, polar, cfg, surge, thresholds));
+    candidates.push(
+      simulate(course, totalNm, hourly, idx, polar, cfg, surge, thresholds, propulsion, cruiseKt),
+    );
   }
 
   // `best` = la salida recomendada (menor costo: nivel + tiempo + penalizaciones);

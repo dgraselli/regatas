@@ -14,8 +14,18 @@ export function useCrossingPlan(
   caution: Caution = 'normal',
 ) {
   const lengthFt = boat?.lengthFt ?? 23;
+  const propulsion = boat?.propulsion ?? 'vela';
+  const cruiseKt = boat?.cruiseKt;
   return useQuery({
-    queryKey: ['crossing', from?.name ?? 'none', to?.name ?? 'none', lengthFt, caution],
+    queryKey: [
+      'crossing',
+      from?.name ?? 'none',
+      to?.name ?? 'none',
+      lengthFt,
+      caution,
+      propulsion,
+      cruiseKt ?? 'def',
+    ],
     queryFn: () =>
       getCrossingPlan(
         from!,
@@ -23,6 +33,8 @@ export function useCrossingPlan(
         generatePolar(lengthFt),
         deriveRouting(lengthFt),
         scoringFor(caution),
+        propulsion,
+        cruiseKt,
       ),
     enabled: !!from && !!to,
   });

@@ -5,8 +5,8 @@ Documento de continuación para retomar el desarrollo desde Claude Code.
 ## Contexto
 
 App **web + PWA instalable** para saber de un vistazo si los próximos días son
-recomendables para navegar a vela en el **Río de la Plata**, con alertas de marea
-meteorológica y un planificador del cruce entre dos puntos (p.ej. La Plata → Colonia).
+recomendables para navegar a **vela o motor** en el **Río de la Plata**, con alertas de
+marea meteorológica y un planificador del cruce entre dos puntos (p.ej. La Plata → Colonia).
 
 Decisión de producto clave: **multiusuario sin registro**. Cada usuario carga sus
 barcos y lugares; todo se guarda en el navegador (localStorage). No hay backend ni login.
@@ -23,6 +23,12 @@ offline) · Zod (validación de APIs) · Vitest (tests de dominio). PWA con mani
 
 ## Estado actual (qué YA está hecho)
 
+- **Vela / motor** — cada barco tiene `propulsion` (`'vela'|'motor'`, default vela) y, a
+  motor, `cruiseKt`. A vela el poco viento penaliza (`poco-viento`); a motor no (agua
+  tranquila = ideal) y el cruce se calcula a **velocidad de crucero constante** en vez de
+  con la polar (sin zona muerta/rizos; avisa "mar formado" con ráfagas). Se hila por
+  `scoreDay/scoreDays` y `planCrossing` (opción `propulsion`/`cruiseKt`), y por los hooks
+  (en la queryKey). El selector de barco (panel y cruce) solo aparece con **>1 barco**.
 - **Panel `/`** — semáforo 🟢🟡🔴 por día (viento/ráfagas/lluvia/**niebla**/surge), con:
   - **Ícono de cielo** por tarjeta (☀️ ⛅ ☁️ 🌦️ 🌧️) según nubosidad/lluvia.
   - **Motivos con íconos** (🌬️ 💨 🌧️ 🌫️ 🌊…) — `src/lib/reasonIcon.ts`.
@@ -36,8 +42,9 @@ offline) · Zod (validación de APIs) · Vitest (tests de dominio). PWA con mani
 - **Cruce `/cruce`** — rankea salidas con la polar del barco. Considera **niebla y marea**,
   da **semáforo por salida**, lista en **orden cronológico**, evalúa **7 días**, usa la
   **tolerancia** del usuario y **recuerda** la selección salida/destino/barco.
-- **Perfil `/perfil`** — barcos y lugares (con **niveles seguros de amarra**), tolerancia y
-  **umbral de poco viento** configurable (`lowWindKt`, default 6). localStorage (`useProfile`).
+- **Perfil `/perfil`** — barcos (**propulsión vela/motor** + eslora, y vel. de crucero si es
+  motor) y lugares (con **niveles seguros de amarra**), tolerancia y **umbral de poco viento**
+  configurable (`lowWindKt`, default 6). localStorage (`useProfile`).
 - **Ayuda `/ayuda`** — guía de uso.
 - **Polar generada por eslora** (`polarModel.ts`): velocidad de casco ≈ 1.34·√LWL.
 - **Datos**: Open-Meteo (forecast: viento/ráfagas/dir/lluvia/temp/**visibility**/

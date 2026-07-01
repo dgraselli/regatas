@@ -50,6 +50,7 @@ export default function CrucePage() {
   const boat = boats.find((b) => b.id === boatId) ?? activeBoat ?? boats[0] ?? null;
 
   const { data, isLoading, isError, error } = useCrossingPlan(from, to, boat, profile.caution);
+  const isMotor = (boat?.propulsion ?? 'vela') === 'motor';
   // La lista va en orden cronológico; el "mejor" (best) puede estar en cualquier lugar.
   const bestIndex = data ? data.ranked.findIndex((c) => c.departAt === data.best?.departAt) : -1;
   const effIndex = selected ?? (bestIndex >= 0 ? bestIndex : 0);
@@ -62,7 +63,7 @@ export default function CrucePage() {
     return (
       <Onboarding
         title="Asociá tu barco"
-        body="El planificador usa la polar de tu velero (según su eslora) para estimar tiempos y rumbos. Agregá tu barco para empezar."
+        body="El planificador estima tiempos y rumbos según tu barco: con la polar del velero (según su eslora) o a velocidad de crucero si es a motor. Agregá tu barco para empezar."
       />
     );
   }
@@ -81,7 +82,8 @@ export default function CrucePage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-800">Planificador de cruce</h1>
         <p className="text-slate-500 text-sm">
-          Mejor hora de salida según el viento, con la polar del{' '}
+          Mejor hora de salida según el viento,{' '}
+          {isMotor ? 'a velocidad de crucero del' : 'con la polar del'}{' '}
           <strong>{boat?.name ?? 'barco'}</strong>
           {route ? ` (~${route.approxNm} NM)` : ''}. Se evalúa la derrota a distintas horas
           y se rankea por tiempo y seguridad.
@@ -183,7 +185,7 @@ export default function CrucePage() {
                     ))}
                   </ul>
                 )}
-                <LegTable legs={candidate.legs} />
+                <LegTable legs={candidate.legs} propulsion={isMotor ? 'motor' : 'vela'} />
               </div>
             </Card>
           )}

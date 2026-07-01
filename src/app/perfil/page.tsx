@@ -5,8 +5,14 @@ import { useProfile } from '@/lib/profile/ProfileContext';
 import { TIMEZONE } from '@/lib/profile/defaults';
 import { hullSpeedKt } from '@/lib/domain/polarModel';
 import { KNOWN_CLUBS, type KnownClub } from '@/lib/config/knownClubs';
+import { DEFAULT_CRUISE_KT } from '@/lib/config/boat';
 import { track } from '@/lib/analytics';
-import { type Caution, type LocationKind, DEFAULT_LOW_WIND_KT } from '@/lib/profile/types';
+import {
+  type Caution,
+  type LocationKind,
+  type Propulsion,
+  DEFAULT_LOW_WIND_KT,
+} from '@/lib/profile/types';
 import { Card } from '@/components/ui/Card';
 import { Loading } from '@/components/ui/States';
 
@@ -67,9 +73,14 @@ export default function PerfilPage() {
                   className="accent-mar-600"
                 />
                 <span>
-                  <span className="font-medium text-slate-800">{b.name}</span>
+                  <span className="font-medium text-slate-800">
+                    {(b.propulsion ?? 'vela') === 'motor' ? '🛥️' : '⛵'} {b.name}
+                  </span>
                   <span className="text-slate-400 text-sm">
-                    {' '}· {b.lengthFt} pies · vel. máx ≈ {hullSpeedKt(b.lengthFt).toFixed(1)} kt
+                    {' '}· {b.lengthFt} pies ·{' '}
+                    {(b.propulsion ?? 'vela') === 'motor'
+                      ? `motor · crucero ≈ ${b.cruiseKt ?? DEFAULT_CRUISE_KT} kt`
+                      : `vela · vel. máx ≈ ${hullSpeedKt(b.lengthFt).toFixed(1)} kt`}
                   </span>
                 </span>
               </label>
@@ -83,9 +94,9 @@ export default function PerfilPage() {
           ))}
         </div>
         <AddBoatForm
-          onAdd={(name, lengthFt) => {
-            addBoat({ name, lengthFt });
-            track('add_boat', { lengthFt });
+          onAdd={(name, lengthFt, propulsion, cruiseKt) => {
+            addBoat({ name, lengthFt, propulsion, cruiseKt });
+            track('add_boat', { lengthFt, propulsion });
           }}
         />
       </section>
@@ -206,17 +217,31 @@ function LowWindForm({ value, onSave }: { value?: number; onSave: (kt: number) =
   );
 }
 
-function AddBoatForm({ onAdd }: { onAdd: (name: string, lengthFt: number) => void }) {
+function AddBoatForm({
+  onAdd,
+}: {
+  onAdd: (name: string, lengthFt: number, propulsion: Propulsion, cruiseKt?: number) => void;
+}) {
   const [name, setName] = useState('');
   const [length, setLength] = useState('23');
+  const [propulsion, setPropulsion] = useState<Propulsion>('vela');
+  const [cruise, setCruise] = useState(String(DEFAULT_CRUISE_KT));
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const ft = Number(length);
     if (!name.trim() || !Number.isFinite(ft) || ft < 8 || ft > 80) return;
-    onAdd(name.trim(), ft);
+    if (propulsion === 'motor') {
+      const kt = Number(cruise);
+      if (!Number.isFinite(kt) || kt < 3 || kt > 60) return;
+      onAdd(name.trim(), ft, 'motor', Math.round(kt));
+    } else {
+      onAdd(name.trim(), ft, 'vela');
+    }
     setName('');
     setLength('23');
+    setPropulsion('vela');
+    setCruise(String(DEFAULT_CRUISE_KT));
   };
 
   return (
@@ -225,9 +250,19 @@ function AddBoatForm({ onAdd }: { onAdd: (name: string, lengthFt: number) => voi
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ej: Plenamar New 23"
+          placeholder={propulsion === 'motor' ? 'Ej: Quicksilver 640' : 'Ej: Plenamar New 23'}
           className="input"
         />
+      </Field>
+      <Field label="Propulsión">
+        <select
+          value={propulsion}
+          onChange={(e) => setPropulsion(e.target.value as Propulsion)}
+          className="input"
+        >
+          <option value="vela">⛵ Vela</option>
+          <option value="motor">🛥️ Motor</option>
+        </select>
       </Field>
       <Field label="Eslora (pies)">
         <input
@@ -239,6 +274,18 @@ function AddBoatForm({ onAdd }: { onAdd: (name: string, lengthFt: number) => voi
           className="input w-28"
         />
       </Field>
+      {propulsion === 'motor' && (
+        <Field label="Vel. crucero (kt)">
+          <input
+            type="number"
+            value={cruise}
+            onChange={(e) => setCruise(e.target.value)}
+            min={3}
+            max={60}
+            className="input w-28"
+          />
+        </Field>
+      )}
       <button type="submit" className="btn-primary">
         Agregar barco
       </button>

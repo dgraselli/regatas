@@ -26,11 +26,17 @@ export default function AyudaPage() {
       <Card className="p-4">
         <Section title="¿Qué es?">
           <p>
-            <strong>Regatas</strong> es un asistente para decidir si conviene salir a navegar a
-            vela en el <strong>Río de la Plata</strong>. Combina el pronóstico de viento con la
-            polar de tu velero y te da, de un vistazo, un <strong>semáforo de navegabilidad</strong>,
-            alertas de <strong>marea meteorológica</strong> (sudestada / bajante) y de{' '}
-            <strong>niebla</strong>, y un <strong>planificador de cruce</strong> entre dos puntos.
+            <strong>Regatas</strong> es un asistente para decidir si conviene salir a navegar en el{' '}
+            <strong>Río de la Plata</strong>, tanto a <strong>vela</strong> como a{' '}
+            <strong>motor</strong>. Combina el pronóstico de viento con las características de tu
+            barco y te da, de un vistazo, un <strong>semáforo de navegabilidad</strong>, alertas de{' '}
+            <strong>marea meteorológica</strong> (sudestada / bajante) y de <strong>niebla</strong>,
+            y un <strong>planificador de cruce</strong> entre dos puntos.
+          </p>
+          <p className="text-xs text-slate-400">
+            Elegís el tipo de propulsión al cargar el barco: a <strong>vela</strong> el poco viento
+            penaliza (no se puede navegar); a <strong>motor</strong> no, y el cruce se calcula a
+            velocidad de crucero constante en vez de con la polar.
           </p>
           <p className="text-xs text-slate-400">
             Tus datos (barcos, lugares, preferencias) se guardan solo en este navegador, sin
@@ -46,8 +52,10 @@ export default function AyudaPage() {
           </p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              <strong>Tu barco</strong> (nombre y eslora en pies): de la eslora se estima la polar,
-              que define velocidad y rumbos.
+              <strong>Tu barco</strong> (nombre, propulsión y eslora en pies). A{' '}
+              <strong>vela</strong>, de la eslora se estima la polar (velocidad y rumbos). A{' '}
+              <strong>motor</strong>, cargás la <strong>velocidad de crucero</strong> y el cruce se
+              calcula con esa velocidad constante.
             </li>
             <li>
               <strong>Tus lugares</strong>: tu amarra y los destinos. Podés elegir un club conocido
@@ -66,7 +74,7 @@ export default function AyudaPage() {
         <Section title="Panel — ¿salimos a navegar?">
           <p>Para cada día, un color resume las condiciones de las horas de luz:</p>
           <ul className="space-y-1">
-            <li>🟢 <strong>Navegable</strong> · 🟡 <strong>Precaución</strong> · 🔴 <strong>No recomendable</strong> · 💤 <strong>Poco viento</strong> (probablemente no se pueda navegar a vela).</li>
+            <li>🟢 <strong>Navegable</strong> · 🟡 <strong>Precaución</strong> · 🔴 <strong>No recomendable</strong> · 💤 <strong>Poco viento</strong> (probablemente no se pueda navegar a vela; <strong>a motor no aplica</strong>, el agua tranquila es ideal).</li>
           </ul>
           <p>
             Abajo de cada tarjeta ves la condición del cielo (☀️ ⛅ ☁️ 🌧️), temperatura y lluvia.
@@ -150,7 +158,8 @@ export default function AyudaPage() {
           <p>
             💤 <strong>Poco viento</strong>: si el día sería verde pero la mediana de viento queda por
             debajo de tu <strong>umbral de poco viento</strong> (default 6 kt), se marca aparte —
-            probablemente no se pueda navegar a vela.
+            probablemente no se pueda navegar a vela. Si tu barco es <strong>a motor</strong> esto no
+            aplica: el poco viento (agua tranquila) queda verde.
           </p>
           <p className="text-xs text-slate-400">
             La <strong>tolerancia</strong> (prudente / normal / audaz) corre estos umbrales: el
@@ -190,8 +199,11 @@ export default function AyudaPage() {
             Elegí <strong>salida</strong>, <strong>destino</strong> y <strong>barco</strong>, y la
             app evalúa la travesía a distintas horas de los próximos 7 días. Te muestra las{' '}
             <strong>salidas en orden cronológico</strong>, cada una con su semáforo, hora de llegada
-            estimada y advertencias (rizos por ráfagas, niebla, marea, llegada de noche). La marcada
-            como <strong>“mejor”</strong> es la recomendada. La tolerancia es la misma del panel.
+            estimada y advertencias (niebla, marea, llegada de noche, y —según el barco— rizos por
+            ráfagas a vela o mar formado a motor). A <strong>vela</strong> los tiempos salen de la
+            polar (con bordejeo si el rumbo cae de proa); a <strong>motor</strong>, de la velocidad
+            de crucero. La marcada como <strong>“mejor”</strong> es la recomendada. La tolerancia es
+            la misma del panel.
           </p>
           <p className="text-xs text-slate-400">
             Tus elecciones de salida/destino/barco quedan guardadas para la próxima vez.

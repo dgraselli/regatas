@@ -13,6 +13,7 @@ import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
 import { FogAlertList } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { LocateButton } from '@/components/common/LocateButton';
+import { BoatPicker } from '@/components/common/BoatPicker';
 import { CautionPicker } from '@/components/common/CautionPicker';
 import { OfflineBadge } from '@/components/common/OfflineBadge';
 import { StaleForecastNotice } from '@/components/common/StaleForecastNotice';
@@ -23,7 +24,7 @@ import { reasonIcon } from '@/lib/reasonIcon';
 import { track } from '@/lib/analytics';
 
 export default function DashboardPage() {
-  const { profile, hydrated, activeLocation, activeBoat, setActiveLocation, setCaution } =
+  const { profile, hydrated, activeLocation, activeBoat, setActiveLocation, setActiveBoat, setCaution } =
     useProfile();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const water = useWaterLevel(activeLocation);
@@ -31,6 +32,7 @@ export default function DashboardPage() {
     activeLocation,
     profile.caution,
     profile.lowWindKt,
+    activeBoat?.propulsion ?? 'vela',
   );
 
   const days = data?.bundle.days ?? [];
@@ -70,6 +72,13 @@ export default function DashboardPage() {
             onChange={setActiveLocation}
           />
           <LocateButton />
+          {profile.boats.length > 1 && (
+            <BoatPicker
+              boats={profile.boats}
+              value={activeBoat?.id ?? null}
+              onChange={setActiveBoat}
+            />
+          )}
           <CautionPicker
             value={profile.caution}
             onChange={(c) => {
@@ -134,7 +143,7 @@ export default function DashboardPage() {
         </>
       )}
 
-      <MetodologiaPanel caution={profile.caution} />
+      <MetodologiaPanel caution={profile.caution} propulsion={activeBoat?.propulsion ?? 'vela'} />
     </div>
   );
 }

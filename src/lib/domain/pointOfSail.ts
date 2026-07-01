@@ -28,3 +28,21 @@ export function pointOfSailLabel(p: PointOfSail): string {
       return 'Popa';
   }
 }
+
+/**
+ * Etiqueta para embarcaciones a motor: no hay amura ni ceñida, sino el sector
+ * del que llega el viento/mar respecto del rumbo (proa/través/aleta/popa).
+ */
+export function seaSectorLabel(p: PointOfSail): string {
+  switch (p) {
+    case 'en irons':
+    case 'ceñida':
+      return 'Mar de proa';
+    case 'través':
+      return 'Mar de través';
+    case 'aleta':
+      return 'Mar de aleta';
+    case 'popa':
+      return 'Mar de popa';
+  }
+}

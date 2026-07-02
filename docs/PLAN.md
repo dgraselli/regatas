@@ -152,6 +152,10 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
   `scripts/metar-eval.mjs report`, sin trackear). Primer resultado: ~79% de aciertos de nivel de
   niebla y 4 subestimaciones (pronóstico "despejado" con niebla real, mañana del 2026-06-30).
   Aprendizaje: **la visibilidad manda**, MIFG/BCFG (niebla superficial) con buena visibilidad NO
-  es niebla navegable. **Fase B pendiente (producto):** mostrar visibilidad observada del
-  aeropuerto más cercano en el panel — requiere un proxy (Cloudflare Worker) porque la API **no
-  trae CORS** y el fetch es 100% del cliente. Cobertura floja en Colonia/Carmelo (METAR irregular).
+  es niebla navegable. **Fase B hecha (producto):** el panel muestra "Visibilidad observada ahora"
+  del aeropuerto más cercano (`MetarObservation` + `useMetarObservation` + `services/metar.ts` +
+  catálogo `config/metarStations.ts`); es solo dato de hoy, NO entra al scoring. El fetch va al
+  proxy propio `/api/metar` (Cloudflare **Worker** en `worker/`, porque la API no trae CORS y el
+  sitio es estático detrás de Cloudflare). **Falta desplegar el Worker** (`cd worker && npx
+  wrangler deploy`); si no está, la tarjeta simplemente no aparece. Cobertura floja en
+  Colonia/Carmelo (METAR irregular).

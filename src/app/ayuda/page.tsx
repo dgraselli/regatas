@@ -251,6 +251,11 @@ export default function AyudaPage() {
             niebla, en particular, es poco confiable. <strong>Verificá siempre el pronóstico oficial
             (SMN / SHN) antes de salir</strong> y confirmá las condiciones en el lugar.
           </p>
+          <p className="text-xs text-slate-400">
+            Para compensar lo flojo del pronóstico de niebla, cuando hay dato el panel muestra la{' '}
+            <strong>visibilidad observada ahora</strong> (METAR) del aeropuerto más cercano: es una
+            medición real del momento, no un pronóstico, y es del aeropuerto, no del agua.
+          </p>
         </Section>
       </Card>
     </div>

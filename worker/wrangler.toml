@@ -1,0 +1,11 @@
+name = "regatas-metar"
+main = "metar.js"
+compatibility_date = "2024-11-01"
+workers_dev = false
+
+# El sitio (GitHub Pages) está detrás de Cloudflare como proxy del apex, así que
+# este Worker intercepta el path /api/metar* del propio dominio (same-origin para
+# la app). Requiere que regatas.com.ar esté proxeado por Cloudflare (nube naranja).
+routes = [
+  { pattern = "regatas.com.ar/api/metar*", zone_name = "regatas.com.ar" }
+]

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
+import { useMetarObservation } from '@/lib/hooks/useMetarObservation';
 import { Onboarding } from '@/components/common/Onboarding';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { ForecastStrip } from '@/components/dashboard/ForecastStrip';
@@ -10,6 +11,7 @@ import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
 import { HourlyWaveChart } from '@/components/dashboard/HourlyWaveChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { TideSummary } from '@/components/dashboard/TideSummary';
+import { MetarObservation } from '@/components/dashboard/MetarObservation';
 import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
 import { FogAlertList } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
@@ -29,6 +31,7 @@ export default function DashboardPage() {
     useProfile();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const water = useWaterLevel(activeLocation);
+  const metar = useMetarObservation(activeLocation);
   const { data, isLoading, isError, isFetching, error } = useForecast(
     activeLocation,
     profile.caution,
@@ -112,6 +115,8 @@ export default function DashboardPage() {
           />
 
           {data.fog.length > 0 && <FogAlertList alerts={data.fog} />}
+
+          {metar.data && <MetarObservation status={metar.data} caution={profile.caution} />}
 
           <ForecastStrip days={days} selectedDate={activeDate} onSelect={setSelectedDate} />
 

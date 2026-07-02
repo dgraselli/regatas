@@ -3,6 +3,7 @@ import type {
   OpenMeteoMarine,
   WaterLevelResponse,
 } from '@/lib/services/schemas';
+import type { MetarRaw } from '@/lib/domain/metar';
 
 /**
  * Generador determinístico de datos de ejemplo con forma de Open-Meteo / INA.
@@ -147,6 +148,25 @@ export function mockMarine(): OpenMeteoMarine {
       wave_period: s.wavePeriod,
     },
   };
+}
+
+/** Observación METAR de ejemplo (visibilidad buena, aire algo húmedo) para el aeropuerto dado. */
+export function mockMetar(icao: string): MetarRaw[] {
+  const now = new Date();
+  const reportTime = new Date(now.getTime() - now.getUTCMinutes() * 60_000).toISOString();
+  return [
+    {
+      icaoId: icao,
+      name: `${icao} (ejemplo)`,
+      reportTime,
+      temp: 12,
+      dewp: 6,
+      wspd: 8,
+      visib: '6+',
+      wxString: null,
+      fltCat: 'VFR',
+    },
+  ];
 }
 
 export function mockWaterLevel(): WaterLevelResponse {

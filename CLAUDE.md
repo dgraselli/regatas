@@ -50,7 +50,7 @@ reconstruir.
 - `src/lib/domain/` — lógica pura (con tests en `tests/`): scoring, surge, fog, routing, polar,
   **sun** (amanecer/atardecer reales por fecha/lat, algoritmo USNO; `daylightHours` con fallback
   a `DAYLIGHT` fijo si no se pasa `location`), **metar** (normaliza observación METAR de
-  visibilidad/niebla; hoy solo lo usa el validador de niebla `scripts/metar-eval.mjs`, aún no la app)…
+  visibilidad/niebla; lo usa el validador `scripts/metar-eval.mjs` y el panel vía `services/metar.ts` → proxy `/api/metar`, Cloudflare Worker en `worker/`)…
 - `src/lib/profile/` — perfil del usuario en localStorage.
 - `src/lib/services/` — borde de red (Open-Meteo / INA) + mocks.
 - `src/lib/config/` — umbrales del semáforo y construcción de rutas/polar.

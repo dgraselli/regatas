@@ -146,5 +146,12 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commit/push**.
   `run.sh` y `validar_pronostico.txt` van sin trackear. En `validation/` hay snapshots de
   pronóstico para validar contra lo observado (`scripts/forecast-eval.mjs`).
-- Pendiente evaluado pero no hecho: **METAR (SMN/aviación)** como observación real de
-  visibilidad para reforzar la niebla (el pronóstico de niebla es flojo).
+- **METAR (aviación) como observación real de visibilidad** para la niebla (el pronóstico es
+  flojo). **Fase A hecha:** parser/normalizador de dominio puro (`src/lib/domain/metar.ts` +
+  tests) y validador de niebla contra METAR observado (aviationweather.gov da 7 días de historia;
+  `scripts/metar-eval.mjs report`, sin trackear). Primer resultado: ~79% de aciertos de nivel de
+  niebla y 4 subestimaciones (pronóstico "despejado" con niebla real, mañana del 2026-06-30).
+  Aprendizaje: **la visibilidad manda**, MIFG/BCFG (niebla superficial) con buena visibilidad NO
+  es niebla navegable. **Fase B pendiente (producto):** mostrar visibilidad observada del
+  aeropuerto más cercano en el panel — requiere un proxy (Cloudflare Worker) porque la API **no
+  trae CORS** y el fetch es 100% del cliente. Cobertura floja en Colonia/Carmelo (METAR irregular).

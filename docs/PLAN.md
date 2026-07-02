@@ -155,7 +155,9 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
   es niebla navegable. **Fase B hecha (producto):** el panel muestra "Visibilidad observada ahora"
   del aeropuerto más cercano (`MetarObservation` + `useMetarObservation` + `services/metar.ts` +
   catálogo `config/metarStations.ts`); es solo dato de hoy, NO entra al scoring. El fetch va al
-  proxy propio `/api/metar` (Cloudflare **Worker** en `worker/`, porque la API no trae CORS y el
-  sitio es estático detrás de Cloudflare). **Falta desplegar el Worker** (`cd worker && npx
-  wrangler deploy`); si no está, la tarjeta simplemente no aparece. Cobertura floja en
-  Colonia/Carmelo (METAR irregular).
+  proxy propio `api.regatas.com.ar/metar` (Cloudflare **Worker** en `worker/`, porque la API no
+  trae CORS). El Worker va en **subdominio propio** (Custom Domain), no en la ruta del apex,
+  porque el sitio (GitHub Pages) tiene el apex en **DNS-only** (no proxeado por Cloudflare), así
+  que una Route no lo interceptaría; la llamada es cross-origin y el Worker responde con CORS.
+  Deploy: `cd worker && npx wrangler deploy` (crea el subdominio). Si no está, la tarjeta no
+  aparece (degrada). Cobertura floja en Colonia/Carmelo (METAR irregular).

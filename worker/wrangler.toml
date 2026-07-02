@@ -3,9 +3,11 @@ main = "metar.js"
 compatibility_date = "2024-11-01"
 workers_dev = false
 
-# El sitio (GitHub Pages) está detrás de Cloudflare como proxy del apex, así que
-# este Worker intercepta el path /api/metar* del propio dominio (same-origin para
-# la app). Requiere que regatas.com.ar esté proxeado por Cloudflare (nube naranja).
+# El sitio corre en GitHub Pages con el apex en DNS-only (no proxeado por
+# Cloudflare), así que una Route sobre regatas.com.ar NO intercepta. En su lugar,
+# el Worker vive en su propio subdominio (Custom Domain), y la app lo llama
+# cross-origin: el Worker responde con CORS (Access-Control-Allow-Origin del sitio).
+# wrangler crea el DNS + cert de api.regatas.com.ar (la zona ya está en Cloudflare).
 routes = [
-  { pattern = "regatas.com.ar/api/metar*", zone_name = "regatas.com.ar" }
+  { pattern = "api.regatas.com.ar", custom_domain = true }
 ]

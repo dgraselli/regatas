@@ -4,6 +4,13 @@ import { nearestMetarStation } from '@/lib/config/metarStations';
 import { haversineNm } from '@/lib/domain/geo';
 import { mockMetar } from '@/mocks/handlers';
 
+/**
+ * Proxy METAR (Cloudflare Worker). Vive en su propio subdominio porque el sitio
+ * (GitHub Pages) no pasa por Cloudflare; la llamada es cross-origin y el Worker
+ * responde con CORS. Configurable por si cambia el host.
+ */
+const METAR_API = process.env.NEXT_PUBLIC_METAR_API ?? 'https://api.regatas.com.ar/metar';
+
 export interface MetarStatus {
   observation: MetarObservation;
   /** Distancia del aeropuerto al lugar del usuario (km). */
@@ -25,7 +32,7 @@ export async function getMetarObservation(loc: {
   try {
     const raw = USE_MOCKS
       ? mockMetar(station.icao)
-      : await getJson<MetarRaw[]>(`/api/metar?ids=${station.icao}&hours=2`);
+      : await getJson<MetarRaw[]>(`${METAR_API}?ids=${station.icao}&hours=2`);
     if (!Array.isArray(raw) || raw.length === 0) return null;
     const latest = raw
       .map(normalizeMetar)

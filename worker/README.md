@@ -6,14 +6,19 @@ de CORS. Ver el porqué en `metar.js` y en `docs/PLAN.md`.
 
 ## Qué hace
 
-- Escucha en `regatas.com.ar/api/metar?ids=SABE&hours=2` (same-origin para la app).
+- Vive en su propio subdominio **`api.regatas.com.ar`** (Worker Custom Domain).
+- Escucha en `api.regatas.com.ar/metar?ids=SABE&hours=2`.
 - Sanitiza los `ids` (solo ICAO), llama a aviationweather server-to-server, cachea
-  ~60 s y responde con CORS. Sin estado ni datos de usuario.
+  ~60 s y responde con CORS (`Access-Control-Allow-Origin: https://regatas.com.ar`).
+  Sin estado ni datos de usuario.
+
+> El sitio (GitHub Pages) tiene el apex en **DNS-only** (no proxeado por Cloudflare),
+> así que una Route sobre `regatas.com.ar/...` no interceptaría. Por eso el Worker
+> usa un subdominio propio y la app lo llama cross-origin (habilitado por el CORS).
 
 ## Requisitos
 
-- El dominio `regatas.com.ar` debe estar **proxeado por Cloudflare** (nube naranja),
-  cosa que ya ocurre (el apex vive en Cloudflare por delante de GitHub Pages).
+- La zona `regatas.com.ar` en Cloudflare (ya está: el DNS se gestiona ahí).
 - Node + `wrangler` (`npx wrangler`).
 
 ## Deploy
@@ -21,13 +26,13 @@ de CORS. Ver el porqué en `metar.js` y en `docs/PLAN.md`.
 ```bash
 cd worker
 npx wrangler login          # una vez, abre el navegador
-npx wrangler deploy         # publica el Worker y crea la ruta /api/metar*
+npx wrangler deploy         # publica el Worker y crea api.regatas.com.ar (DNS + cert)
 ```
 
 Probar:
 
 ```bash
-curl "https://regatas.com.ar/api/metar?ids=SABE&hours=2"
+curl "https://api.regatas.com.ar/metar?ids=SABE&hours=2"
 ```
 
 Si la app no encuentra el endpoint (Worker no desplegado, o en localhost), la tarjeta

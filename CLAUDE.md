@@ -47,7 +47,9 @@ reconstruir.
 ## Estructura rápida
 
 - `src/app/` — páginas: `/` (panel), `/alertas`, `/cruce`, `/perfil`, `/ayuda`.
-- `src/lib/domain/` — lógica pura (con tests en `tests/`): scoring, surge, fog, routing, polar…
+- `src/lib/domain/` — lógica pura (con tests en `tests/`): scoring, surge, fog, routing, polar,
+  **sun** (amanecer/atardecer reales por fecha/lat, algoritmo USNO; `daylightHours` con fallback
+  a `DAYLIGHT` fijo si no se pasa `location`)…
 - `src/lib/profile/` — perfil del usuario en localStorage.
 - `src/lib/services/` — borde de red (Open-Meteo / INA) + mocks.
 - `src/lib/config/` — umbrales del semáforo y construcción de rutas/polar.

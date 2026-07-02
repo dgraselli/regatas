@@ -119,8 +119,11 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
       sumar **corriente** (Open-Meteo oceánica
       no sirve bien en el estuario) y el **canal obligatorio de salida/entrada** (tramo con rumbo
       fijo por lugar, p. ej. La Plata ~40 min).
-- [ ] **Amanecer/atardecer reales** por fecha/lat en vez de horas fijas
-      (`DAYLIGHT` en `config/boat.ts`).
+- [x] **Amanecer/atardecer reales** por fecha/lat (`src/lib/domain/sun.ts`, algoritmo USNO,
+      dominio puro): `daylightHours(date, {lat,lon})` alimenta el filtro de horas de luz del
+      panel (`scoreDay/scoreDays`) y las salidas diurnas / "llegada de noche" del cruce
+      (`planCrossing`, opción `location`). Sin `location` cae a `DAYLIGHT` fijo (tests). Offset
+      UTC−3 fijo (RdlP, sin DST).
 - [ ] Routing con **isócronas** (hoy es derrota fija sobre varias horas de salida).
 - [ ] Enlazar/parsear el **modelo oficial de altura del SHN** en alertas.
 

@@ -1,4 +1,4 @@
-import { scoringFor, DAYLIGHT } from '@/lib/config/boat';
+import { scoringFor } from '@/lib/config/boat';
 import type { Caution, Propulsion } from '@/lib/profile/types';
 
 /**
@@ -55,8 +55,8 @@ export function MetodologiaPanel({
         <div>
           <h3 className="mb-1 font-semibold text-slate-700">Cómo se arma el semáforo del día</h3>
           <p className="mb-2">
-            Para cada día se miran solo las <strong>horas de luz</strong> (de{' '}
-            {DAYLIGHT.sunriseHour}:00 a {DAYLIGHT.sunsetHour}:00). Se toma el{' '}
+            Para cada día se miran solo las <strong>horas de luz</strong> (del{' '}
+            <strong>amanecer al atardecer reales</strong> de esa fecha y lugar). Se toma el{' '}
             <strong>viento mediano</strong>, la <strong>ráfaga máxima</strong> y la{' '}
             <strong>lluvia total</strong> de esas horas, y se asigna el peor color que
             corresponda según tus umbrales (tolerancia: <strong>{caution}</strong>

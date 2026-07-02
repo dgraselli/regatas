@@ -12,7 +12,8 @@ import type {
   CrossingPlan,
 } from '@/lib/types/crossing';
 import type { SurgeAlert } from '@/lib/types/water';
-import { DEFAULT_POLAR, ROUTING, DAYLIGHT, SCORING, DEFAULT_CRUISE_KT } from '@/lib/config/boat';
+import { DEFAULT_POLAR, ROUTING, SCORING, DEFAULT_CRUISE_KT } from '@/lib/config/boat';
+import { daylightHours } from '@/lib/domain/sun';
 import { haversineNm, initialBearing, trueWindAngle } from '@/lib/domain/geo';
 import { boatSpeed } from '@/lib/domain/polar';
 import {
@@ -24,6 +25,7 @@ import {
 import { detectSurge } from '@/lib/domain/surge';
 
 const hourOf = (iso: string) => Number(iso.slice(11, 13));
+const dateOf = (iso: string) => iso.slice(0, 10);
 
 /** Visibilidad legible: metros por debajo de 1 km, km con un decimal por encima. */
 const formatVis = (m: number) => (m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`);
@@ -76,6 +78,7 @@ function simulate(
   thresholds: ScoringThresholds,
   propulsion: Propulsion,
   cruiseKt: number,
+  location: { lat: number; lon: number } | undefined,
 ): DepartureCandidate {
   const isMotor = propulsion === 'motor';
   const legs: Leg[] = [];
@@ -194,8 +197,10 @@ function simulate(
   const totalHours = Math.round(elapsed * 100) / 100;
   const arriveAt = addHoursIso(departAt, totalHours);
   const arriveHour = hourOf(arriveAt);
+  const arriveDaylight = daylightHours(dateOf(arriveAt), location);
   const arrivesAtNight =
-    completes && (arriveHour < DAYLIGHT.sunriseHour || arriveHour > DAYLIGHT.sunsetHour);
+    completes &&
+    (arriveHour < arriveDaylight.sunriseHour || arriveHour > arriveDaylight.sunsetHour);
 
   // Niebla / visibilidad: prioriza el aviso a la salida (clave para zarpar de la
   // amarra) y, si no, marca la visibilidad reducida durante el cruce.
@@ -319,6 +324,11 @@ export interface PlanOptions {
   propulsion?: Propulsion;
   /** Velocidad de crucero (kt) cuando `propulsion === 'motor'`. */
   cruiseKt?: number;
+  /**
+   * Posición para calcular el amanecer/atardecer reales (salidas diurnas y aviso
+   * de "llegada de noche"). Sin ella se usan las horas de luz fijas (`DAYLIGHT`).
+   */
+  location?: { lat: number; lon: number };
 }
 
 /**
@@ -340,6 +350,7 @@ export function planCrossing(
     thresholds = SCORING,
     propulsion = 'vela',
     cruiseKt = DEFAULT_CRUISE_KT,
+    location,
   } = options;
   // Cruce directo: un solo rumbo y distancia, de extremo a extremo de la ruta.
   const from = route.waypoints[0];
@@ -354,11 +365,14 @@ export function planCrossing(
   const maxIdx = Math.min(hourly.length - 1, horizonHours);
   for (let idx = 0; idx <= maxIdx; idx += stepHours) {
     const h = hourOf(hourly[idx].time);
-    if (daylightOnly && (h < DAYLIGHT.sunriseHour || h > DAYLIGHT.sunsetHour - 2)) {
+    const dl = daylightHours(dateOf(hourly[idx].time), location);
+    if (daylightOnly && (h < dl.sunriseHour || h > dl.sunsetHour - 2)) {
       continue;
     }
     candidates.push(
-      simulate(course, totalNm, hourly, idx, polar, cfg, surge, thresholds, propulsion, cruiseKt),
+      simulate(
+        course, totalNm, hourly, idx, polar, cfg, surge, thresholds, propulsion, cruiseKt, location,
+      ),
     );
   }
 

@@ -1,7 +1,14 @@
 import type { HourlyPoint, DayScore, TrafficLevel, SkyCondition } from '@/lib/types/forecast';
 import type { ScoringThresholds, Propulsion } from '@/lib/types/config';
 import type { SurgeAlert } from '@/lib/types/water';
-import { SCORING, DAYLIGHT } from '@/lib/config/boat';
+import { SCORING } from '@/lib/config/boat';
+import { daylightHours } from '@/lib/domain/sun';
+
+/** Posición del lugar, para calcular el amanecer/atardecer reales del día. */
+export interface DaylightLocation {
+  lat: number;
+  lon: number;
+}
 
 /**
  * Horas de luz despejadas que deben quedar antes o DESPUÉS de la niebla para
@@ -95,9 +102,11 @@ export function scoreDay(
   thresholds: ScoringThresholds = SCORING,
   surgeOnDay: SurgeAlert[] = [],
   propulsion: Propulsion = 'vela',
+  location?: DaylightLocation,
 ): DayScore {
+  const { sunriseHour, sunsetHour } = daylightHours(date, location);
   const daylight = points.filter(
-    (p) => hourOf(p.time) >= DAYLIGHT.sunriseHour && hourOf(p.time) <= DAYLIGHT.sunsetHour,
+    (p) => hourOf(p.time) >= sunriseHour && hourOf(p.time) <= sunsetHour,
   );
   const usable = daylight.length ? daylight : points;
 
@@ -265,6 +274,7 @@ export function scoreDays(
   thresholds: ScoringThresholds = SCORING,
   surgeAlerts: SurgeAlert[] = [],
   propulsion: Propulsion = 'vela',
+  location?: DaylightLocation,
 ): DayScore[] {
   const byDay = groupByDay(hourly);
   const days: DayScore[] = [];
@@ -272,7 +282,7 @@ export function scoreDays(
     const surgeOnDay = surgeAlerts.filter(
       (a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date,
     );
-    days.push(scoreDay(date, points, thresholds, surgeOnDay, propulsion));
+    days.push(scoreDay(date, points, thresholds, surgeOnDay, propulsion, location));
   }
   return days.sort((a, b) => a.date.localeCompare(b.date));
 }

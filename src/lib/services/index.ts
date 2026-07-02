@@ -42,7 +42,7 @@ export async function getForecastBundle(
   const hourly = normalizeForecast(forecast, marine);
   const surge = detectSurge(hourly);
   const fog = detectFog(hourly, thresholds);
-  const days = scoreDays(hourly, thresholds, surge, propulsion);
+  const days = scoreDays(hourly, thresholds, surge, propulsion, { lat: loc.lat, lon: loc.lon });
   const fetchedAt = new Date().toISOString();
 
   return {
@@ -93,5 +93,10 @@ export async function getCrossingPlan(
     fetchMarine(mid.lat, mid.lon),
   ]);
   const hourly = normalizeForecast(forecast, marine);
-  return planCrossing(route, hourly, polar, routingCfg, { thresholds, propulsion, cruiseKt });
+  return planCrossing(route, hourly, polar, routingCfg, {
+    thresholds,
+    propulsion,
+    cruiseKt,
+    location: { lat: from.lat, lon: from.lon },
+  });
 }

@@ -104,7 +104,9 @@ export default function AyudaPage() {
         <Section title="Criterios del semáforo">
           <p>
             El color del día es el del <strong>factor más exigente</strong>, mirando solo las{' '}
-            <strong>horas de luz</strong> (7–19 h). El viento se evalúa por la <strong>mediana</strong>{' '}
+            <strong>horas de luz</strong> (del amanecer al atardecer reales de esa fecha y lugar; en
+            invierno la ventana es más corta que en verano). El viento se evalúa por la{' '}
+            <strong>mediana</strong>{' '}
             del día y las ráfagas por el <strong>pico</strong>. Valores para tolerancia{' '}
             <em>normal</em>:
           </p>

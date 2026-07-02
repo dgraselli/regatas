@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { HourlyPoint } from '@/lib/types/forecast';
 import { type Caution, DEFAULT_LOW_WIND_KT } from '@/lib/profile/types';
-import { scoringFor } from '@/lib/config/boat';
+import { scoringFor, DAYLIGHT } from '@/lib/config/boat';
+import { sunEvent } from '@/lib/domain/sun';
 import { formatHour, compass } from '@/lib/format';
 
 /**
@@ -19,10 +20,13 @@ export function HourlyWindChart({
   points,
   caution = 'normal',
   lowWindKt,
+  location,
 }: {
   points: HourlyPoint[];
   caution?: Caution;
   lowWindKt?: number;
+  /** Posición del lugar, para dibujar la campana de horas de luz (amanecer/atardecer). */
+  location?: { lat: number; lon: number };
 }) {
   // Mide el ancho disponible para que el gráfico se ajuste al contenedor.
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -68,6 +72,29 @@ export function HourlyWindChart({
   // La línea de "poco viento" solo se dibuja si alguna hora cae por debajo del umbral.
   const hasLowWind = points.some((p) => p.windKt < lowWind);
 
+  // Campana de horas de luz: cúpula tenue (amanecer→atardecer, pico al mediodía
+  // solar) detrás de las barras, con el amanecer/atardecer REALES de la fecha y el
+  // lugar. Sin lugar cae a las horas fijas. Deja ver de un vistazo la franja diurna.
+  const dayDate = points[0].time.slice(0, 10);
+  const hour0 = Number(points[0].time.slice(11, 13));
+  const sunrise = location
+    ? sunEvent(dayDate, location.lat, location.lon, true) ?? DAYLIGHT.sunriseHour
+    : DAYLIGHT.sunriseHour;
+  const sunset = location
+    ? sunEvent(dayDate, location.lat, location.lon, false) ?? DAYLIGHT.sunsetHour
+    : DAYLIGHT.sunsetHour;
+  const cxForHour = (h: number) => padLeft + (h - hour0) * slot + (slot - gap) / 2;
+  const domeTopY = 6; // el pico de la campana casi toca el borde superior
+  const domeY = (h: number) =>
+    height - Math.sin((Math.PI * (h - sunrise)) / (sunset - sunrise)) * (height - domeTopY);
+  const domeSteps = 48;
+  let domePath = `M ${cxForHour(sunrise).toFixed(1)} ${height}`;
+  for (let k = 1; k <= domeSteps; k++) {
+    const h = sunrise + ((sunset - sunrise) * k) / domeSteps;
+    domePath += ` L ${cxForHour(h).toFixed(1)} ${domeY(h).toFixed(1)}`;
+  }
+  domePath += ' Z';
+
   return (
     <div ref={wrapRef} className="w-full overflow-x-auto">
       <svg width={width} height={height + 34} className="text-mar-500 max-w-none">
@@ -80,6 +107,9 @@ export function HourlyWindChart({
             </text>
           </g>
         ))}
+
+        {/* Campana de horas de luz (detrás de todo): franja diurna amanecer→atardecer. */}
+        <path d={domePath} className="fill-amber-200 stroke-amber-300" opacity={0.35} strokeWidth={1} />
 
         {/* Bandas de visibilidad reducida (detrás de las barras): solo en las horas
             con neblina/niebla, para identificar de un vistazo cuándo cae la visibilidad. */}
@@ -132,6 +162,9 @@ export function HourlyWindChart({
         <line x1={padLeft} y1={y(red)} x2={width} y2={y(red)} className="stroke-red-500" strokeWidth={1.5} strokeDasharray="5 3" />
       </svg>
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 mt-1">
+        <span className="inline-flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded-t-full bg-amber-200/80 border-t border-amber-300" /> Horas de luz
+        </span>
         <span className="inline-flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded-sm bg-mar-500" /> Viento (kt)
         </span>

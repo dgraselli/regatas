@@ -257,4 +257,19 @@ describe('scoring', () => {
     expect(s.level).toBe('verde');
     expect(s.metrics.waveMaxM).toBeUndefined();
   });
+
+  it('con la posición del lugar, la ventana de luz sigue el amanecer/atardecer reales', () => {
+    // Día calmo salvo un pico peligroso a las 07:00 (antes del amanecer invernal ~08:00).
+    const pts = day('2026-06-21', 12, 16).map((p) => {
+      const h = Number(p.time.slice(11, 13));
+      return h === 7 ? { ...p, windKt: 40, gustKt: 48 } : p;
+    });
+    // Sin lugar: las 07 h entran en la ventana fija (7–19) → ráfaga peligrosa → rojo.
+    expect(scoreDay('2026-06-21', pts).level).toBe('rojo');
+    // Con lugar (Buenos Aires, invierno): el sol sale ~08 h, así que las 07 h quedan
+    // fuera de las horas de luz → el pico no cuenta → verde.
+    expect(
+      scoreDay('2026-06-21', pts, undefined, [], 'vela', { lat: -34.61, lon: -58.38 }).level,
+    ).toBe('verde');
+  });
 });

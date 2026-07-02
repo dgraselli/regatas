@@ -137,6 +137,7 @@ export default function DashboardPage() {
                   points={hoursOfDay}
                   caution={profile.caution}
                   lowWindKt={profile.lowWindKt}
+                  location={{ lat: activeLocation.lat, lon: activeLocation.lon }}
                 />
                 {hoursOfDay.some((p) => p.waveHeightM != null) && (
                   <div className="mt-4 border-t border-slate-100 pt-3">

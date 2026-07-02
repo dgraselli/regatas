@@ -124,8 +124,8 @@ export function HourlyWindChart({
               y={0}
               width={slot}
               height={height}
-              className={niebla ? 'fill-red-300' : 'fill-amber-300'}
-              opacity={0.3}
+              className={niebla ? 'fill-slate-500' : 'fill-slate-300'}
+              opacity={0.35}
             />
           );
         })}
@@ -184,12 +184,12 @@ export function HourlyWindChart({
         </span>
         {hasNeblina && (
           <span className="inline-flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm bg-amber-300/60" /> Visibilidad reducida
+            <span className="inline-block w-3 h-3 rounded-sm bg-slate-300/70" /> Visibilidad reducida
           </span>
         )}
         {hasNiebla && (
           <span className="inline-flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm bg-red-300/60" /> Niebla
+            <span className="inline-block w-3 h-3 rounded-sm bg-slate-500/70" /> Niebla
           </span>
         )}
       </div>

@@ -49,7 +49,7 @@ export function NoAlerts() {
 
 const FOG_STYLES: Record<number, string> = {
   1: 'bg-slate-50 border-slate-300 text-slate-700',
-  2: 'bg-red-50 border-red-300 text-red-900',
+  2: 'bg-slate-200 border-slate-500 text-slate-900',
 };
 
 /**

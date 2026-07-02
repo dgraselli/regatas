@@ -19,6 +19,12 @@ export interface HourlyPoint {
   cloudCoverPct?: number;
   /** Nivel del mar respecto al MSL (m), si está disponible (Marine API). */
   seaLevelM?: number;
+  /** Altura de ola significativa (m), si está disponible (Marine API). */
+  waveHeightM?: number;
+  /** Dirección de la ola (de dónde viene), en grados 0..360, si está disponible. */
+  waveDir?: number;
+  /** Período medio de la ola en segundos, si está disponible. */
+  wavePeriodS?: number;
 }
 
 export type TrafficLevel = 'verde' | 'poco-viento' | 'amarillo' | 'rojo';
@@ -55,6 +61,8 @@ export interface DayScore {
     tempMaxC: number;
     /** Visibilidad mínima del día (m) en horas de luz, si hay dato. */
     visibilityMinM?: number;
+    /** Altura de ola máxima del día (m) en horas de luz, si hay dato. */
+    waveMaxM?: number;
   };
 }
 

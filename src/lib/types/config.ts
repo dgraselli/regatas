@@ -66,6 +66,10 @@ export interface ScoringThresholds {
   fogYellowM: number;
   /** Visibilidad (m) que vuelve el día rojo (niebla). */
   fogRedM: number;
+  /** Altura de ola (m) que vuelve el día amarillo (olas moderadas). */
+  waveYellowM: number;
+  /** Altura de ola (m) que vuelve el día rojo (olas grandes). */
+  waveRedM: number;
 }
 
 export interface SurgeThresholds {

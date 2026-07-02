@@ -15,7 +15,12 @@ import type { SurgeAlert } from '@/lib/types/water';
 import { DEFAULT_POLAR, ROUTING, DAYLIGHT, SCORING, DEFAULT_CRUISE_KT } from '@/lib/config/boat';
 import { haversineNm, initialBearing, trueWindAngle } from '@/lib/domain/geo';
 import { boatSpeed } from '@/lib/domain/polar';
-import { pointOfSail } from '@/lib/domain/pointOfSail';
+import {
+  pointOfSail,
+  waveSector,
+  waveSeverityFactor,
+  type WaveSector,
+} from '@/lib/domain/pointOfSail';
 import { detectSurge } from '@/lib/domain/surge';
 
 const hourOf = (iso: string) => Number(iso.slice(11, 13));
@@ -88,6 +93,19 @@ function simulate(
     }
     const twa = trueWindAngle(course, fc.windDir);
 
+    // Ola respecto del rumbo: de proa → cabeceo, de través → balanceo. Afecta a
+    // vela y a motor por igual (es el mar, no el viento). Grilla marina gruesa.
+    let waveHeightM: number | undefined;
+    let waveAngle: number | undefined;
+    let sector: WaveSector | undefined;
+    if (fc.waveHeightM != null) {
+      waveHeightM = Math.round(fc.waveHeightM * 10) / 10;
+      if (fc.waveDir != null) {
+        waveAngle = Math.round(trueWindAngle(course, fc.waveDir));
+        sector = waveSector(waveAngle);
+      }
+    }
+
     // A motor la velocidad es de crucero (constante), independiente del ángulo al
     // viento. A vela sale de la polar, con penalización si el rumbo cae en zona muerta.
     let boatKt: number;
@@ -118,6 +136,17 @@ function simulate(
         legWarnings.push('Mar de través con viento fuerte: navegación incómoda.');
       }
     }
+    // Advertencia por la ola de proa/través (vale para vela y motor). El resumen
+    // del candidato lleva una sola línea con el pico (se arma tras el bucle).
+    if (waveHeightM != null && waveHeightM >= thresholds.waveYellowM && sector != null) {
+      const hs = waveHeightM.toFixed(1);
+      const short = fc.wavePeriodS != null && fc.wavePeriodS < 5;
+      if (sector === 'proa') {
+        legWarnings.push(`Mar de proa (~${hs} m${short ? ', corta y empinada' : ''}): cabeceo, se moja y frena.`);
+      } else if (sector === 'través') {
+        legWarnings.push(`Mar de través (~${hs} m): balanceo incómodo.`);
+      }
+    }
 
     // Avance del tramo: hasta 1 h, o lo que falte para llegar.
     const dt = boatKt < 0.3 ? 1 : Math.min(1, remaining / boatKt);
@@ -140,12 +169,17 @@ function simulate(
       segmentNm: segNm,
       cumulativeNm: Math.round((totalNm - remaining) * 10) / 10,
       hours: Math.round(dt * 100) / 100,
+      waveHeightM,
+      waveAngle,
+      waveSector: sector,
       warnings: legWarnings,
     });
 
-    // La ráfaga por-hora queda en el tramo (LegTable); al resumen del candidato va
-    // una sola advertencia de ráfaga con el máximo (se agrega después del bucle).
-    warnings.push(...legWarnings.filter((w) => !w.startsWith('Ráfagas de')));
+    // La ráfaga y la ola por-hora quedan en el tramo (LegTable); al resumen del
+    // candidato va una sola advertencia de cada una con el pico (tras el bucle).
+    warnings.push(
+      ...legWarnings.filter((w) => !w.startsWith('Ráfagas de') && !w.startsWith('Mar de proa') && !w.startsWith('Mar de través (')),
+    );
   }
 
   if (!completes) {
@@ -208,6 +242,16 @@ function simulate(
     if (minVisM <= thresholds.fogRedM) escLevel('rojo');
     else if (minVisM <= thresholds.fogYellowM) escLevel('amarillo');
   }
+  // La ola escala el semáforo por su altura EFECTIVA: la dirección respecto del
+  // rumbo modula el umbral (de proa/través pega de lleno; de aleta/popa molesta
+  // menos). Si no hay dirección, se usa la altura tal cual (factor 1).
+  const peakEffWaveM = legs.reduce((m, l) => {
+    if (l.waveHeightM == null) return m;
+    const eff = l.waveHeightM * (l.waveSector ? waveSeverityFactor(l.waveSector) : 1);
+    return eff > m ? eff : m;
+  }, 0);
+  if (peakEffWaveM >= thresholds.waveRedM) escLevel('rojo');
+  else if (peakEffWaveM >= thresholds.waveYellowM) escLevel('amarillo');
   for (const a of overlapSurge) escLevel(a.severity >= 2 ? 'rojo' : 'amarillo');
 
   // Una sola advertencia de ráfaga, con el máximo del cruce (no una por hora).
@@ -217,6 +261,23 @@ function simulate(
     }
   } else if (peakGust >= cfg.reefGust) {
     warnings.push(`Ráfagas de hasta ${peakGust} kt: conviene tomar rizos.`);
+  }
+
+  // Una sola advertencia de ola, con el pico y el peor sector (proa/través) del cruce.
+  const waveLegs = legs.filter(
+    (l) =>
+      l.waveHeightM != null &&
+      l.waveHeightM >= thresholds.waveYellowM &&
+      (l.waveSector === 'proa' || l.waveSector === 'través'),
+  );
+  if (waveLegs.length) {
+    const worst = waveLegs.reduce((a, b) => (b.waveHeightM! > a.waveHeightM! ? b : a));
+    const hs = worst.waveHeightM!.toFixed(1);
+    warnings.push(
+      worst.waveSector === 'proa'
+        ? `Mar de proa de hasta ~${hs} m: cabeceo, se moja y frena.`
+        : `Mar de través de hasta ~${hs} m: balanceo incómodo.`,
+    );
   }
 
   // Costo: nivel (verde<amarillo<rojo) + tiempo + penalizaciones. Los cruces que

@@ -20,6 +20,22 @@ function forecast(dir: number, wind: number): HourlyPoint[] {
   }));
 }
 
+/** Forecast con datos de ola (altura/dirección/período) en todas las horas. */
+function forecastWave(
+  windDir: number,
+  wind: number,
+  waveM: number,
+  waveDir: number,
+  wavePeriodS = 6,
+): HourlyPoint[] {
+  return forecast(windDir, wind).map((p) => ({
+    ...p,
+    waveHeightM: waveM,
+    waveDir,
+    wavePeriodS,
+  }));
+}
+
 /** Igual que `forecast` pero con timestamps que avanzan de verdad (necesario
  *  para los eventos de marea, que se solapan por hora real). */
 function forecastSeq(dir: number, wind: number): HourlyPoint[] {
@@ -167,5 +183,66 @@ describe('routing', () => {
     const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
     expect(allWarnings).not.toMatch(/rizos/i);
     expect(allWarnings).toMatch(/mar formado/i);
+  });
+
+  // Ola respecto del rumbo (course ≈ 11° para esta ruta): de proa → cabeceo,
+  // de través → balanceo. La ola afecta a vela y motor por igual.
+  it('ola grande de proa => advertencia de cabeceo y semáforo rojo', () => {
+    const plan = planCrossing(route, forecastWave(100, 12, 2.0, 11));
+    const best = plan.best!;
+    expect(best.legs[0].waveSector).toBe('proa');
+    expect(best.level).toBe('rojo'); // 2.0 m ≥ waveRedM
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).toMatch(/mar de proa.*cabeceo/i);
+  });
+
+  it('ola moderada de través => advertencia de balanceo y semáforo amarillo', () => {
+    const plan = planCrossing(route, forecastWave(100, 12, 1.2, 101));
+    const best = plan.best!;
+    expect(best.legs[0].waveSector).toBe('través');
+    expect(best.level).toBe('amarillo'); // 1.2 m ≥ waveYellowM, < waveRedM
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).toMatch(/mar de través.*balanceo/i);
+  });
+
+  it('ola chica no agrega advertencia ni degrada por olas', () => {
+    const plan = planCrossing(route, forecastWave(100, 12, 0.4, 11));
+    expect(plan.best!.level).toBe('verde');
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).not.toMatch(/cabeceo|balanceo/i);
+  });
+
+  it('ola de popa grande no dispara cabeceo/balanceo', () => {
+    // Ola desde ~191° (de popa respecto al rumbo ~11°).
+    const plan = planCrossing(route, forecastWave(100, 12, 2.0, 191));
+    expect(plan.best!.legs[0].waveSector).toBe('popa');
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).not.toMatch(/cabeceo|balanceo/i);
+  });
+
+  it('la dirección modula el umbral: 2.0 m de proa => rojo, de popa => no rojo', () => {
+    // Misma altura (2.0 m), mismo viento seguro; solo cambia el sector de la ola.
+    const proa = planCrossing(route, forecastWave(100, 12, 2.0, 11));
+    const popa = planCrossing(route, forecastWave(100, 12, 2.0, 191));
+    expect(proa.best!.legs[0].waveSector).toBe('proa');
+    expect(popa.best!.legs[0].waveSector).toBe('popa');
+    // De proa pega de lleno (factor 1) → rojo; de popa se atenúa (×0.6 = 1.2 m) → amarillo.
+    expect(proa.best!.level).toBe('rojo');
+    expect(popa.best!.level).toBe('amarillo');
+  });
+
+  it('la ola afecta también a motor (cabeceo)', () => {
+    const opts = { propulsion: 'motor' as const, cruiseKt: 12 };
+    const plan = planCrossing(route, forecastWave(100, 12, 2.0, 11), undefined, undefined, opts);
+    expect(plan.best!.level).toBe('rojo');
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).toMatch(/cabeceo/i);
+  });
+
+  it('sin dato de ola el cruce no cambia (no rompe ni agrega olas)', () => {
+    const plan = planCrossing(route, forecast(100, 14));
+    expect(plan.best!.legs.every((l) => l.waveHeightM === undefined)).toBe(true);
+    const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
+    expect(allWarnings).not.toMatch(/cabeceo|balanceo/i);
   });
 });

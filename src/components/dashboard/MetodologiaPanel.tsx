@@ -42,6 +42,10 @@ export function MetodologiaPanel({
               sin registro).
             </li>
             <li>
+              <span className="text-slate-300">•</span> <strong>Altura de ola:</strong> Open-Meteo
+              Marine (grilla marina gruesa, orientativa en el estuario).
+            </li>
+            <li>
               <span className="text-slate-300">•</span> Los datos se actualizan cuando abrís la
               app; si estás sin conexión se muestra el último pronóstico guardado.
             </li>
@@ -76,6 +80,11 @@ export function MetodologiaPanel({
               <span className="text-slate-300">•</span> 🔴 <strong>Rojo</strong> (mejor no salir):
               viento ≥ {t.dangerWind} kt, ráfagas ≥ {t.gustRed} kt, lluvia ≥ {t.rainRed} mm
               o visibilidad ≤ {vis(t.fogRedM)} (posible niebla).
+            </li>
+            <li>
+              <span className="text-slate-300">•</span> 🌊 <strong>Olas:</strong> altura ≥{' '}
+              {t.waveYellowM} m degrada a precaución y ≥ {t.waveRedM} m a peligro (afecta a vela y
+              motor). El dato marino es de grilla gruesa: tomalo como orientativo.
             </li>
             {!isMotor && (
               <li>

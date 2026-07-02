@@ -1,6 +1,7 @@
 /** Modelo de dominio del planificador de cruce. */
 
 import type { TrafficLevel } from '@/lib/types/forecast';
+import type { WaveSector } from '@/lib/domain/pointOfSail';
 
 export type PointOfSail =
   | 'en irons' // dentro de la zona muerta (hay que virar)
@@ -34,6 +35,12 @@ export interface Leg {
   cumulativeNm: number;
   /** Duración del tramo en horas (≤ 1). */
   hours: number;
+  /** Altura de ola significativa en el tramo (m), si hay dato marino. */
+  waveHeightM?: number;
+  /** Ángulo de la ola respecto del rumbo (0 = de proa, 180 = de popa), si hay dato. */
+  waveAngle?: number;
+  /** Sector del que llega la ola respecto del rumbo, si hay dato. */
+  waveSector?: WaveSector;
   /** Advertencias del tramo (en español). */
   warnings: string[];
 }

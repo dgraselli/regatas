@@ -29,7 +29,7 @@ offline) · Zod (validación de APIs) · Vitest (tests de dominio). PWA con mani
   con la polar (sin zona muerta/rizos; avisa "mar formado" con ráfagas). Se hila por
   `scoreDay/scoreDays` y `planCrossing` (opción `propulsion`/`cruiseKt`), y por los hooks
   (en la queryKey). El selector de barco (panel y cruce) solo aparece con **>1 barco**.
-- **Panel `/`** — semáforo 🟢🟡🔴 por día (viento/ráfagas/lluvia/**niebla**/surge), con:
+- **Panel `/`** — semáforo 🟢🟡🔴 por día (viento/ráfagas/lluvia/**niebla**/**olas**/surge), con:
   - **Ícono de cielo** por tarjeta (☀️ ⛅ ☁️ 🌦️ 🌧️) según nubosidad/lluvia.
   - **Motivos con íconos** (🌬️ 💨 🌧️ 🌫️ 🌊…) — `src/lib/reasonIcon.ts`.
   - **Resumen de marea**: nivel observado (INA) + tendencia + aviso de agua alta/baja para
@@ -39,9 +39,10 @@ offline) · Zod (validación de APIs) · Vitest (tests de dominio). PWA con mani
     visibilidad reducida**.
 - **Alertas `/alertas`** — sudestada/bajante + **niebla/visibilidad** (con ventana horaria)
   + nivel de agua observado del INA.
-- **Cruce `/cruce`** — rankea salidas con la polar del barco. Considera **niebla y marea**,
-  da **semáforo por salida**, lista en **orden cronológico**, evalúa **7 días**, usa la
-  **tolerancia** del usuario y **recuerda** la selección salida/destino/barco.
+- **Cruce `/cruce`** — rankea salidas con la polar del barco. Considera **niebla, marea y
+  olas** (ola por tramo respecto del rumbo: proa→cabeceo, través→balanceo), da **semáforo por
+  salida**, lista en **orden cronológico**, evalúa **7 días**, usa la **tolerancia** del usuario
+  y **recuerda** la selección salida/destino/barco.
 - **Perfil `/perfil`** — barcos (**propulsión vela/motor** + eslora, y vel. de crucero si es
   motor) y lugares (con **niveles seguros de amarra**), tolerancia y **umbral de poco viento**
   configurable (`lowWindKt`, default 6). localStorage (`useProfile`).
@@ -108,7 +109,16 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
 
 ### Mejoras de dominio
 - [ ] Permitir cargar una **polar real (medida)** además de la generada por eslora.
-- [ ] Sumar **olas y corriente** (Open-Meteo Marine ya se trae) al scoring y al cruce.
+- [x] Sumar **olas** al scoring del panel (`waveHeightM` mapeado en `normalizeForecast`;
+      umbrales `waveYellowM`/`waveRedM` en `scoringFor`, movidos por tolerancia; afecta vela y
+      motor; grilla marina gruesa → orientativo).
+- [x] Llevar la ola al **cruce**: `wave_direction`/`wave_period` de Marine → por tramo se
+      clasifica respecto del rumbo (`waveSector`: proa→cabeceo, través→balanceo) y una ola
+      grande baja el semáforo de la salida por altura **efectiva** (`Hs × waveSeverityFactor`:
+      proa/través=1, aleta=0.75, popa=0.6), o sea la dirección modula el umbral. Pendiente:
+      sumar **corriente** (Open-Meteo oceánica
+      no sirve bien en el estuario) y el **canal obligatorio de salida/entrada** (tramo con rumbo
+      fijo por lugar, p. ej. La Plata ~40 min).
 - [ ] **Amanecer/atardecer reales** por fecha/lat en vez de horas fijas
       (`DAYLIGHT` en `config/boat.ts`).
 - [ ] Routing con **isócronas** (hoy es derrota fija sobre varias horas de salida).
@@ -127,7 +137,7 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
   `src/lib/domain/` con su test en `tests/`.
 - **Caché persistido (buster):** si cambiás la FORMA del `ForecastBundle`/`DayScore`/
   `CrossingPlan`/`DepartureCandidate`, subí el `buster` en `src/app/providers.tsx`
-  (hoy `schema-8`) o la app crashea con caché viejo. Ya pasó 2 veces.
+  (hoy `schema-13`) o la app crashea con caché viejo. Ya pasó varias veces.
 - **Preview:** `output: export` → `next start` no sirve; usar `npx serve out`. Sin HMR
   (rebuild para ver cambios). Matar servers `serve` zombies con `pkill -f "serve out"`.
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commit/push**.

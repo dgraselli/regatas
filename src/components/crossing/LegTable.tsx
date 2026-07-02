@@ -4,7 +4,15 @@ import type { Leg } from '@/lib/types/crossing';
 import type { Propulsion } from '@/lib/types/config';
 import { formatHour } from '@/lib/format';
 import { WindArrow } from '@/components/common/WindArrow';
-import { pointOfSailLabel, seaSectorLabel } from '@/lib/domain/pointOfSail';
+import { pointOfSailLabel, seaSectorLabel, type WaveSector } from '@/lib/domain/pointOfSail';
+
+/** Sector de la ola en formato corto para la celda de la tabla. */
+const WAVE_SHORT: Record<WaveSector, string> = {
+  proa: 'de proa · cabeceo',
+  través: 'de través · balanceo',
+  aleta: 'de aleta',
+  popa: 'de popa',
+};
 
 export function LegTable({ legs, propulsion = 'vela' }: { legs: Leg[]; propulsion?: Propulsion }) {
   const isMotor = propulsion === 'motor';
@@ -37,6 +45,12 @@ export function LegTable({ legs, propulsion = 'vela' }: { legs: Leg[]; propulsio
                   {isMotor ? seaSectorLabel(leg.pointOfSail) : pointOfSailLabel(leg.pointOfSail)}
                 </span>
                 <div className="text-xs text-slate-400">TWA {leg.twa}°</div>
+                {leg.waveHeightM != null && leg.waveHeightM >= 0.5 && (
+                  <div className="text-xs text-mar-600">
+                    🌊 {leg.waveHeightM.toFixed(1)} m
+                    {leg.waveSector ? ` ${WAVE_SHORT[leg.waveSector]}` : ''}
+                  </div>
+                )}
               </td>
               <td className="py-2 px-3 text-slate-600">{leg.boatKt} kt</td>
               <td className="py-2 pl-3 text-slate-600">

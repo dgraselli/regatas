@@ -7,6 +7,7 @@ import { Onboarding } from '@/components/common/Onboarding';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { ForecastStrip } from '@/components/dashboard/ForecastStrip';
 import { HourlyWindChart } from '@/components/dashboard/HourlyWindChart';
+import { HourlyWaveChart } from '@/components/dashboard/HourlyWaveChart';
 import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { TideSummary } from '@/components/dashboard/TideSummary';
 import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
@@ -137,6 +138,12 @@ export default function DashboardPage() {
                   caution={profile.caution}
                   lowWindKt={profile.lowWindKt}
                 />
+                {hoursOfDay.some((p) => p.waveHeightM != null) && (
+                  <div className="mt-4 border-t border-slate-100 pt-3">
+                    <p className="mb-1 text-xs font-medium text-slate-500">🌊 Oleaje</p>
+                    <HourlyWaveChart points={hoursOfDay} caution={profile.caution} />
+                  </div>
+                )}
               </div>
             </Card>
           )}

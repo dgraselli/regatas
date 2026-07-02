@@ -109,6 +109,12 @@ export function scoreDay(
     .map((p) => p.visibilityM)
     .filter((v): v is number => v != null);
   const visibilityMinM = visVals.length ? Math.round(Math.min(...visVals)) : undefined;
+  const waveVals = usable
+    .map((p) => p.waveHeightM)
+    .filter((v): v is number => v != null);
+  const waveMaxM = waveVals.length
+    ? Math.round(Math.max(...waveVals) * 10) / 10
+    : undefined;
   const temps = points.map((p) => p.tempC);
   const tempMinC = Math.round(Math.min(...temps));
   const tempMaxC = Math.round(Math.max(...temps));
@@ -202,6 +208,16 @@ export function scoreDay(
     }
   }
 
+  // Olas (altura significativa). Afecta a vela y motor por igual. La grilla marina
+  // es gruesa y no resuelve bien la costa del estuario, así que es orientativo.
+  if (waveMaxM != null) {
+    if (waveMaxM >= thresholds.waveRedM) {
+      escalate('rojo', `Olas grandes (~${waveMaxM.toFixed(1)} m)`);
+    } else if (waveMaxM >= thresholds.waveYellowM) {
+      escalate('amarillo', `Olas moderadas (~${waveMaxM.toFixed(1)} m)`);
+    }
+  }
+
   // Surge meteorológico
   for (const alert of surgeOnDay) {
     const to: TrafficLevel = alert.severity >= 2 ? 'rojo' : 'amarillo';
@@ -238,6 +254,7 @@ export function scoreDay(
       tempMinC,
       tempMaxC,
       visibilityMinM,
+      waveMaxM,
     },
   };
 }

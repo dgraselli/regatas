@@ -78,6 +78,12 @@ export function DayCard({
             {day.metrics.precipTotalMm} mm
           </span>
         )}
+        {day.metrics.waveMaxM != null && day.metrics.waveMaxM >= 0.5 && (
+          <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
+            <span aria-hidden className="text-[10px]">🌊</span>
+            {day.metrics.waveMaxM.toFixed(1)} m
+          </span>
+        )}
       </div>
     </button>
   );

@@ -12,12 +12,18 @@ export function normalizeForecast(
 ): HourlyPoint[] {
   const h = forecast.hourly;
 
-  // Mapa de nivel del mar por timestamp para alinear (las grillas pueden diferir).
+  // Mapas de nivel del mar y altura de ola por timestamp para alinear (las grillas
+  // marina y de forecast pueden diferir).
   const seaLevelByTime = new Map<string, number | undefined>();
-  if (marine?.hourly.sea_level_height_msl) {
+  const waveByTime = new Map<string, number | undefined>();
+  const waveDirByTime = new Map<string, number | undefined>();
+  const wavePeriodByTime = new Map<string, number | undefined>();
+  if (marine?.hourly) {
     marine.hourly.time.forEach((t, i) => {
-      const v = marine.hourly.sea_level_height_msl?.[i];
-      seaLevelByTime.set(t, v ?? undefined);
+      seaLevelByTime.set(t, marine.hourly.sea_level_height_msl?.[i] ?? undefined);
+      waveByTime.set(t, marine.hourly.wave_height?.[i] ?? undefined);
+      waveDirByTime.set(t, marine.hourly.wave_direction?.[i] ?? undefined);
+      wavePeriodByTime.set(t, marine.hourly.wave_period?.[i] ?? undefined);
     });
   }
 
@@ -31,5 +37,8 @@ export function normalizeForecast(
     visibilityM: h.visibility?.[i] ?? undefined,
     cloudCoverPct: h.cloud_cover?.[i] ?? undefined,
     seaLevelM: seaLevelByTime.get(time),
+    waveHeightM: waveByTime.get(time),
+    waveDir: waveDirByTime.get(time),
+    wavePeriodS: wavePeriodByTime.get(time),
   }));
 }

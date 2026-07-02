@@ -39,8 +39,8 @@ reconstruir.
 - **Caché persistido (buster):** el pronóstico y el plan de cruce se cachean en localStorage
   vía TanStack Query (`src/app/providers.tsx`). **Si cambia la FORMA de esos datos**
   (campos nuevos en `ForecastBundle`, `DayScore`, `CrossingPlan`/`DepartureCandidate`),
-  hay que **subir el `buster`** (`schema-N`) o la app crashea sirviendo caché viejo. Pasó 2
-  veces. Valor actual: `schema-8`.
+  hay que **subir el `buster`** (`schema-N`) o la app crashea sirviendo caché viejo. Pasó
+  varias veces. Valor actual: `schema-13`.
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commitear o
   pushear** (no hacerlo automáticamente). `run.sh` y `validar_pronostico.txt` van sin trackear.
 
@@ -59,19 +59,32 @@ reconstruir.
   tranquila = ideal) y el cruce se calcula a **velocidad de crucero constante**, no con la
   polar. Se hila por `scoreDay/scoreDays` (5º arg) y `planCrossing` (opción `propulsion`/
   `cruiseKt`). El picker de barco (panel y cruce) **solo aparece con >1 barco**.
-- **Panel**: semáforo por día (viento/ráfagas/lluvia/niebla/marea), ícono de cielo
+- **Olas**: `wave_height` (Open-Meteo Marine) entra al scoring como factor propio
+  (`waveYellowM`/`waveRedM` en `SCORING`/`scoringFor`, movidos por tolerancia). Afecta a vela
+  y motor. La grilla marina es gruesa → orientativo. Se mapea en `normalizeForecast`
+  (`waveHeightM`) y se muestra en la tarjeta/motivos. En el **cruce** además se usan
+  `wave_direction`/`wave_period`: la ola por tramo se clasifica respecto del rumbo
+  (`waveSector`: proa→cabeceo, través→balanceo) y escala el semáforo de la salida por altura
+  **efectiva** (`Hs × waveSeverityFactor` según sector), no solo por altura.
+  **Corriente**: no implementada.
+- **Panel**: semáforo por día (viento/ráfagas/lluvia/niebla/**olas**/marea), ícono de cielo
   (☀️⛅☁️🌧️) por tarjeta, motivos con íconos, resumen de marea (nivel observado + agua
   alta/baja para la amarra), y gráfico horario (barras viento/ráfagas, **flechas de
   dirección**, líneas de umbral precaución/peligro y **poco viento** —solo si aplica—,
   bandas de visibilidad reducida).
 - **Niebla**: `detectFog` + visibilidad en el scoring (niebla matinal que despeja **no**
   hunde el día; ver `FOG_NAVIGABLE_WINDOW_H`). Aparece en panel, alertas y gráfico.
-- **Cruce**: considera niebla y marea, da **semáforo por salida**, lista en **orden
+- **Cruce**: considera niebla, marea y **olas**, da **semáforo por salida**, lista en **orden
   cronológico**, evalúa **7 días**, usa la **tolerancia** del usuario y **recuerda** la
-  selección salida/destino/barco.
+  selección salida/destino/barco. La **ola por tramo** se cruza con el rumbo: de proa →
+  **cabeceo**, de través → **balanceo** (vela y motor); una ola grande también baja el semáforo
+  de la salida **modulada por la dirección**: escala por la altura EFECTIVA (`Hs ×
+  waveSeverityFactor`: proa/través=1, aleta=0.75, popa=0.6), con los mismos umbrales de
+  tolerancia. Usa `wave_direction`/`wave_period` de Open-Meteo Marine (`waveSector`/
+  `waveSeverityFactor` en `pointOfSail.ts`). El panel, en cambio, mira solo la altura.
 - **Perfil**: barcos (**propulsión vela/motor** + eslora, y vel. de crucero si es motor),
   lugares (con niveles seguros de amarra), tolerancia, y **umbral de poco viento**
   configurable (`lowWindKt`, default 6).
 - Datos: Open-Meteo (forecast: viento, ráfagas, dir, lluvia, temp, **visibility**,
-  **cloud_cover**; marine: nivel del mar/olas) e INA (nivel observado). SMN/SHN: solo
-  referencia, no se consultan (ver memoria/PLAN).
+  **cloud_cover**; marine: nivel del mar, **olas: altura/dirección/período**) e INA (nivel
+  observado). SMN/SHN: solo referencia, no se consultan (ver memoria/PLAN).

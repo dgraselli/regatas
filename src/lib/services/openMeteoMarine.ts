@@ -21,7 +21,7 @@ export async function fetchMarine(
     const params = new URLSearchParams({
       latitude: String(lat),
       longitude: String(lon),
-      hourly: 'sea_level_height_msl,wave_height',
+      hourly: 'sea_level_height_msl,wave_height,wave_direction,wave_period',
       timezone: 'America/Argentina/Buenos_Aires',
       forecast_days: String(forecastDays),
     });

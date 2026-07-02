@@ -46,6 +46,11 @@ function dayClouds(date: string, cloudPct: number, rainHours = 0): HourlyPoint[]
   }));
 }
 
+/** Día con viento ideal y una altura de ola (m) constante en todas las horas. */
+function waveDay(date: string, waveM: number, wind = 12): HourlyPoint[] {
+  return day(date, wind, wind + 4).map((p) => ({ ...p, waveHeightM: waveM }));
+}
+
 describe('scoring', () => {
   it('día ideal => verde', () => {
     const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16));
@@ -214,5 +219,42 @@ describe('scoring', () => {
     expect(scoreDay('2026-06-18', foggyDay('2026-06-18', 600), undefined, [], 'motor').level).toBe(
       'rojo',
     );
+  });
+
+  it('olas grandes => rojo', () => {
+    const s = scoreDay('2026-06-18', waveDay('2026-06-18', 2.0));
+    expect(s.level).toBe('rojo');
+    expect(s.reasons.join(' ')).toMatch(/olas grandes/i);
+    expect(s.metrics.waveMaxM).toBe(2);
+  });
+
+  it('olas moderadas => amarillo', () => {
+    const s = scoreDay('2026-06-18', waveDay('2026-06-18', 1.2));
+    expect(s.level).toBe('amarillo');
+    expect(s.reasons.join(' ')).toMatch(/olas moderadas/i);
+  });
+
+  it('olas chicas no penalizan', () => {
+    const s = scoreDay('2026-06-18', waveDay('2026-06-18', 0.4));
+    expect(s.level).toBe('verde');
+  });
+
+  it('las olas penalizan igual a vela y a motor', () => {
+    expect(scoreDay('2026-06-18', waveDay('2026-06-18', 2.0), undefined, [], 'motor').level).toBe(
+      'rojo',
+    );
+  });
+
+  it('la sensibilidad a las olas sigue la tolerancia', () => {
+    // 1.3 m: el prudente lo ve peligroso (rojo), el normal lo ve moderado (amarillo).
+    const olas = waveDay('2026-06-18', 1.3);
+    expect(scoreDay('2026-06-18', olas, scoringFor('prudente')).level).toBe('rojo');
+    expect(scoreDay('2026-06-18', olas, scoringFor('normal')).level).toBe('amarillo');
+  });
+
+  it('sin dato de ola no rompe ni penaliza', () => {
+    const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16));
+    expect(s.level).toBe('verde');
+    expect(s.metrics.waveMaxM).toBeUndefined();
   });
 });

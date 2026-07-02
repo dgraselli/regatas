@@ -85,11 +85,17 @@ export default function AyudaPage() {
             precaución</strong> aunque después despeje, y si cubre toda la jornada lo marca como no
             recomendable.
             Al elegir un día se despliegan los <strong>motivos</strong> (con íconos: 🌬️ viento, 💨
-            ráfagas, 🌧️ lluvia, 🌫️ niebla, 🌊 sudestada…) y el <strong>gráfico por hora</strong>:
+            ráfagas, 🌧️ lluvia, 🌫️ niebla, 🌊 olas/sudestada…) y el <strong>gráfico por hora</strong>:
             barras de viento y ráfagas, <strong>flechas</strong> que muestran hacia dónde sopla,
             líneas de umbral (precaución / peligro / poco viento) y bandas cuando baja la
             visibilidad. Arriba aparece un <strong>resumen de marea</strong> (nivel observado y si se
             prevé agua muy alta o muy baja para entrar/salir de la amarra).
+          </p>
+          <p>
+            Si hay dato marino, debajo aparece un <strong>gráfico de oleaje</strong> más chico:
+            barras de <strong>altura de ola</strong> por hora, <strong>flechas</strong> con la
+            dirección (hacia dónde va la ola) y las líneas de umbral de precaución/peligro. Comparte
+            las horas con el gráfico de viento, así se leen juntos.
           </p>
         </Section>
       </Card>
@@ -127,6 +133,11 @@ export default function AyudaPage() {
                   <td className="py-1 pr-3">≥ 2 mm</td>
                   <td className="py-1">≥ 12 mm</td>
                 </tr>
+                <tr className="border-b border-slate-100">
+                  <td className="py-1 pr-3">Olas (altura máx.)</td>
+                  <td className="py-1 pr-3">≥ 1.0 m</td>
+                  <td className="py-1">≥ 1.75 m</td>
+                </tr>
                 <tr>
                   <td className="py-1 pr-3">Marea (sudestada / bajante)</td>
                   <td className="py-1 pr-3">evento moderado</td>
@@ -155,6 +166,12 @@ export default function AyudaPage() {
               ventana navegable).
             </li>
           </ul>
+          <p>
+            🌊 <strong>Olas</strong>: se mira la <strong>altura de ola máxima</strong> del día
+            (Open-Meteo Marine). En el Plata la ola es corta y empinada, sobre todo con viento del
+            sur/sudeste: por eso un día puede estar flojo de viento y aun así incómodo. Afecta a{' '}
+            <strong>vela y motor</strong>. El dato marino es de grilla gruesa, así que es orientativo.
+          </p>
           <p>
             💤 <strong>Poco viento</strong>: si el día sería verde pero la mediana de viento queda por
             debajo de tu <strong>umbral de poco viento</strong> (default 6 kt), se marca aparte —
@@ -204,6 +221,20 @@ export default function AyudaPage() {
             polar (con bordejeo si el rumbo cae de proa); a <strong>motor</strong>, de la velocidad
             de crucero. La marcada como <strong>“mejor”</strong> es la recomendada. La tolerancia es
             la misma del panel.
+          </p>
+          <p>
+            🌊 <strong>Olas en el cruce</strong>: para cada tramo se cruza la altura de ola con su{' '}
+            <strong>dirección respecto del rumbo</strong>. Si la ola viene <strong>de proa</strong>{' '}
+            avisa <strong>cabeceo</strong> (el barco se moja y frena); <strong>de través</strong>,{' '}
+            <strong>balanceo</strong> incómodo. Y la <strong>dirección modula el semáforo</strong> de
+            la salida: la misma altura pesa <strong>de lleno de proa o de través</strong>, y{' '}
+            <strong>menos de aleta o de popa</strong> (más cómoda), así que una ola que sería roja de
+            proa puede quedar amarilla si la tomás de popa. Afecta a vela y a motor; el dato marino
+            es de grilla gruesa, así que es orientativo.
+          </p>
+          <p className="text-xs text-slate-400">
+            En el <strong>panel</strong> (un lugar, sin rumbo) el semáforo mira solo la altura de ola;
+            la dirección recién juega en el cruce, donde hay un rumbo con el cual compararla.
           </p>
           <p className="text-xs text-slate-400">
             Tus elecciones de salida/destino/barco quedan guardadas para la próxima vez.

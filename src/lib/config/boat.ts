@@ -26,6 +26,10 @@ export const SCORING: ScoringThresholds = {
   rainRed: 12,
   fogYellowM: 4000,
   fogRedM: 1000,
+  // Altura de ola significativa (m). En el estuario la ola es corta y empinada;
+  // ~1 m ya incomoda a un barco chico y ~1.75 m es mar duro.
+  waveYellowM: 1.0,
+  waveRedM: 1.75,
 };
 
 /**
@@ -36,10 +40,10 @@ export const SCORING: ScoringThresholds = {
  */
 export function scoringFor(caution: 'prudente' | 'normal' | 'audaz'): ScoringThresholds {
   if (caution === 'prudente') {
-    return { ...SCORING, strongWind: 18, dangerWind: 24, gustYellow: 22, gustRed: 28, rainYellow: 1, rainRed: 8, fogYellowM: 6000, fogRedM: 2000 };
+    return { ...SCORING, strongWind: 18, dangerWind: 24, gustYellow: 22, gustRed: 28, rainYellow: 1, rainRed: 8, fogYellowM: 6000, fogRedM: 2000, waveYellowM: 0.75, waveRedM: 1.25 };
   }
   if (caution === 'audaz') {
-    return { ...SCORING, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16, fogYellowM: 2000, fogRedM: 500 };
+    return { ...SCORING, strongWind: 26, dangerWind: 33, gustYellow: 30, gustRed: 38, rainYellow: 4, rainRed: 16, fogYellowM: 2000, fogRedM: 500, waveYellowM: 1.25, waveRedM: 2.25 };
   }
   return SCORING;
 }

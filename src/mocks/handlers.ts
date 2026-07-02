@@ -8,7 +8,10 @@ import type {
  * Generador determinístico de datos de ejemplo con forma de Open-Meteo / INA.
  * Cubre un patrón de 7 días con: días buenos, una sudestada (viento SE
  * sostenido), un día de viento fuerte y una bajante (viento NW sostenido),
- * para que el dashboard, las alertas y el planificador tengan datos con sentido.
+ * casos de niebla, y casos de OLAS (día 6 con poco viento pero mar de fondo
+ * grande → olas grandes → rojo, con dirección/período para ver cabeceo/balanceo
+ * en el cruce), para que el dashboard, las alertas y el planificador tengan
+ * datos con sentido.
  */
 
 const HOURS_PER_DAY = 24;
@@ -38,18 +41,24 @@ interface DayPattern {
   fog?: { from: number; to: number; visM: number };
   /** Nubosidad media del día (0..100 %). */
   cloud: number;
+  /** Altura de ola significativa pico del día (m). Umbrales normal: 1.0 / 1.75 m. */
+  wave: number;
+  /** Dirección de procedencia de la ola (grados). */
+  waveDir: number;
+  /** Período medio de la ola (s). <5 s = mar corta y empinada. */
+  wavePeriod: number;
 }
 
 // Patrón por día (índice 0 = hoy). Solo hay 7 días (forecast_days=7), así que los
 // casos de niebla viven dentro de esa ventana para que se vean en el panel.
 const PATTERN: DayPattern[] = [
-  { baseWind: 11, gustExtra: 5, dir: 270, rain: 0, tempBase: 15, cloud: 10 }, // verde · soleado
-  { baseWind: 23, gustExtra: 6, dir: 135, rain: 3, tempBase: 14, cloud: 95 }, // sudestada · lluvia
-  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fog: { from: 7, to: 8, visM: 500 }, cloud: 20 }, // niebla densa CORTA (2 h) → "Niebla temporal a primera hora" (verde)
-  { baseWind: 10, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fog: { from: 7, to: 9, visM: 3000 }, cloud: 85 }, // neblina liviana → "Neblina temporal a primera hora" (verde)
-  { baseWind: 22, gustExtra: 5, dir: 315, rain: 0, tempBase: 13, cloud: 45 }, // bajante · parcial
-  { baseWind: 12, gustExtra: 5, dir: 270, rain: 0, tempBase: 16, fog: { from: 15, to: 19, visM: 600 }, cloud: 30 }, // niebla densa LARGA (5 h) por la tarde → precaución (amarillo)
-  { baseWind: 10, gustExtra: 4, dir: 250, rain: 0, tempBase: 17, fog: { from: 15, to: 19, visM: 3000 }, cloud: 60 }, // neblina liviana → "Neblina temporal por la tarde" (verde)
+  { baseWind: 11, gustExtra: 5, dir: 270, rain: 0, tempBase: 15, cloud: 10, wave: 0.4, waveDir: 200, wavePeriod: 4 }, // verde · soleado
+  { baseWind: 23, gustExtra: 6, dir: 135, rain: 3, tempBase: 14, cloud: 95, wave: 1.2, waveDir: 135, wavePeriod: 6 }, // sudestada · lluvia · olas moderadas → rojo (por viento/lluvia)
+  { baseWind: 12, gustExtra: 5, dir: 250, rain: 0, tempBase: 17, fog: { from: 7, to: 8, visM: 500 }, cloud: 20, wave: 0.5, waveDir: 220, wavePeriod: 4 }, // niebla densa CORTA (2 h) → "Niebla temporal a primera hora" (verde)
+  { baseWind: 10, gustExtra: 4, dir: 90, rain: 0, tempBase: 16, fog: { from: 7, to: 9, visM: 3000 }, cloud: 85, wave: 0.5, waveDir: 100, wavePeriod: 4 }, // neblina liviana → "Neblina temporal a primera hora" (verde)
+  { baseWind: 22, gustExtra: 5, dir: 315, rain: 0, tempBase: 13, cloud: 45, wave: 1.1, waveDir: 315, wavePeriod: 5 }, // bajante · parcial · olas moderadas
+  { baseWind: 12, gustExtra: 5, dir: 270, rain: 0, tempBase: 16, fog: { from: 15, to: 19, visM: 600 }, cloud: 30, wave: 0.6, waveDir: 240, wavePeriod: 4 }, // niebla densa LARGA (5 h) por la tarde → precaución (amarillo)
+  { baseWind: 5, gustExtra: 3, dir: 90, rain: 0, tempBase: 17, cloud: 60, wave: 2.0, waveDir: 135, wavePeriod: 9 }, // poco viento pero mar de fondo GRANDE (swell SE, período largo) → "Olas grandes" → rojo (único driver)
 ];
 
 function buildSeries() {
@@ -63,6 +72,9 @@ function buildSeries() {
   const vis: number[] = [];
   const cloud: number[] = [];
   const seaLevel: number[] = [];
+  const wave: number[] = [];
+  const waveDir: number[] = [];
+  const wavePeriod: number[] = [];
 
   const CLEAR_VIS = 24000; // visibilidad "despejada" en metros
 
@@ -93,10 +105,16 @@ function buildSeries() {
       if (day === 1) surge = 0.4 + h * 0.02;
       if (day === 4) surge = -(0.3 + h * 0.015);
       seaLevel.push(Math.round((tide + surge) * 100) / 100);
+      // Ola: pico del día con leve variación diurna (más ola a la tarde). El scoring
+      // toma el máximo en horas de luz, así que el pico queda ~p.wave.
+      const waveDiurnal = Math.sin(((h - 9) / 24) * Math.PI * 2) * (p.wave * 0.12);
+      wave.push(Math.max(0.2, Math.round((p.wave + waveDiurnal) * 100) / 100));
+      waveDir.push(p.waveDir);
+      wavePeriod.push(p.wavePeriod);
     }
   }
 
-  return { time, wind, gust, dir, precip, temp, vis, cloud, seaLevel };
+  return { time, wind, gust, dir, precip, temp, vis, cloud, seaLevel, wave, waveDir, wavePeriod };
 }
 
 export function mockForecast(lat: number, lon: number): OpenMeteoForecast {
@@ -124,7 +142,9 @@ export function mockMarine(): OpenMeteoMarine {
     hourly: {
       time: s.time,
       sea_level_height_msl: s.seaLevel,
-      wave_height: s.seaLevel.map((v) => Math.max(0.2, 0.4 + Math.abs(v))),
+      wave_height: s.wave,
+      wave_direction: s.waveDir,
+      wave_period: s.wavePeriod,
     },
   };
 }

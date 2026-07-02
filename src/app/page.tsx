@@ -142,7 +142,11 @@ export default function DashboardPage() {
                 {hoursOfDay.some((p) => p.waveHeightM != null) && (
                   <div className="mt-4 border-t border-slate-100 pt-3">
                     <p className="mb-1 text-xs font-medium text-slate-500">🌊 Oleaje</p>
-                    <HourlyWaveChart points={hoursOfDay} caution={profile.caution} />
+                    <HourlyWaveChart
+                      points={hoursOfDay}
+                      caution={profile.caution}
+                      location={{ lat: activeLocation.lat, lon: activeLocation.lon }}
+                    />
                   </div>
                 )}
               </div>

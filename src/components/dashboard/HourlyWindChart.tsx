@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { HourlyPoint } from '@/lib/types/forecast';
 import { type Caution, DEFAULT_LOW_WIND_KT } from '@/lib/profile/types';
 import { scoringFor, DAYLIGHT } from '@/lib/config/boat';
@@ -28,6 +28,11 @@ export function HourlyWindChart({
   /** Posición del lugar, para dibujar la campana de horas de luz (amanecer/atardecer). */
   location?: { lat: number; lon: number };
 }) {
+  // IDs únicos para los patrones de niebla (por si hay más de un gráfico en la página).
+  const uid = useId();
+  const neblinaPatternId = `wavy-neblina-${uid}`;
+  const nieblaPatternId = `wavy-niebla-${uid}`;
+
   // Mide el ancho disponible para que el gráfico se ajuste al contenedor.
   const wrapRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(0);
@@ -98,6 +103,17 @@ export function HourlyWindChart({
   return (
     <div ref={wrapRef} className="w-full overflow-x-auto">
       <svg width={width} height={height + 34} className="text-mar-500 max-w-none">
+        {/* Patrones de "niebla" (líneas onduladas): más densas y oscuras para niebla
+            cerrada, más espaciadas y claras para neblina/visibilidad reducida. */}
+        <defs>
+          <pattern id={neblinaPatternId} width="10" height="6" patternUnits="userSpaceOnUse">
+            <path d="M0,3 Q2.5,0.5 5,3 T10,3" fill="none" stroke="#94a3b8" strokeWidth={1} />
+          </pattern>
+          <pattern id={nieblaPatternId} width="8" height="4.5" patternUnits="userSpaceOnUse">
+            <path d="M0,2.25 Q2,0.4 4,2.25 T8,2.25" fill="none" stroke="#475569" strokeWidth={1.15} />
+          </pattern>
+        </defs>
+
         {/* Eje Y: grilla y escala fija de referencia */}
         {TICKS.map((kt) => (
           <g key={kt}>
@@ -124,8 +140,7 @@ export function HourlyWindChart({
               y={0}
               width={slot}
               height={height}
-              className={niebla ? 'fill-slate-500' : 'fill-slate-300'}
-              opacity={0.35}
+              fill={niebla ? `url(#${nieblaPatternId})` : `url(#${neblinaPatternId})`}
             />
           );
         })}
@@ -184,12 +199,18 @@ export function HourlyWindChart({
         </span>
         {hasNeblina && (
           <span className="inline-flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm bg-slate-300/70" /> Visibilidad reducida
+            <svg width={12} height={12} className="rounded-sm border border-slate-200">
+              <rect width={12} height={12} fill={`url(#${neblinaPatternId})`} />
+            </svg>{' '}
+            Visibilidad reducida
           </span>
         )}
         {hasNiebla && (
           <span className="inline-flex items-center gap-1">
-            <span className="inline-block w-3 h-3 rounded-sm bg-slate-500/70" /> Niebla
+            <svg width={12} height={12} className="rounded-sm border border-slate-200">
+              <rect width={12} height={12} fill={`url(#${nieblaPatternId})`} />
+            </svg>{' '}
+            Niebla
           </span>
         )}
       </div>

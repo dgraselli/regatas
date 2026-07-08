@@ -22,7 +22,8 @@ import { OfflineBadge } from '@/components/common/OfflineBadge';
 import { StaleForecastNotice } from '@/components/common/StaleForecastNotice';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
-import { formatDate } from '@/lib/format';
+import { formatDate, todayInTz } from '@/lib/format';
+import { TIMEZONE } from '@/lib/profile/defaults';
 import { reasonIcon } from '@/lib/reasonIcon';
 import { track } from '@/lib/analytics';
 
@@ -39,8 +40,13 @@ export default function DashboardPage() {
     activeBoat?.propulsion ?? 'vela',
   );
 
-  const days = data?.bundle.days ?? [];
-  const activeDate = selectedDate ?? days[0]?.date ?? '';
+  // Descartar días ya pasados: el caché persistido puede servir un pronóstico
+  // viejo (de un día anterior) mientras revalida. Solo desde el día en curso.
+  const today = todayInTz(activeLocation?.timezone ?? TIMEZONE);
+  const days = (data?.bundle.days ?? []).filter((d) => d.date >= today);
+  // Si la selección guardada apunta a un día ya pasado, caer al primer día vigente.
+  const selectedIsValid = selectedDate != null && days.some((d) => d.date === selectedDate);
+  const activeDate = (selectedIsValid ? selectedDate : days[0]?.date) ?? '';
   const selectedDay = days.find((d) => d.date === activeDate);
 
   const hoursOfDay = useMemo(

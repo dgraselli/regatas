@@ -12,7 +12,8 @@ import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { buildRoute } from '@/lib/config/routes';
-import { formatDate, formatHour, formatDuration, compass } from '@/lib/format';
+import { formatDate, formatHour, formatDuration, compass, todayInTz } from '@/lib/format';
+import { TIMEZONE } from '@/lib/profile/defaults';
 import { track } from '@/lib/analytics';
 
 export default function CrucePage() {
@@ -51,10 +52,14 @@ export default function CrucePage() {
 
   const { data, isLoading, isError, error } = useCrossingPlan(from, to, boat, profile.caution);
   const isMotor = (boat?.propulsion ?? 'vela') === 'motor';
+  // Descartar salidas de días ya pasados: el caché persistido puede servir un
+  // plan viejo mientras revalida. Solo desde el día en curso.
+  const today = todayInTz(from?.timezone ?? TIMEZONE);
+  const ranked = (data?.ranked ?? []).filter((c) => c.departAt.slice(0, 10) >= today);
   // La lista va en orden cronológico; el "mejor" (best) puede estar en cualquier lugar.
-  const bestIndex = data ? data.ranked.findIndex((c) => c.departAt === data.best?.departAt) : -1;
+  const bestIndex = ranked.findIndex((c) => c.departAt === data?.best?.departAt);
   const effIndex = selected ?? (bestIndex >= 0 ? bestIndex : 0);
-  const candidate = data?.ranked[effIndex];
+  const candidate = ranked[effIndex];
   const route = from && to ? buildRoute(from, to) : null;
 
   if (!hydrated) return <Loading />;
@@ -145,12 +150,12 @@ export default function CrucePage() {
       {isLoading && <Loading label="Calculando planes de cruce…" />}
       {isError && <ErrorState message={(error as Error)?.message} />}
 
-      {data && data.ranked.length > 0 && (
+      {data && ranked.length > 0 && (
         <>
           <Card className="p-4">
             <h2 className="font-semibold text-slate-700 mb-2">Opciones de salida</h2>
             <DepartureRanker
-              candidates={data.ranked}
+              candidates={ranked}
               selectedIndex={effIndex}
               bestIndex={bestIndex}
               onSelect={(i) => {

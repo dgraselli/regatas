@@ -28,6 +28,20 @@ export function formatHour(iso: string): string {
   return typeof iso === 'string' ? iso.slice(11, 16) : '';
 }
 
+/**
+ * Fecha de hoy ('YYYY-MM-DD') en la zona horaria dada. Sirve para descartar
+ * días ya pasados del caché persistido (que puede tener un pronóstico viejo).
+ */
+export function todayInTz(timezone: string, now: Date = new Date()): string {
+  // en-CA da el formato 'YYYY-MM-DD'.
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+}
+
 /** Horas decimales → 'Xh YYmin'. */
 export function formatDuration(hours: number): string {
   const h = Math.floor(hours);

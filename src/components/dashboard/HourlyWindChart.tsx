@@ -6,6 +6,7 @@ import { type Caution, DEFAULT_LOW_WIND_KT } from '@/lib/profile/types';
 import { scoringFor, DAYLIGHT } from '@/lib/config/boat';
 import { sunEvent } from '@/lib/domain/sun';
 import { formatHour, compass } from '@/lib/format';
+import { FogIcon } from '@/components/common/FogIcon';
 
 /**
  * Escala vertical fija (kt). Es constante a propósito: así dos gráficos de días
@@ -32,6 +33,10 @@ export function HourlyWindChart({
   const uid = useId();
   const neblinaPatternId = `wavy-neblina-${uid}`;
   const nieblaPatternId = `wavy-niebla-${uid}`;
+  const fogFadeId = `fog-fade-${uid}`;
+  const fogFadeMaskId = `fog-fade-mask-${uid}`;
+  const fogHFadeId = `fog-hfade-${uid}`;
+  const fogHFadeMaskId = `fog-hfade-mask-${uid}`;
 
   // Mide el ancho disponible para que el gráfico se ajuste al contenedor.
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -74,6 +79,29 @@ export function HourlyWindChart({
     (p) => p.visibilityM != null && p.visibilityM <= t.fogYellowM && p.visibilityM > t.fogRedM,
   );
   const hasNiebla = points.some((p) => p.visibilityM != null && p.visibilityM <= t.fogRedM);
+  // Ventanas de niebla: horas contiguas con visibilidad reducida, agrupadas para
+  // dibujar una banda por ventana (con su degradé), no una por hora. La ventana es
+  // "niebla" (más oscura) si su visibilidad mínima cae bajo el umbral rojo.
+  const fogWindows: { startIdx: number; endIdx: number; niebla: boolean }[] = [];
+  {
+    let start = -1;
+    let minVis = Infinity;
+    const flush = (endIdx: number) => {
+      if (start >= 0) fogWindows.push({ startIdx: start, endIdx, niebla: minVis <= t.fogRedM });
+      start = -1;
+      minVis = Infinity;
+    };
+    for (let i = 0; i < points.length; i++) {
+      const v = points[i].visibilityM;
+      if (v != null && v <= t.fogYellowM) {
+        if (start < 0) start = i;
+        minVis = Math.min(minVis, v);
+      } else {
+        flush(i - 1);
+      }
+    }
+    flush(points.length - 1);
+  }
   // La línea de "poco viento" solo se dibuja si alguna hora cae por debajo del umbral.
   const hasLowWind = points.some((p) => p.windKt < lowWind);
 
@@ -112,6 +140,25 @@ export function HourlyWindChart({
           <pattern id={nieblaPatternId} width="8" height="4.5" patternUnits="userSpaceOnUse">
             <path d="M0,2.25 Q2,0.4 4,2.25 T8,2.25" fill="none" stroke="#475569" strokeWidth={1.15} />
           </pattern>
+          {/* Degradé vertical: la niebla se ve opaca arriba y se desvanece hacia abajo. */}
+          <linearGradient id={fogFadeId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="white" stopOpacity={1} />
+            <stop offset="100%" stopColor="white" stopOpacity={0} />
+          </linearGradient>
+          <mask id={fogFadeMaskId}>
+            <rect x={0} y={0} width={width} height={height} fill={`url(#${fogFadeId})`} />
+          </mask>
+          {/* Degradé horizontal por ventana: transparente en los bordes, opaco al
+              centro. En unidades relativas (0..1) para que se adapte al ancho de
+              cada ventana de niebla. */}
+          <linearGradient id={fogHFadeId}>
+            <stop offset="0%" stopColor="white" stopOpacity={0.1} />
+            <stop offset="50%" stopColor="white" stopOpacity={1} />
+            <stop offset="100%" stopColor="white" stopOpacity={0.1} />
+          </linearGradient>
+          <mask id={fogHFadeMaskId} maskContentUnits="objectBoundingBox">
+            <rect x={0} y={0} width={1} height={1} fill={`url(#${fogHFadeId})`} />
+          </mask>
         </defs>
 
         {/* Eje Y: grilla y escala fija de referencia */}
@@ -127,23 +174,24 @@ export function HourlyWindChart({
         {/* Campana de horas de luz (detrás de todo): franja diurna amanecer→atardecer. */}
         <path d={domePath} className="fill-amber-200 stroke-amber-300" opacity={0.35} strokeWidth={1} />
 
-        {/* Bandas de visibilidad reducida (detrás de las barras): solo en las horas
-            con neblina/niebla, para identificar de un vistazo cuándo cae la visibilidad. */}
-        {points.map((p, i) => {
-          const v = p.visibilityM;
-          if (v == null || v > t.fogYellowM) return null;
-          const niebla = v <= t.fogRedM;
-          return (
+        {/* Bandas de visibilidad reducida (detrás de las barras): una por ventana de
+            niebla. Se dibujan con ondas (no una sombra sólida) para leer de un vistazo
+            cuándo cae la visibilidad, consistente con las tarjetas. Doble degradé:
+            vertical (opaco arriba → transparente abajo) sobre el grupo, y horizontal
+            (transparente en los bordes → opaco al centro) sobre la banda. */}
+        {fogWindows.map((w) => (
+          <g key={`vis-${w.startIdx}`} mask={`url(#${fogFadeMaskId})`}>
             <rect
-              key={`vis-${p.time}`}
-              x={padLeft + i * slot}
+              x={padLeft + w.startIdx * slot}
               y={0}
-              width={slot}
+              width={(w.endIdx - w.startIdx + 1) * slot}
               height={height}
-              fill={niebla ? `url(#${nieblaPatternId})` : `url(#${neblinaPatternId})`}
+              fill={w.niebla ? `url(#${nieblaPatternId})` : `url(#${neblinaPatternId})`}
+              opacity={w.niebla ? 0.7 : 0.6}
+              mask={`url(#${fogHFadeMaskId})`}
             />
-          );
-        })}
+          </g>
+        ))}
 
         {/* Barras + hora + flecha de dirección (hacia dónde sopla) en cada hora */}
         {points.map((p, i) => {
@@ -199,18 +247,12 @@ export function HourlyWindChart({
         </span>
         {hasNeblina && (
           <span className="inline-flex items-center gap-1">
-            <svg width={12} height={12} className="rounded-sm border border-slate-200">
-              <rect width={12} height={12} fill={`url(#${neblinaPatternId})`} />
-            </svg>{' '}
-            Visibilidad reducida
+            <FogIcon dense={false} className="h-3 w-4" /> Visibilidad reducida
           </span>
         )}
         {hasNiebla && (
           <span className="inline-flex items-center gap-1">
-            <svg width={12} height={12} className="rounded-sm border border-slate-200">
-              <rect width={12} height={12} fill={`url(#${nieblaPatternId})`} />
-            </svg>{' '}
-            Niebla
+            <FogIcon dense className="h-3 w-4" /> Niebla
           </span>
         )}
       </div>

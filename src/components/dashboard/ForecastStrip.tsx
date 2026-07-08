@@ -7,10 +7,16 @@ export function ForecastStrip({
   days,
   selectedDate,
   onSelect,
+  fogYellowM,
+  fogRedM,
 }: {
   days: DayScore[];
   selectedDate: string;
   onSelect: (date: string) => void;
+  /** Umbral (m) de visibilidad para marcar neblina en la tarjeta. */
+  fogYellowM: number;
+  /** Umbral (m) de visibilidad para marcar niebla (más cerrada) en la tarjeta. */
+  fogRedM: number;
 }) {
   return (
     <div className="flex items-start gap-3 overflow-x-auto pb-2">
@@ -20,6 +26,8 @@ export function ForecastStrip({
           day={d}
           selected={d.date === selectedDate}
           onSelect={() => onSelect(d.date)}
+          fogYellowM={fogYellowM}
+          fogRedM={fogRedM}
         />
       ))}
     </div>

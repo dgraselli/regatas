@@ -23,9 +23,23 @@ export function formatDate(iso: string): string {
   return `${DOW[dow]} ${d} ${MON[m]}`;
 }
 
+/** 'YYYY-MM-DD' → 'Mié 18' (sin mes). Compacto para las tarjetas del panel. */
+export function formatDateShort(iso: string): string {
+  const y = Number(iso.slice(0, 4));
+  const m = Number(iso.slice(5, 7)) - 1;
+  const d = Number(iso.slice(8, 10));
+  const dow = new Date(Date.UTC(y, m, d)).getUTCDay();
+  return `${DOW[dow]} ${d}`;
+}
+
 /** 'YYYY-MM-DDTHH:mm' → 'HH:mm'. Tolera valores ausentes/ inválidos. */
 export function formatHour(iso: string): string {
   return typeof iso === 'string' ? iso.slice(11, 16) : '';
+}
+
+/** Visibilidad legible: metros por debajo de 1 km, km por encima. */
+export function formatVisibility(m: number): string {
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
 }
 
 /**

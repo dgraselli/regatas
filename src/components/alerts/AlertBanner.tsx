@@ -2,12 +2,7 @@
 
 import type { SurgeAlert } from '@/lib/types/water';
 import type { FogAlert } from '@/lib/types/forecast';
-import { formatDate, formatHour } from '@/lib/format';
-
-/** Visibilidad legible: metros por debajo de 1 km, km por encima. */
-function visLabel(m: number): string {
-  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
-}
+import { formatDate, formatHour, formatVisibility } from '@/lib/format';
 
 const STYLES: Record<number, string> = {
   1: 'bg-amber-50 border-amber-200 text-amber-800',
@@ -102,7 +97,7 @@ export function FogAlertList({ alerts }: { alerts: FogAlert[] }) {
                 <span className="rounded bg-current/10 px-1.5 py-0.5 font-medium">
                   {a.severity === 2 ? 'niebla' : 'neblina'}
                 </span>
-                <span className="opacity-80">vis. {visLabel(a.minVisibilityM)}</span>
+                <span className="opacity-80">vis. {formatVisibility(a.minVisibilityM)}</span>
               </span>
             </li>
           );

@@ -6,10 +6,17 @@ import { scoringFor } from '@/lib/config/boat';
 import type { Caution } from '@/lib/profile/types';
 import { Card } from '@/components/ui/Card';
 
-const LEVEL: Record<Exclude<VisibilityLevel, 'sin-dato'>, { label: string; cls: string }> = {
-  despejado: { label: 'Buena visibilidad', cls: 'bg-emerald-50 text-emerald-700' },
-  neblina: { label: 'Visibilidad reducida', cls: 'bg-amber-50 text-amber-700' },
-  niebla: { label: 'Niebla', cls: 'bg-red-50 text-red-700' },
+const LEVEL: Record<
+  Exclude<VisibilityLevel, 'sin-dato'>,
+  { label: string; cls: string; border: string }
+> = {
+  despejado: { label: 'Buena visibilidad', cls: 'bg-emerald-50 text-emerald-700', border: '' },
+  neblina: {
+    label: 'Visibilidad reducida',
+    cls: 'bg-amber-50 text-amber-700',
+    border: 'border-amber-300',
+  },
+  niebla: { label: 'Niebla', cls: 'bg-red-50 text-red-700', border: 'border-2 border-red-400' },
 };
 
 function fmtVis(m?: number): string {
@@ -46,7 +53,7 @@ export function MetarObservation({
   const humid = o.spreadC != null && o.spreadC <= 2; // aire casi saturado = propenso a niebla
 
   return (
-    <Card className="p-4">
+    <Card className={`p-4 ${meta.border}`}>
       <div className="text-xs font-medium text-slate-500">🛬 Visibilidad observada ahora</div>
       <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
         <span className="text-2xl font-semibold text-slate-800">{fmtVis(o.visibilityM)}</span>

@@ -24,6 +24,7 @@ import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
 import { formatDate, todayInTz } from '@/lib/format';
 import { TIMEZONE } from '@/lib/profile/defaults';
+import { scoringFor } from '@/lib/config/boat';
 import { reasonIcon } from '@/lib/reasonIcon';
 import { track } from '@/lib/analytics';
 
@@ -47,6 +48,8 @@ export default function DashboardPage() {
   // Si la selección guardada apunta a un día ya pasado, caer al primer día vigente.
   const selectedIsValid = selectedDate != null && days.some((d) => d.date === selectedDate);
   const activeDate = (selectedIsValid ? selectedDate : days[0]?.date) ?? '';
+  // Umbrales de niebla según la tolerancia, para marcar niebla/neblina en cada tarjeta.
+  const fogThresholds = scoringFor(profile.caution);
   const selectedDay = days.find((d) => d.date === activeDate);
 
   const hoursOfDay = useMemo(
@@ -120,11 +123,25 @@ export default function DashboardPage() {
             safeMaxM={activeLocation.safeLevelMaxM}
           />
 
-          {data.fog.length > 0 && <FogAlertList alerts={data.fog} />}
+          {/* La niebla es un pronóstico poco confiable: en el panel solo se
+              muestra el bloque si hay niebla/neblina prevista para HOY. Los
+              días futuros la marcan con su ícono en la tarjeta. */}
+          {(() => {
+            const fogToday = data.fog.filter(
+              (a) => a.startsAt.slice(0, 10) <= today && a.endsAt.slice(0, 10) >= today,
+            );
+            return fogToday.length > 0 && <FogAlertList alerts={fogToday} />;
+          })()}
 
           {metar.data && <MetarObservation status={metar.data} caution={profile.caution} />}
 
-          <ForecastStrip days={days} selectedDate={activeDate} onSelect={setSelectedDate} />
+          <ForecastStrip
+            days={days}
+            selectedDate={activeDate}
+            onSelect={setSelectedDate}
+            fogYellowM={fogThresholds.fogYellowM}
+            fogRedM={fogThresholds.fogRedM}
+          />
 
           {selectedDay && (
             <Card>

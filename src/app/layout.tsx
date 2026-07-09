@@ -98,9 +98,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Analytics />
         <Providers>
           <div className="min-h-screen flex flex-col">
-            <NavBar />
-            {/* TEMPORAL — quitar al salir de etapa de pruebas */}
+            {/* TEMPORAL — quitar al salir de etapa de pruebas. Va arriba de todo. */}
             <BetaBanner />
+            <NavBar />
             {/* Solo aparece cuando se corre con datos de ejemplo (mocks) */}
             <MockBanner />
             <main className="flex-1 mx-auto w-full max-w-4xl px-4 py-6">{children}</main>

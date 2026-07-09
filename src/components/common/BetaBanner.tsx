@@ -5,13 +5,11 @@ export function BetaBanner() {
   return (
     <div
       role="alert"
-      className="bg-amber-100 border-b border-amber-300 text-amber-900 text-sm"
+      className="bg-amber-100 border-b border-amber-300 text-amber-900 text-xs"
     >
-      <div className="mx-auto max-w-4xl px-4 py-2 flex items-start gap-2">
-        <span aria-hidden className="leading-5">
-          ⚠️
-        </span>
-        <p className="leading-5">
+      <div className="mx-auto max-w-4xl px-4 py-1 flex items-center justify-center gap-1.5 text-center">
+        <span aria-hidden>⚠️</span>
+        <p>
           Esta app está en etapa de desarrollo. Verificá siempre el pronóstico
           oficial antes de salir.
         </p>

@@ -24,11 +24,19 @@ export function HourlyWaveChart({
   points,
   caution = 'normal',
   location,
+  now,
 }: {
   points: HourlyPoint[];
   caution?: Caution;
   /** Posición del lugar, para dibujar la campana de horas de luz (amanecer/atardecer). */
   location?: { lat: number; lon: number };
+  /**
+   * Hora actual ('YYYY-MM-DDTHH:mm', misma zona horaria que `points`). Si cae
+   * dentro del día graficado, las horas ya cumplidas se atenúan y una línea
+   * vertical marca el "ahora" (sin rótulo: lo lleva el gráfico de viento de
+   * arriba, con el que comparte layout).
+   */
+  now?: string;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [containerW, setContainerW] = useState(0);
@@ -86,6 +94,16 @@ export function HourlyWaveChart({
   }
   domePath += ' Z';
 
+  // Indicador de hora actual (solo si el gráfico es del día de hoy), igual que
+  // en el gráfico de viento: horas cumplidas en gris + línea vertical.
+  const nowH =
+    now && now.slice(0, 10) === dayDate
+      ? Number(now.slice(11, 13)) + Number(now.slice(14, 16)) / 60
+      : null;
+  const isPastHour = (i: number) => nowH != null && hour0 + i + 1 <= nowH;
+  const xNow = nowH != null ? cxForHour(nowH) : 0;
+  const showNow = nowH != null && xNow >= padLeft && xNow <= width;
+
   return (
     <div ref={wrapRef} className="w-full overflow-x-auto">
       <svg width={width} height={height + (hasDir ? 30 : 18)} className="max-w-none">
@@ -108,17 +126,18 @@ export function HourlyWaveChart({
           const x = padLeft + i * slot + (slot - gap - barW) / 2;
           const cx = x + barW / 2;
           const hy = y(p.waveHeightM);
+          const past = isPastHour(i); // hora ya cumplida: se dibuja atenuada en gris
           const title =
             `Ola ${p.waveHeightM.toFixed(1)} m` +
             (p.waveDir != null ? ` del ${compass(p.waveDir)}` : '') +
             (p.wavePeriodS != null ? ` · período ${Math.round(p.wavePeriodS)} s` : '');
           return (
             <g key={p.time}>
-              <rect x={x} y={hy} width={barW} height={height - hy} className="fill-cyan-500" rx={2}>
+              <rect x={x} y={hy} width={barW} height={height - hy} className={past ? 'fill-slate-300' : 'fill-cyan-500'} rx={2}>
                 <title>{title}</title>
               </rect>
               {i % labelEvery === 0 && (
-                <text x={cx} y={height + 12} textAnchor="middle" className="fill-slate-400 text-[9px]">
+                <text x={cx} y={height + 12} textAnchor="middle" className={`${past ? 'fill-slate-300' : 'fill-slate-400'} text-[9px]`}>
                   {formatHour(p.time)}
                 </text>
               )}
@@ -126,7 +145,7 @@ export function HourlyWaveChart({
               {p.waveDir != null && (
                 <g transform={`translate(${cx} ${height + 23}) rotate(${p.waveDir + 180})`}>
                   <title>{`Ola del ${compass(p.waveDir)}`}</title>
-                  <path d="M0,-4 L2.8,4 L0,1.6 L-2.8,4 Z" className="fill-cyan-600" />
+                  <path d="M0,-4 L2.8,4 L0,1.6 L-2.8,4 Z" className={past ? 'fill-slate-300' : 'fill-cyan-600'} />
                 </g>
               )}
             </g>
@@ -136,6 +155,14 @@ export function HourlyWaveChart({
         {/* Líneas de umbral (precaución/peligro) según la tolerancia */}
         <line x1={padLeft} y1={y(yellow)} x2={width} y2={y(yellow)} className="stroke-amber-400" strokeWidth={1.5} strokeDasharray="5 3" />
         <line x1={padLeft} y1={y(red)} x2={width} y2={y(red)} className="stroke-red-500" strokeWidth={1.5} strokeDasharray="5 3" />
+
+        {/* Línea de "ahora" (el rótulo con la hora lo lleva el gráfico de viento). */}
+        {showNow && (
+          <>
+            <line x1={xNow} y1={0} x2={xNow} y2={height} className="stroke-slate-600" strokeWidth={1.5} />
+            <circle cx={xNow} cy={height} r={2.5} className="fill-slate-600" />
+          </>
+        )}
       </svg>
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500 mt-1">
         <span className="inline-flex items-center gap-1">

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { todayInTz } from '@/lib/format';
+import { todayInTz, nowInTz } from '@/lib/format';
 
 const TZ = 'America/Argentina/Buenos_Aires';
 
@@ -28,5 +28,26 @@ describe('todayInTz', () => {
     ];
     const visible = cachedDays.filter((d) => d.date >= today).map((d) => d.date);
     expect(visible).toEqual(['2026-07-08', '2026-07-09', '2026-07-10']);
+  });
+});
+
+describe('nowInTz', () => {
+  it('devuelve YYYY-MM-DDTHH:mm en la zona horaria dada', () => {
+    // 2026-07-08 17:32 UTC = 14:32 en Buenos Aires (UTC-3).
+    const now = new Date('2026-07-08T17:32:00Z');
+    expect(nowInTz(TZ, now)).toBe('2026-07-08T14:32');
+  });
+
+  it('cruza la medianoche cambiando de fecha (sin hora 24)', () => {
+    // 2026-07-08 03:00 UTC = 2026-07-08 00:00 en Buenos Aires.
+    const now = new Date('2026-07-08T03:00:00Z');
+    expect(nowInTz(TZ, now)).toBe('2026-07-08T00:00');
+  });
+
+  it('coincide en formato con los puntos horarios del pronóstico', () => {
+    const now = new Date('2026-07-08T17:32:00Z');
+    const value = nowInTz(TZ, now);
+    expect(value.slice(0, 10)).toBe(todayInTz(TZ, now));
+    expect(value).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
   });
 });

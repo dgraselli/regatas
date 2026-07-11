@@ -56,6 +56,25 @@ export function todayInTz(timezone: string, now: Date = new Date()): string {
   }).format(now);
 }
 
+/**
+ * Fecha y hora actuales ('YYYY-MM-DDTHH:mm') en la zona horaria dada, el mismo
+ * formato de los puntos horarios del pronóstico. Sirve para marcar la hora
+ * actual en los gráficos del día de hoy.
+ */
+export function nowInTz(timezone: string, now: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
+}
+
 /** Horas decimales → 'Xh YYmin'. */
 export function formatDuration(hours: number): string {
   const h = Math.floor(hours);

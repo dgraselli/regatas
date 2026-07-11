@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
+import { useNowInTz } from '@/lib/hooks/useNow';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { useMetarObservation } from '@/lib/hooks/useMetarObservation';
 import { Onboarding } from '@/components/common/Onboarding';
@@ -41,6 +42,9 @@ export default function DashboardPage() {
     activeBoat?.propulsion ?? 'vela',
   );
 
+  // Hora actual en la zona horaria del lugar (mismo formato que los puntos
+  // horarios), para marcar el "ahora" en los gráficos del día de hoy.
+  const nowLocal = useNowInTz(activeLocation?.timezone ?? TIMEZONE);
   // Descartar días ya pasados: el caché persistido puede servir un pronóstico
   // viejo (de un día anterior) mientras revalida. Solo desde el día en curso.
   const today = todayInTz(activeLocation?.timezone ?? TIMEZONE);
@@ -166,6 +170,7 @@ export default function DashboardPage() {
                   caution={profile.caution}
                   lowWindKt={profile.lowWindKt}
                   location={{ lat: activeLocation.lat, lon: activeLocation.lon }}
+                  now={nowLocal}
                 />
                 {hoursOfDay.some((p) => p.waveHeightM != null) && (
                   <div className="mt-4 border-t border-slate-100 pt-3">
@@ -174,6 +179,7 @@ export default function DashboardPage() {
                       points={hoursOfDay}
                       caution={profile.caution}
                       location={{ lat: activeLocation.lat, lon: activeLocation.lon }}
+                      now={nowLocal}
                     />
                   </div>
                 )}

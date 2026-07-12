@@ -3,7 +3,7 @@ import './globals.css';
 import { Providers } from './providers';
 import { NavBar } from '@/components/common/NavBar';
 import { BetaBanner } from '@/components/common/BetaBanner';
-import { Analytics } from '@/components/common/Analytics';
+import { Analytics, OpenPanelAnalytics } from '@/components/common/Analytics';
 import { FeedbackButton } from '@/components/common/FeedbackButton';
 import { APP_VERSION } from '@/lib/version';
 
@@ -95,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Analytics />
+        <OpenPanelAnalytics />
         <Providers>
           <div className="min-h-screen flex flex-col">
             <NavBar />

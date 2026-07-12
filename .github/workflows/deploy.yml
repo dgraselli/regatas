@@ -27,6 +27,9 @@ jobs:
       # sobreescribir en Settings → Secrets and variables → Actions → Variables.
       NEXT_PUBLIC_UMAMI_SRC: ${{ vars.NEXT_PUBLIC_UMAMI_SRC || 'https://cloud.umami.is/script.js' }}
       NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.NEXT_PUBLIC_UMAMI_WEBSITE_ID || '5072e63d-c5b4-4813-84c6-8e63abccf357' }}
+      # Client ID de OpenPanel: público (va en el <script> del sitio), igual que
+      # el de Umami arriba.
+      NEXT_PUBLIC_OPENPANEL_CLIENT_ID: ${{ vars.NEXT_PUBLIC_OPENPANEL_CLIENT_ID || 'f8e870d1-fad7-49df-a3b1-24c707999110' }}
       NEXT_PUBLIC_FEEDBACK_URL: ${{ vars.NEXT_PUBLIC_FEEDBACK_URL || 'https://tally.so/r/D4bxkE' }}
     steps:
       - uses: actions/checkout@v4

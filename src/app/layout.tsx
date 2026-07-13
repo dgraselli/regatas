@@ -6,6 +6,7 @@ import { BetaBanner } from '@/components/common/BetaBanner';
 import { MockBanner } from '@/components/common/MockBanner';
 import { Analytics } from '@/components/common/Analytics';
 import { FeedbackButton } from '@/components/common/FeedbackButton';
+import { WelcomeModal } from '@/components/common/WelcomeModal';
 import { APP_VERSION } from '@/lib/version';
 
 const SITE_URL = 'https://regatas.com.ar';
@@ -97,6 +98,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Analytics />
         <Providers>
+          {/* Bienvenida de primer uso (se muestra una sola vez) */}
+          <WelcomeModal />
           <div className="min-h-screen flex flex-col">
             {/* TEMPORAL — quitar al salir de etapa de pruebas. Va arriba de todo. */}
             <BetaBanner />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useNowInTz } from '@/lib/hooks/useNow';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
@@ -35,7 +35,7 @@ export default function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const water = useWaterLevel(activeLocation);
   const metar = useMetarObservation(activeLocation);
-  const { data, isLoading, isError, isFetching, error } = useForecast(
+  const { data, isLoading, isError, isFetching, error, refetch } = useForecast(
     activeLocation,
     profile.caution,
     profile.lowWindKt,
@@ -55,6 +55,18 @@ export default function DashboardPage() {
   // Umbrales de niebla según la tolerancia, para marcar niebla/neblina en cada tarjeta.
   const fogThresholds = scoringFor(profile.caution);
   const selectedDay = days.find((d) => d.date === activeDate);
+
+  // Un caché (service worker / persistido) puede servir un pronóstico tan viejo
+  // que TODOS sus días ya pasaron: en vez de dejar el panel en blanco, se pide
+  // uno nuevo (una sola vez, para no entrar en loop si offline devuelve lo mismo).
+  const allDaysStale = !!data && days.length === 0;
+  const retriedStale = useRef(false);
+  useEffect(() => {
+    if (allDaysStale && !retriedStale.current) {
+      retriedStale.current = true;
+      refetch();
+    }
+  }, [allDaysStale, refetch]);
 
   const hoursOfDay = useMemo(
     () => (data?.bundle.hourly ?? []).filter((p) => p.time.slice(0, 10) === activeDate),
@@ -138,6 +150,26 @@ export default function DashboardPage() {
           })()}
 
           {metar.data && <MetarObservation status={metar.data} caution={profile.caution} />}
+
+          {/* Todos los días del pronóstico guardado ya pasaron: avisar en vez de
+              mostrar un panel vacío sin explicación. */}
+          {allDaysStale &&
+            (isFetching ? (
+              <Loading label="Recuperando información del clima…" />
+            ) : (
+              <div
+                role="alert"
+                className="rounded-lg border border-amber-300 bg-amber-100 px-4 py-3 text-sm text-amber-900"
+              >
+                <p className="font-semibold flex items-center gap-2">
+                  <span aria-hidden>⚠️</span>
+                  El pronóstico guardado quedó desactualizado
+                </p>
+                <p className="mt-1">
+                  No se pudo obtener uno nuevo. Revisá tu conexión y recargá la página.
+                </p>
+              </div>
+            ))}
 
           <ForecastStrip
             days={days}

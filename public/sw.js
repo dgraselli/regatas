@@ -3,9 +3,12 @@
      de chunks vigentes) cuando hay red; cae al caché solo offline. Esto evita el
      bug de servir un index.html viejo que pide chunks de _next que ya no existen.
    - Assets hasheados de _next (inmutables) e íconos: cache-first.
-   - Pronóstico (Open-Meteo / INA): stale-while-revalidate (disponible offline). */
+   - Pronóstico (Open-Meteo / INA): network-first → dato fresco cuando hay red; el
+     caché queda solo como respaldo offline. (Antes era stale-while-revalidate, pero
+     podía servir una respuesta de días atrás: React Query la tomaba como fresca y
+     el filtro de días pasados del panel descartaba todo → panel en blanco.) */
 
-const CACHE = 'regatas-v3';
+const CACHE = 'regatas-v4';
 // Rutas relativas al scope del SW: en dev resuelven a la raíz; en GitHub Pages, a /regatas/.
 const SHELL = ['./', './mareas/', './cruce/', './perfil/', './manifest.webmanifest', './icons/icon.svg'];
 
@@ -44,17 +47,18 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (isApi(request.url)) {
-    // stale-while-revalidate
+    // network-first: dato fresco siempre que haya red; caché solo offline.
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {
-        const cached = await cache.match(request);
-        const network = fetch(request)
-          .then((res) => {
-            cache.put(request, res.clone());
-            return res;
-          })
-          .catch(() => cached);
-        return cached || network;
+        try {
+          const res = await fetch(request);
+          cache.put(request, res.clone());
+          return res;
+        } catch {
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          throw new Error('offline y sin caché para ' + request.url);
+        }
       }),
     );
     return;

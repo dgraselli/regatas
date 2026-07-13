@@ -14,7 +14,6 @@ import { TrafficLight } from '@/components/dashboard/TrafficLight';
 import { TideSummary } from '@/components/dashboard/TideSummary';
 import { MetarObservation } from '@/components/dashboard/MetarObservation';
 import { MetodologiaPanel } from '@/components/dashboard/MetodologiaPanel';
-import { FogAlertList } from '@/components/alerts/AlertBanner';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { LocateButton } from '@/components/common/LocateButton';
 import { BoatPicker } from '@/components/common/BoatPicker';
@@ -139,16 +138,9 @@ export default function DashboardPage() {
             safeMaxM={activeLocation.safeLevelMaxM}
           />
 
-          {/* La niebla es un pronóstico poco confiable: en el panel solo se
-              muestra el bloque si hay niebla/neblina prevista para HOY. Los
-              días futuros la marcan con su ícono en la tarjeta. */}
-          {(() => {
-            const fogToday = data.fog.filter(
-              (a) => a.startsAt.slice(0, 10) <= today && a.endsAt.slice(0, 10) >= today,
-            );
-            return fogToday.length > 0 && <FogAlertList alerts={fogToday} />;
-          })()}
-
+          {/* La niebla PRONOSTICADA ya se ve en la tarjeta de cada día (ícono +
+              visibilidad mínima) y en /alertas; acá solo va la visibilidad
+              OBSERVADA (METAR), que es dato medido y sí importa para el hoy. */}
           {metar.data && <MetarObservation status={metar.data} caution={profile.caution} />}
 
           {/* Todos los días del pronóstico guardado ya pasaron: avisar en vez de

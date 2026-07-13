@@ -19,7 +19,14 @@ export function Providers({ children }: { children: ReactNode }) {
             staleTime: 1000 * 60 * 30, // 30 min
             gcTime: 1000 * 60 * 60 * 24, // 24 h
             retry: 1,
-            refetchOnWindowFocus: false,
+            // Refrescar al volver a la pestaña: si no, una pestaña abierta se
+            // queda con datos viejos para siempre (no hay otro disparador).
+            refetchOnWindowFocus: true,
+            // Con el networkMode default, un navigator.onLine mentiroso (VPN,
+            // adaptador virtual) PAUSA todos los refetch y la app queda
+            // congelada sirviendo el caché persistido. 'always' intenta igual;
+            // si de verdad no hay red, queda el dato viejo + StaleForecastNotice.
+            networkMode: 'always',
           },
         },
       }),

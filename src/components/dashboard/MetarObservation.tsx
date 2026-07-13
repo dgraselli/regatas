@@ -34,6 +34,11 @@ function ageLabel(iso?: string): string {
   return `hace ${Math.round(min / 60)} h`;
 }
 
+/** Edad máxima para mostrar la observación: más vieja solo puede venir de un
+ * caché restaurado sin red (la API se pide con ventana de 2 h), y un dato de
+ * "ahora" con horas de edad es peor que nada. */
+const MAX_AGE_MS = 2 * 60 * 60 * 1000;
+
 /**
  * Tarjeta con la visibilidad OBSERVADA (METAR) del aeropuerto más cercano. Es un
  * dato medido "de ahora" que complementa el flojo pronóstico de niebla. No entra al
@@ -47,6 +52,7 @@ export function MetarObservation({
   caution?: Caution;
 }) {
   const { observation: o, distanceKm } = status;
+  if (o.time && Date.now() - new Date(o.time).getTime() > MAX_AGE_MS) return null;
   const level = metarVisibilityLevel(o, scoringFor(caution));
   if (level === 'sin-dato') return null;
   const meta = LEVEL[level];

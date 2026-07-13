@@ -7,7 +7,8 @@ import { nearestMetarStation } from '@/lib/config/metarStations';
 /**
  * Visibilidad observada (METAR) del aeropuerto más cercano al lugar activo. Es un
  * dato complementario "de ahora": si el proxy no responde, la query da null y no se
- * muestra nada. METAR es ~horario, así que no hace falta refrescar seguido.
+ * muestra nada. METAR es ~horario; el intervalo mantiene fresca una pestaña que
+ * queda abierta (el refetch on focus no alcanza si nunca pierde el foco).
  */
 export function useMetarObservation(loc: { lat: number; lon: number } | null) {
   const station = loc ? nearestMetarStation(loc.lat, loc.lon) : null;
@@ -16,5 +17,6 @@ export function useMetarObservation(loc: { lat: number; lon: number } | null) {
     queryFn: () => getMetarObservation(loc!),
     enabled: !!loc,
     staleTime: 10 * 60 * 1000,
+    refetchInterval: 15 * 60 * 1000,
   });
 }

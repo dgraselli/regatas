@@ -23,5 +23,8 @@ export function useForecast(
       );
     },
     enabled: !!loc,
+    // Una pestaña/PWA que queda abierta en pantalla nunca pierde el foco:
+    // sin intervalo, el pronóstico no se renovaría jamás.
+    refetchInterval: 30 * 60 * 1000,
   });
 }

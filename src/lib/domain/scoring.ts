@@ -39,7 +39,7 @@ function formatVis(m: number): string {
 }
 
 /** mm por hora a partir de los cuales se cuenta una hora como "con lluvia". */
-const PRECIP_HOUR_MM = 0.2;
+export const PRECIP_HOUR_MM = 0.2;
 
 /**
  * Condición del cielo del día (para el ícono de la tarjeta), a partir de las

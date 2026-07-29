@@ -7,6 +7,8 @@ import { scoringFor, DAYLIGHT } from '@/lib/config/boat';
 import { sunEvent } from '@/lib/domain/sun';
 import { formatHour, compass } from '@/lib/format';
 import { FogIcon } from '@/components/common/FogIcon';
+import { RainIcon } from '@/components/common/RainIcon';
+import { PRECIP_HOUR_MM } from '@/lib/domain/scoring';
 
 /**
  * Escala vertical fija (kt). Es constante a propósito: así dos gráficos de días
@@ -15,6 +17,10 @@ import { FogIcon } from '@/components/common/FogIcon';
  */
 const MAX_KT = 45;
 const TICKS = [0, 10, 20, 30, 40];
+
+/** mm/hora a partir de los cuales la lluvia se marca como "fuerte" (convención
+ * meteorológica habitual de lluvia moderada/fuerte). Por debajo es "ligera". */
+const RAIN_HEAVY_MM_H = 2.5;
 
 /** Gráfico simple de barras de viento/ráfagas por hora (solo SVG, sin librerías). */
 export function HourlyWindChart({
@@ -44,6 +50,9 @@ export function HourlyWindChart({
   const fogFadeMaskId = `fog-fade-mask-${uid}`;
   const fogHFadeId = `fog-hfade-${uid}`;
   const fogHFadeMaskId = `fog-hfade-mask-${uid}`;
+  // IDs para las rayas diagonales de lluvia (patrón distinto al de niebla, a propósito).
+  const rainLightPatternId = `rain-light-${uid}`;
+  const rainHeavyPatternId = `rain-heavy-${uid}`;
 
   // Mide el ancho disponible para que el gráfico se ajuste al contenedor.
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -109,6 +118,18 @@ export function HourlyWindChart({
     }
     flush(points.length - 1);
   }
+
+  // Lluvia: a diferencia de la niebla (una condición que persiste pareja durante
+  // una ventana de horas), la lluvia varía mucho hora a hora, así que se marca
+  // por hora en una franja propia arriba del todo (no detrás de las barras, donde
+  // quedaría tapada). Cada hora con lluvia es "fuerte" o "ligera" según su propio
+  // mm/h.
+  const hasLluviaLigera = points.some(
+    (p) => p.precipMm >= PRECIP_HOUR_MM && p.precipMm < RAIN_HEAVY_MM_H,
+  );
+  const hasLluviaFuerte = points.some((p) => p.precipMm >= RAIN_HEAVY_MM_H);
+  const hasLluvia = hasLluviaLigera || hasLluviaFuerte;
+  const rainRowH = hasLluvia ? 18 : 0; // franja reservada arriba para la lluvia
   // La línea de "poco viento" solo se dibuja si alguna hora cae por debajo del umbral.
   const hasLowWind = points.some((p) => p.windKt < lowWind);
 
@@ -151,7 +172,7 @@ export function HourlyWindChart({
 
   return (
     <div ref={wrapRef} className="w-full overflow-x-auto">
-      <svg width={width} height={height + 34 + topPad} className="text-mar-500 max-w-none">
+      <svg width={width} height={height + 34 + topPad + rainRowH} className="text-mar-500 max-w-none">
         {/* Patrones de "niebla" (líneas onduladas): más densas y oscuras para niebla
             cerrada, más espaciadas y claras para neblina/visibilidad reducida. */}
         <defs>
@@ -180,10 +201,61 @@ export function HourlyWindChart({
           <mask id={fogHFadeMaskId} maskContentUnits="objectBoundingBox">
             <rect x={0} y={0} width={1} height={1} fill={`url(#${fogHFadeId})`} />
           </mask>
+          {/* Patrones de lluvia: rayas diagonales celestes (ligera) o azules y más
+              gruesas/densas (fuerte), como gotas cayendo. A propósito bien distinto
+              del patrón ondulado y horizontal de la niebla, para que se note de
+              un vistazo que es lluvia y no visibilidad reducida. */}
+          <pattern
+            id={rainLightPatternId}
+            width="7"
+            height="9"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(18)"
+          >
+            <line x1="0" y1="0" x2="0" y2="9" stroke="#38bdf8" strokeWidth={1} strokeLinecap="round" />
+          </pattern>
+          <pattern
+            id={rainHeavyPatternId}
+            width="4.5"
+            height="8"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(18)"
+          >
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#2563eb" strokeWidth={1.6} strokeLinecap="round" />
+          </pattern>
         </defs>
 
-        {/* Todo el dibujo baja `topPad` px cuando hay rótulo de hora actual. */}
-        <g transform={`translate(0 ${topPad})`}>
+        {/* Franja de lluvia, arriba del todo y sin superponerse a las barras (así no
+            queda tapada): un mosaico de rayas diagonales por cada hora con lluvia,
+            más celeste (ligera) o azul y denso (fuerte) según los mm/h de esa hora.
+            Como el patrón está en coordenadas absolutas, los mosaicos de horas
+            contiguas empalman y se leen como una sola "cortina" de lluvia. */}
+        {hasLluvia && (
+          <g>
+            {points.map((p, i) => {
+              if (p.precipMm < PRECIP_HOUR_MM) return null;
+              const heavy = p.precipMm >= RAIN_HEAVY_MM_H;
+              return (
+                <rect
+                  key={`rain-${p.time}`}
+                  x={padLeft + i * slot + 0.5}
+                  y={2}
+                  width={slot - 1}
+                  height={rainRowH - 4}
+                  rx={2}
+                  fill={`url(#${heavy ? rainHeavyPatternId : rainLightPatternId})`}
+                  opacity={heavy ? 0.9 : 0.8}
+                >
+                  <title>{`Lluvia ${heavy ? 'fuerte' : 'ligera'}: ${p.precipMm} mm/h`}</title>
+                </rect>
+              );
+            })}
+          </g>
+        )}
+
+        {/* Todo el dibujo baja `topPad + rainRowH` px para dejar lugar al rótulo de
+            hora actual y/o a la franja de lluvia. */}
+        <g transform={`translate(0 ${topPad + rainRowH})`}>
 
         {/* Eje Y: grilla y escala fija de referencia */}
         {TICKS.map((kt) => (
@@ -301,6 +373,16 @@ export function HourlyWindChart({
         {hasNiebla && (
           <span className="inline-flex items-center gap-1">
             <FogIcon dense className="h-3 w-4" /> Niebla
+          </span>
+        )}
+        {hasLluviaLigera && (
+          <span className="inline-flex items-center gap-1">
+            <RainIcon heavy={false} className="h-3 w-4" /> Lluvia ligera
+          </span>
+        )}
+        {hasLluviaFuerte && (
+          <span className="inline-flex items-center gap-1">
+            <RainIcon heavy className="h-3 w-4" /> Lluvia fuerte
           </span>
         )}
       </div>

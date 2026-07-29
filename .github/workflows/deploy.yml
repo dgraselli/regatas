@@ -5,11 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Permisos que necesita el deploy oficial de Pages.
+# Necesario para pushear el build a la branch gh-pages.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 # Un solo deploy a la vez; cancela los viejos en curso.
 concurrency:
@@ -17,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     env:
       # Usa las APIs reales (Open-Meteo) en el sitio publicado, no los mocks.
@@ -38,17 +36,12 @@ jobs:
       - run: npm run build
       # Evita que Jekyll ignore la carpeta _next/ de Next.js.
       - run: touch out/.nojekyll
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Publicar en la branch gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: out
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          publish_branch: gh-pages
+          # No borra lo que ya haya en la branch (p.ej. las carpetas de preview
+          # por PR que publica pr-preview.yml en pr-preview/pr-<n>/).
+          keep_files: true

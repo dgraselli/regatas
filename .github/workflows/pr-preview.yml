@@ -40,6 +40,10 @@ jobs:
       - run: touch out/.nojekyll
         if: github.event.action != 'closed'
 
+      - name: Estampar el SHA en el service worker
+        if: github.event.action != 'closed'
+        run: sed -i "s/__BUILD_MARKER__/${{ github.sha }}/" out/sw.js
+
       - name: Publicar / limpiar el preview
         uses: rossjrw/pr-preview-action@v1
         with:

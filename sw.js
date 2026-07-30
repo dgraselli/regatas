@@ -8,6 +8,13 @@
      podía servir una respuesta de días atrás: React Query la tomaba como fresca y
      el filtro de días pasados del panel descartaba todo → panel en blanco.) */
 
+// CI reemplaza b75a2c0dee9437ff661306c5f7c5ffdc8408c7ab con el SHA del commit (ver deploy.yml y
+// pr-preview.yml) después de `next build`. Sin esto el service worker es
+// byte-idéntico entre deploys que no tocan este archivo, así que el navegador
+// nunca detecta que hay una versión nueva para instalar. No se usa en ninguna
+// lógica de abajo: solo existe para que el contenido del archivo cambie.
+const BUILD = 'b75a2c0dee9437ff661306c5f7c5ffdc8408c7ab';
+
 const CACHE = 'regatas-v4';
 // Rutas relativas al scope del SW: en dev resuelven a la raíz; en GitHub Pages, a /regatas/.
 const SHELL = ['./', './mareas/', './cruce/', './perfil/', './manifest.webmanifest', './icons/icon.svg'];
@@ -33,9 +40,12 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   // Navegación / HTML: network-first (no servir un shell viejo con chunks caducos).
+  // cache: 'no-store' salta la caché HTTP del navegador (no solo la del SW):
+  // sin esto, un index.html con un Cache-Control corto podía volver a
+  // servirse "fresco" desde ahí aunque ya hubiera una versión nueva publicada.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE).then((cache) => cache.put(request, copy));

@@ -21,7 +21,23 @@ ZONAS=(
 )
 
 echo "===== $(date '+%Y-%m-%d %H:%M:%S') captura diaria ====="
-for z in "${ZONAS[@]}"; do
-  read -r lat lon nombre <<<"$z"
-  node scripts/forecast-eval.mjs capture "$lat" "$lon" "$nombre" || echo "FALLO: $nombre"
-done
+
+# El snapshot vale como "lo que el pronóstico decía a la mañana": correrlo de nuevo
+# más tarde lo pisa con datos de la tarde, que para el día +0 ya son casi observación
+# e inflan el acierto. Si ya hay captura de hoy, no se rehace (FORZAR=1 para pisarla).
+HOY="$(date '+%Y-%m-%d')"
+if compgen -G "validation/forecast-${HOY}-*.json" > /dev/null && [ "${FORZAR:-0}" != "1" ]; then
+  echo "Ya hay captura de $HOY; no se rehace (FORZAR=1 para pisarla)."
+else
+  for z in "${ZONAS[@]}"; do
+    read -r lat lon nombre <<<"$z"
+    node scripts/forecast-eval.mjs capture "$lat" "$lon" "$nombre" || echo "FALLO: $nombre"
+  done
+fi
+
+# Observación REAL de visibilidad (METAR de aeropuertos). aviationweather.gov sólo
+# expone 7 días de historia, así que si no se acumula día a día se pierde: esto va
+# armando la serie larga para validar niebla contra dato medido y no contra
+# reanálisis. Es idempotente (no duplica), así que correrlo de más es inofensivo.
+echo "--- METAR (visibilidad observada) ---"
+node scripts/metar-eval.mjs capture || echo "FALLO: captura METAR"

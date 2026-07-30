@@ -11,8 +11,10 @@
  *        días pronosticados despejados que resultaron con niebla real.
  *
  *   node scripts/metar-eval.mjs capture
- *     -> Agrega la observación METAR actual de las 6 zonas a
- *        validation/metar-observado.jsonl (para acumular más allá de la ventana de 7 días).
+ *     -> Acumula la serie HORARIA de METAR de las 6 zonas en
+ *        validation/metar-observado.jsonl, para poder validar niebla más allá de la
+ *        ventana de 7 días que expone aviationweather.gov. Pensado para cron 1×/día
+ *        (lo corre scripts/snapshot-diario.sh). Idempotente: no duplica.
  */
 import { writeFile, readFile, readdir } from 'node:fs/promises';
 import {
@@ -113,6 +115,27 @@ async function report() {
   }
 }
 
+// Ventana que se pide en cada corrida. El cron corre 1×/día, así que con 24 h
+// alcanzaría, pero se pide el máximo nominal (168 h) porque las repetidas se
+// descartan por clave: el único costo es una respuesta HTTP más grande y, a cambio,
+// unos días de máquina apagada no dejan hueco. Los huecos son IRREVERSIBLES: pasada
+// la ventana, aviationweather.gov ya no devuelve esas horas.
+// Medido el 2026-07-30: pidiendo 168 h devuelve ~3-4 días, no 7. O sea que la
+// retención real es menor que la nominal y conviene no saltearse muchos días.
+const CAPTURE_HOURS = 168;
+const OBS_FILE = 'validation/metar-observado.jsonl';
+
+/**
+ * Acumula la serie HORARIA de METAR en un .jsonl, para poder validar niebla más allá
+ * de la ventana de 7 días que expone aviationweather.gov.
+ *
+ * Guarda TODAS las observaciones de la ventana, no la última: la métrica que importa
+ * es la visibilidad MÍNIMA del día, y con una sola muestra diaria no se puede calcular
+ * (la niebla del Plata es de madrugada y se levanta en un par de horas).
+ *
+ * Idempotente: la clave estación+hora ya guardada se saltea, así que se puede correr
+ * de más sin ensuciar el archivo.
+ */
 async function capture() {
   const ZONES = [
     { name: 'Buenos Aires', lat: -34.6, lon: -58.37 },
@@ -124,23 +147,58 @@ async function capture() {
   ];
   const stations = ZONES.map((z) => ({ z, st: nearestMetarStation(z.lat, z.lon) }));
   const icaos = [...new Set(stations.map((s) => s.st.icao))];
-  const raw = await fetchMetarHistory(icaos, 2);
-  const latest = new Map(); // icao -> obs más reciente
-  for (const r of raw) {
-    const o = normalizeMetar(r);
-    const cur = latest.get(r.icaoId);
-    if (!cur || (o.time ?? '') > (cur.time ?? '')) latest.set(r.icaoId, o);
+
+  // Qué hay ya en el archivo, para no repetir.
+  const prev = await readFile(OBS_FILE, 'utf8').catch(() => '');
+  const seen = new Set();
+  for (const line of prev.split('\n')) {
+    if (!line.trim()) continue;
+    try { const o = JSON.parse(line); seen.add(`${o.station}|${o.time}`); } catch { /* línea rota: se ignora */ }
   }
+
+  // Una observación pertenece a la ESTACIÓN, no a la zona: SADF cubre a la vez
+  // San Fernando y Carmelo. Se guarda una fila por estación+hora (con las zonas que
+  // la usan), y quien la lea mapea zona→estación con nearestMetarStation().
+  const zonesOf = new Map(); // icao -> [zonas]
+  for (const { z, st } of stations) zonesOf.set(st.icao, [...(zonesOf.get(st.icao) ?? []), z.name]);
+
+  const raw = await fetchMetarHistory(icaos, CAPTURE_HOURS);
+  const capturedAt = new Date().toISOString();
   const lines = [];
-  for (const { z, st } of stations) {
-    const o = latest.get(st.icao);
-    if (!o) continue;
-    lines.push(JSON.stringify({ capturedAt: new Date().toISOString(), zone: z.name, station: st.icao, distanceKm: st.distanceKm, ...o }));
-    console.log(`  ${z.name.padEnd(12)} ${st.icao} ${o.time ?? ''} vis=${o.visibilityM ?? 's/d'}m ${o.fog ? 'FG' : ''}${o.mist ? 'BR' : ''} spread=${o.spreadC ?? '?'}`);
+  const perStation = new Map(); // icao -> {nuevas, minVis}
+  let dup = 0;
+
+  for (const r of raw) {
+    const icao = r.icaoId;
+    if (!zonesOf.has(icao)) continue;
+    const o = normalizeMetar(r);
+    if (!o.time) continue;
+    const key = `${icao}|${o.time}`;
+    if (seen.has(key)) { dup++; continue; }
+    seen.add(key);
+    lines.push(JSON.stringify({ capturedAt, station: icao, zones: zonesOf.get(icao), ...o }));
+    const a = perStation.get(icao) ?? { nuevas: 0, minVis: null };
+    a.nuevas++;
+    if (o.visibilityM != null && (a.minVis == null || o.visibilityM < a.minVis)) a.minVis = o.visibilityM;
+    perStation.set(icao, a);
   }
-  const prev = await readFile('validation/metar-observado.jsonl', 'utf8').catch(() => '');
-  await writeFile('validation/metar-observado.jsonl', prev + lines.join('\n') + '\n');
-  console.log(`\n${lines.length} observaciones agregadas a validation/metar-observado.jsonl`);
+
+  for (const icao of icaos) {
+    const a = perStation.get(icao) ?? { nuevas: 0, minVis: null };
+    const vis = a.minVis == null ? 's/d' : `${a.minVis}m`;
+    const flag = a.minVis != null && a.minVis <= TH.fogYellowM ? '  ← niebla/neblina' : '';
+    console.log(`  ${icao}  ${String(a.nuevas).padStart(2)} obs nuevas · vis mín ${String(vis).padStart(6)}${flag}   ${zonesOf.get(icao).join(', ')}`);
+  }
+
+  if (!lines.length) {
+    console.log(`\nSin observaciones nuevas (${dup} ya estaban). ${OBS_FILE} sin cambios.`);
+    return;
+  }
+  // El archivo siempre termina en \n, así que se concatena directo.
+  await writeFile(OBS_FILE, prev + lines.join('\n') + '\n');
+  const total = seen.size;
+  console.log(`\n${lines.length} observaciones nuevas (${dup} repetidas salteadas) → ${OBS_FILE}`);
+  console.log(`Total acumulado: ${total} observaciones.`);
 }
 
 const cmd = process.argv[2];

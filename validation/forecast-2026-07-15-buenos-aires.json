@@ -1,0 +1,181 @@
+{
+  "capturedAt": "2026-07-15T09:10:11.143Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-15",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 17,
+        "windDirDominant": 8,
+        "precipTotalMm": 0.2,
+        "visibilityMinM": 7900
+      }
+    },
+    {
+      "date": "2026-07-16",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 21,
+        "windDirDominant": 21,
+        "precipTotalMm": 0,
+        "visibilityMinM": 11820
+      }
+    },
+    {
+      "date": "2026-07-17",
+      "level": "rojo",
+      "reasons": [
+        "Lluvia fuerte (19.6 mm)",
+        "Niebla buena parte del día (mín 200 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 22,
+        "windDirDominant": 27,
+        "precipTotalMm": 19.6,
+        "visibilityMinM": 200
+      }
+    },
+    {
+      "date": "2026-07-18",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.7 mm)",
+        "Niebla varias horas (mín 380 m, 3 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 16,
+        "windDirDominant": 169,
+        "precipTotalMm": 2.7,
+        "visibilityMinM": 380
+      }
+    },
+    {
+      "date": "2026-07-19",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 26,
+        "windDirDominant": 117,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 15640
+      }
+    },
+    {
+      "date": "2026-07-20",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 27,
+        "windDirDominant": 200,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 11200
+      }
+    },
+    {
+      "date": "2026-07-21",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 19,
+        "windDirDominant": 189,
+        "precipTotalMm": 0,
+        "visibilityMinM": 43460
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-15T21:00",
+      "endsAt": "2026-07-15T21:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2860
+    },
+    {
+      "startsAt": "2026-07-17T07:00",
+      "endsAt": "2026-07-17T07:00",
+      "durationH": 1,
+      "severity": 2,
+      "minVisibilityM": 920
+    },
+    {
+      "startsAt": "2026-07-17T10:00",
+      "endsAt": "2026-07-17T10:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3200
+    },
+    {
+      "startsAt": "2026-07-17T12:00",
+      "endsAt": "2026-07-17T13:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2020
+    },
+    {
+      "startsAt": "2026-07-17T17:00",
+      "endsAt": "2026-07-17T21:00",
+      "durationH": 5,
+      "severity": 2,
+      "minVisibilityM": 140
+    },
+    {
+      "startsAt": "2026-07-17T23:00",
+      "endsAt": "2026-07-18T08:00",
+      "durationH": 10,
+      "severity": 2,
+      "minVisibilityM": 380
+    },
+    {
+      "startsAt": "2026-07-18T14:00",
+      "endsAt": "2026-07-18T14:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3080
+    },
+    {
+      "startsAt": "2026-07-20T03:00",
+      "endsAt": "2026-07-20T03:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3820
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "capturedAt": "2026-06-27T10:04:49.151Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "La Plata",
+    "lat": -34.8399,
+    "lon": -57.9234
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-06-27",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 11,
+        "windDirDominant": 352,
+        "precipTotalMm": 0,
+        "visibilityMinM": 34340
+      }
+    },
+    {
+      "date": "2026-06-28",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (4.1 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 203,
+        "precipTotalMm": 4.1,
+        "visibilityMinM": 2860
+      }
+    },
+    {
+      "date": "2026-06-29",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 14,
+        "windDirDominant": 277,
+        "precipTotalMm": 0,
+        "visibilityMinM": 34300
+      }
+    },
+    {
+      "date": "2026-06-30",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 100 m, 6 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 11,
+        "windDirDominant": 56,
+        "precipTotalMm": 0,
+        "visibilityMinM": 100
+      }
+    },
+    {
+      "date": "2026-07-01",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 180 m, 6 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 24,
+        "windDirDominant": 178,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 180
+      }
+    },
+    {
+      "date": "2026-07-02",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 20,
+        "windDirDominant": 194,
+        "precipTotalMm": 0,
+        "visibilityMinM": 43640
+      }
+    },
+    {
+      "date": "2026-07-03",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~2 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 2,
+        "gustPeakKt": 12,
+        "windDirDominant": 145,
+        "precipTotalMm": 0,
+        "visibilityMinM": 47620
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-06-28T13:00",
+      "endsAt": "2026-06-28T13:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2860
+    },
+    {
+      "startsAt": "2026-06-30T04:00",
+      "endsAt": "2026-06-30T12:00",
+      "durationH": 9,
+      "severity": 2,
+      "minVisibilityM": 100
+    },
+    {
+      "startsAt": "2026-07-01T06:00",
+      "endsAt": "2026-07-01T12:00",
+      "durationH": 7,
+      "severity": 2,
+      "minVisibilityM": 180
+    }
+  ]
+}

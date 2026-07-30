@@ -1,0 +1,145 @@
+{
+  "capturedAt": "2026-06-28T13:47:37.817Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-06-28",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (5.9 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 20,
+        "windDirDominant": 209,
+        "precipTotalMm": 5.9,
+        "visibilityMinM": 3340
+      }
+    },
+    {
+      "date": "2026-06-29",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 266,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44540
+      }
+    },
+    {
+      "date": "2026-06-30",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 13,
+        "windDirDominant": 65,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44500
+      }
+    },
+    {
+      "date": "2026-07-01",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)",
+        "Niebla buena parte del día (mín 140 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 27,
+        "windDirDominant": 170,
+        "precipTotalMm": 0,
+        "visibilityMinM": 140
+      }
+    },
+    {
+      "date": "2026-07-02",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 24,
+        "windDirDominant": 188,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48400
+      }
+    },
+    {
+      "date": "2026-07-03",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 116,
+        "precipTotalMm": 0,
+        "visibilityMinM": 22760
+      }
+    },
+    {
+      "date": "2026-07-04",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 16,
+        "windDirDominant": 81,
+        "precipTotalMm": 0,
+        "visibilityMinM": 19440
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-06-28T11:00",
+      "endsAt": "2026-06-28T13:00",
+      "durationH": 3,
+      "severity": 1,
+      "minVisibilityM": 3340
+    },
+    {
+      "startsAt": "2026-07-01T07:00",
+      "endsAt": "2026-07-01T12:00",
+      "durationH": 6,
+      "severity": 2,
+      "minVisibilityM": 140
+    },
+    {
+      "startsAt": "2026-07-01T14:00",
+      "endsAt": "2026-07-01T17:00",
+      "durationH": 4,
+      "severity": 1,
+      "minVisibilityM": 3320
+    }
+  ]
+}

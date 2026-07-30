@@ -1,0 +1,144 @@
+{
+  "capturedAt": "2026-07-08T09:10:10.408Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 18,
+        "windDirDominant": 341,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44420
+      }
+    },
+    {
+      "date": "2026-07-09",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 15,
+        "windDirDominant": 285,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 44380
+      }
+    },
+    {
+      "date": "2026-07-10",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 118,
+        "precipTotalMm": 0,
+        "visibilityMinM": 23820
+      }
+    },
+    {
+      "date": "2026-07-11",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 180 m, 5 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 11,
+        "windDirDominant": 198,
+        "precipTotalMm": 0,
+        "visibilityMinM": 180
+      }
+    },
+    {
+      "date": "2026-07-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 15,
+        "windDirDominant": 202,
+        "precipTotalMm": 0,
+        "visibilityMinM": 19560
+      }
+    },
+    {
+      "date": "2026-07-13",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 180 m, 8 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 16,
+        "windDirDominant": 15,
+        "precipTotalMm": 0,
+        "visibilityMinM": 180
+      }
+    },
+    {
+      "date": "2026-07-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 17,
+        "windDirDominant": 0,
+        "precipTotalMm": 0,
+        "visibilityMinM": 27080
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-11T02:00",
+      "endsAt": "2026-07-11T03:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 1060
+    },
+    {
+      "startsAt": "2026-07-11T05:00",
+      "endsAt": "2026-07-11T11:00",
+      "durationH": 7,
+      "severity": 2,
+      "minVisibilityM": 180
+    },
+    {
+      "startsAt": "2026-07-13T08:00",
+      "endsAt": "2026-07-13T15:00",
+      "durationH": 8,
+      "severity": 2,
+      "minVisibilityM": 180
+    }
+  ]
+}

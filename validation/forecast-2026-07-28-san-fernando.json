@@ -1,0 +1,158 @@
+{
+  "capturedAt": "2026-07-28T09:10:09.128Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-28",
+      "level": "rojo",
+      "reasons": [
+        "Niebla buena parte del día (mín 100 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 21,
+        "windDirDominant": 133,
+        "precipTotalMm": 0,
+        "visibilityMinM": 100
+      }
+    },
+    {
+      "date": "2026-07-29",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 21,
+        "windDirDominant": 118,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38520
+      }
+    },
+    {
+      "date": "2026-07-30",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 21,
+        "windDirDominant": 72,
+        "precipTotalMm": 0,
+        "visibilityMinM": 24760
+      }
+    },
+    {
+      "date": "2026-07-31",
+      "level": "rojo",
+      "reasons": [
+        "Lluvia fuerte (30.2 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 24,
+        "windDirDominant": 37,
+        "precipTotalMm": 30.2,
+        "visibilityMinM": 1740
+      }
+    },
+    {
+      "date": "2026-08-01",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 25,
+        "windDirDominant": 219,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 8760
+      }
+    },
+    {
+      "date": "2026-08-02",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 85,
+        "precipTotalMm": 0,
+        "visibilityMinM": 7740
+      }
+    },
+    {
+      "date": "2026-08-03",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 20,
+        "windDirDominant": 173,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 1200
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-28T03:00",
+      "endsAt": "2026-07-29T00:00",
+      "durationH": 22,
+      "severity": 2,
+      "minVisibilityM": 100
+    },
+    {
+      "startsAt": "2026-07-31T13:00",
+      "endsAt": "2026-07-31T14:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 1740
+    },
+    {
+      "startsAt": "2026-07-31T18:00",
+      "endsAt": "2026-07-31T22:00",
+      "durationH": 5,
+      "severity": 1,
+      "minVisibilityM": 1460
+    },
+    {
+      "startsAt": "2026-08-01T02:00",
+      "endsAt": "2026-08-01T03:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2840
+    },
+    {
+      "startsAt": "2026-08-03T08:00",
+      "endsAt": "2026-08-03T09:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 1200
+    }
+  ]
+}

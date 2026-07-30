@@ -1,0 +1,145 @@
+{
+  "capturedAt": "2026-07-19T09:10:05.531Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-19",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (30 kt)",
+        "Algo de lluvia (6.1 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 15,
+        "gustPeakKt": 30,
+        "windDirDominant": 159,
+        "precipTotalMm": 6.1,
+        "visibilityMinM": 2560
+      }
+    },
+    {
+      "date": "2026-07-20",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (30 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 14,
+        "gustPeakKt": 30,
+        "windDirDominant": 137,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 10500
+      }
+    },
+    {
+      "date": "2026-07-21",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 13,
+        "gustPeakKt": 26,
+        "windDirDominant": 127,
+        "precipTotalMm": 0,
+        "visibilityMinM": 13900
+      }
+    },
+    {
+      "date": "2026-07-22",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 21,
+        "windDirDominant": 134,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 15660
+      }
+    },
+    {
+      "date": "2026-07-23",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 140 m, 3 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 16,
+        "windDirDominant": 67,
+        "precipTotalMm": 0,
+        "visibilityMinM": 140
+      }
+    },
+    {
+      "date": "2026-07-24",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 17,
+        "windDirDominant": 27,
+        "precipTotalMm": 0,
+        "visibilityMinM": 22960
+      }
+    },
+    {
+      "date": "2026-07-25",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 6,
+        "precipTotalMm": 0,
+        "visibilityMinM": 16820
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-19T08:00",
+      "endsAt": "2026-07-19T08:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2560
+    },
+    {
+      "startsAt": "2026-07-23T03:00",
+      "endsAt": "2026-07-23T09:00",
+      "durationH": 7,
+      "severity": 2,
+      "minVisibilityM": 140
+    },
+    {
+      "startsAt": "2026-07-25T21:00",
+      "endsAt": "2026-07-25T21:00",
+      "durationH": 1,
+      "severity": 2,
+      "minVisibilityM": 400
+    }
+  ]
+}

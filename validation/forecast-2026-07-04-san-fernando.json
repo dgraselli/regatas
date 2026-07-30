@@ -1,0 +1,137 @@
+{
+  "capturedAt": "2026-07-04T09:10:12.090Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-04",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 18,
+        "windDirDominant": 90,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 1360
+      }
+    },
+    {
+      "date": "2026-07-05",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.6 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 14,
+        "windDirDominant": 116,
+        "precipTotalMm": 2.6,
+        "visibilityMinM": 4580
+      }
+    },
+    {
+      "date": "2026-07-06",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 140 m, 5 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 17,
+        "windDirDominant": 277,
+        "precipTotalMm": 0,
+        "visibilityMinM": 140
+      }
+    },
+    {
+      "date": "2026-07-07",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 312,
+        "precipTotalMm": 0,
+        "visibilityMinM": 25940
+      }
+    },
+    {
+      "date": "2026-07-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 15,
+        "windDirDominant": 327,
+        "precipTotalMm": 0,
+        "visibilityMinM": 40220
+      }
+    },
+    {
+      "date": "2026-07-09",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 13,
+        "windDirDominant": 337,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48280
+      }
+    },
+    {
+      "date": "2026-07-10",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 9,
+        "windDirDominant": 216,
+        "precipTotalMm": 0,
+        "visibilityMinM": 35160
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-04T11:00",
+      "endsAt": "2026-07-04T13:00",
+      "durationH": 3,
+      "severity": 1,
+      "minVisibilityM": 1360
+    },
+    {
+      "startsAt": "2026-07-06T03:00",
+      "endsAt": "2026-07-06T11:00",
+      "durationH": 9,
+      "severity": 2,
+      "minVisibilityM": 140
+    }
+  ]
+}

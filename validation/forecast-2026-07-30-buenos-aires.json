@@ -1,0 +1,166 @@
+{
+  "capturedAt": "2026-07-30T09:10:03.281Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-30",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 21,
+        "windDirDominant": 68,
+        "precipTotalMm": 0,
+        "visibilityMinM": 33220
+      }
+    },
+    {
+      "date": "2026-07-31",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)",
+        "Lluvia fuerte (27.2 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 25,
+        "windDirDominant": 36,
+        "precipTotalMm": 27.2,
+        "visibilityMinM": 2160
+      }
+    },
+    {
+      "date": "2026-08-01",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 26,
+        "windDirDominant": 202,
+        "precipTotalMm": 0.2,
+        "visibilityMinM": 15820
+      }
+    },
+    {
+      "date": "2026-08-02",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 420 m, 3 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 23,
+        "windDirDominant": 74,
+        "precipTotalMm": 0,
+        "visibilityMinM": 420
+      }
+    },
+    {
+      "date": "2026-08-03",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 160,
+        "precipTotalMm": 0,
+        "visibilityMinM": 24440
+      }
+    },
+    {
+      "date": "2026-08-04",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 17,
+        "windDirDominant": 89,
+        "precipTotalMm": 0,
+        "visibilityMinM": 1080
+      }
+    },
+    {
+      "date": "2026-08-05",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (5.5 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 16,
+        "windDirDominant": 107,
+        "precipTotalMm": 5.5,
+        "visibilityMinM": 13780
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-31T12:00",
+      "endsAt": "2026-07-31T13:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2160
+    },
+    {
+      "startsAt": "2026-07-31T15:00",
+      "endsAt": "2026-07-31T15:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3400
+    },
+    {
+      "startsAt": "2026-07-31T18:00",
+      "endsAt": "2026-08-01T01:00",
+      "durationH": 8,
+      "severity": 1,
+      "minVisibilityM": 1420
+    },
+    {
+      "startsAt": "2026-08-02T09:00",
+      "endsAt": "2026-08-02T11:00",
+      "durationH": 3,
+      "severity": 2,
+      "minVisibilityM": 420
+    },
+    {
+      "startsAt": "2026-08-04T12:00",
+      "endsAt": "2026-08-04T13:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 1080
+    },
+    {
+      "startsAt": "2026-08-04T18:00",
+      "endsAt": "2026-08-04T18:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3900
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+{
+  "capturedAt": "2026-07-07T09:10:04.540Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-07",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 12,
+        "windDirDominant": 327,
+        "precipTotalMm": 0,
+        "visibilityMinM": 39960
+      }
+    },
+    {
+      "date": "2026-07-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 13,
+        "windDirDominant": 352,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44140
+      }
+    },
+    {
+      "date": "2026-07-09",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 10,
+        "windDirDominant": 332,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44120
+      }
+    },
+    {
+      "date": "2026-07-10",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 12,
+        "windDirDominant": 149,
+        "precipTotalMm": 0,
+        "visibilityMinM": 24800
+      }
+    },
+    {
+      "date": "2026-07-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 16,
+        "windDirDominant": 162,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 24700
+      }
+    },
+    {
+      "date": "2026-07-12",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 8,
+        "windDirDominant": 151,
+        "precipTotalMm": 0,
+        "visibilityMinM": 2640
+      }
+    },
+    {
+      "date": "2026-07-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 17,
+        "windDirDominant": 10,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38080
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-12T09:00",
+      "endsAt": "2026-07-12T09:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2640
+    }
+  ]
+}

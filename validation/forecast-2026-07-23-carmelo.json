@@ -1,0 +1,144 @@
+{
+  "capturedAt": "2026-07-23T09:10:04.414Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-23",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 11,
+        "windDirDominant": 58,
+        "precipTotalMm": 0,
+        "visibilityMinM": 20960
+      }
+    },
+    {
+      "date": "2026-07-24",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 9,
+        "windDirDominant": 4,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 14280
+      }
+    },
+    {
+      "date": "2026-07-25",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 500 m, 4 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 9,
+        "windDirDominant": 35,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 500
+      }
+    },
+    {
+      "date": "2026-07-26",
+      "level": "rojo",
+      "reasons": [
+        "Niebla buena parte del día (mín 180 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 5,
+        "windDirDominant": 132,
+        "precipTotalMm": 0,
+        "visibilityMinM": 180
+      }
+    },
+    {
+      "date": "2026-07-27",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 9,
+        "windDirDominant": 5,
+        "precipTotalMm": 0,
+        "visibilityMinM": 27660
+      }
+    },
+    {
+      "date": "2026-07-28",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 220 m, 9 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 18,
+        "windDirDominant": 147,
+        "precipTotalMm": 1.2,
+        "visibilityMinM": 220
+      }
+    },
+    {
+      "date": "2026-07-29",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~10 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 19,
+        "windDirDominant": 140,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38260
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-25T09:00",
+      "endsAt": "2026-07-25T12:00",
+      "durationH": 4,
+      "severity": 2,
+      "minVisibilityM": 500
+    },
+    {
+      "startsAt": "2026-07-26T06:00",
+      "endsAt": "2026-07-26T21:00",
+      "durationH": 16,
+      "severity": 2,
+      "minVisibilityM": 180
+    },
+    {
+      "startsAt": "2026-07-27T23:00",
+      "endsAt": "2026-07-28T15:00",
+      "durationH": 17,
+      "severity": 2,
+      "minVisibilityM": 200
+    }
+  ]
+}

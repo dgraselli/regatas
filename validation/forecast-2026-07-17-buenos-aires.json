@@ -1,0 +1,183 @@
+{
+  "capturedAt": "2026-07-17T09:10:02.983Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-17",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)",
+        "Algo de lluvia (9.2 mm)",
+        "Niebla buena parte del día (mín 200 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 27,
+        "windDirDominant": 338,
+        "precipTotalMm": 9.2,
+        "visibilityMinM": 200
+      }
+    },
+    {
+      "date": "2026-07-18",
+      "level": "rojo",
+      "reasons": [
+        "Algo de lluvia (9.4 mm)",
+        "Niebla buena parte del día (mín 860 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 126,
+        "precipTotalMm": 9.4,
+        "visibilityMinM": 860
+      }
+    },
+    {
+      "date": "2026-07-19",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 22,
+        "windDirDominant": 154,
+        "precipTotalMm": 0,
+        "visibilityMinM": 16580
+      }
+    },
+    {
+      "date": "2026-07-20",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)",
+        "Algo de lluvia (8.9 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 26,
+        "windDirDominant": 148,
+        "precipTotalMm": 8.9,
+        "visibilityMinM": 2580
+      }
+    },
+    {
+      "date": "2026-07-21",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 179,
+        "precipTotalMm": 0,
+        "visibilityMinM": 29720
+      }
+    },
+    {
+      "date": "2026-07-22",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 24,
+        "windDirDominant": 97,
+        "precipTotalMm": 0,
+        "visibilityMinM": 21520
+      }
+    },
+    {
+      "date": "2026-07-23",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 14,
+        "windDirDominant": 167,
+        "precipTotalMm": 1.8,
+        "visibilityMinM": 11060
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-17T07:00",
+      "endsAt": "2026-07-17T07:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 1460
+    },
+    {
+      "startsAt": "2026-07-17T10:00",
+      "endsAt": "2026-07-17T10:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3860
+    },
+    {
+      "startsAt": "2026-07-17T12:00",
+      "endsAt": "2026-07-17T12:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3320
+    },
+    {
+      "startsAt": "2026-07-17T16:00",
+      "endsAt": "2026-07-17T17:00",
+      "durationH": 2,
+      "severity": 2,
+      "minVisibilityM": 200
+    },
+    {
+      "startsAt": "2026-07-18T03:00",
+      "endsAt": "2026-07-18T09:00",
+      "durationH": 7,
+      "severity": 2,
+      "minVisibilityM": 300
+    },
+    {
+      "startsAt": "2026-07-18T17:00",
+      "endsAt": "2026-07-18T18:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2220
+    },
+    {
+      "startsAt": "2026-07-20T10:00",
+      "endsAt": "2026-07-20T11:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2580
+    },
+    {
+      "startsAt": "2026-07-20T14:00",
+      "endsAt": "2026-07-20T14:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2600
+    }
+  ]
+}

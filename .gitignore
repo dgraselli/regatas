@@ -28,3 +28,15 @@ next-env.d.ts
 
 # testing
 /coverage
+
+# Scratch local: atajos y notas propias, no son del proyecto.
+/run.sh
+/run_mock.sh
+/pendiente.txt
+/validar_pronostico.txt
+/validation/snapshot.log
+
+# Nota: validation/*.json SÍ se versiona. Son capturas históricas del pronóstico y
+# NO se pueden regenerar (Open-Meteo no devuelve el pronóstico que emitió tal día);
+# si se pierden hay que volver a acumular desde cero. El dashboard derivado de ellas
+# vive en public/validacion/index.html (se publica con el sitio).

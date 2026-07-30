@@ -55,6 +55,27 @@ reconstruir.
 - `src/lib/profile/` — perfil del usuario en localStorage.
 - `src/lib/services/` — borde de red (Open-Meteo / INA) + mocks.
 - `src/lib/config/` — umbrales del semáforo y construcción de rutas/polar.
+- `scripts/` — **ops de validación, no son parte de la app** (Node suelto, sin build):
+  `snapshot-diario.sh` (cron 6:10, captura las 6 zonas), `forecast-report.mjs` (reporte
+  agregado, lo principal), `forecast-dashboard.mjs`, `forecast-eval.mjs`, `metar-eval.mjs`.
+  El dominio replicado vive en `scripts/lib/forecast-domain.mjs` (**una sola copia**: no
+  volver a duplicar los umbrales dentro de cada script). Guía de uso: `validar_pronostico.txt`.
+
+## Validación del pronóstico
+
+`validation/forecast-<fecha>-<zona>.json` son **capturas históricas irrepetibles** (Open-Meteo
+no devuelve el pronóstico que emitió tal día) → **se versionan**, no se gitignorean.
+
+El **semáforo se mide con tres varas** porque una sola engaña: el nivel es un `max` sobre 5
+umbrales y `poco-viento` no es una severidad sino una anotación para vela.
+**Decisión** (seguro vs peligroso; la métrica de producto) · **Severidad** (fusiona verde y
+poco-viento) · **Exacto** (las 4 clases; la más dura). Al 2026-07-30: 77% / 68% / 59%, con
+18% de fallos peligrosos cuya causa dominante es la **niebla** (29 de 31 rojos perdidos).
+
+El dashboard se genera en **`public/validacion/index.html`**, o sea dentro del sitio: el
+export lo publica en **regatas.com.ar/validacion/**. Lleva `noindex` (es página de ops). El
+cron actualiza los snapshots pero **no** la página: para refrescar lo publicado hay que
+regenerar y commitear.
 
 ## Features actuales (resumen)
 

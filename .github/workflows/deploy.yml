@@ -36,6 +36,10 @@ jobs:
       - run: npm run build
       # Evita que Jekyll ignore la carpeta _next/ de Next.js.
       - run: touch out/.nojekyll
+      # Estampa el SHA en el service worker: sin esto, un deploy que no toca
+      # sw.js queda byte-idéntico al anterior y el navegador nunca detecta que
+      # hay una versión nueva (ver useServiceWorkerUpdate / UpdateBanner).
+      - run: sed -i "s/__BUILD_MARKER__/${{ github.sha }}/" out/sw.js
       - name: Publicar en la branch gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

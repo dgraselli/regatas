@@ -4,6 +4,7 @@ import { Providers } from './providers';
 import { NavBar } from '@/components/common/NavBar';
 import { BetaBanner } from '@/components/common/BetaBanner';
 import { MockBanner } from '@/components/common/MockBanner';
+import { UpdateBanner } from '@/components/common/UpdateBanner';
 import { Analytics } from '@/components/common/Analytics';
 import { FeedbackButton } from '@/components/common/FeedbackButton';
 import { WelcomeModal } from '@/components/common/WelcomeModal';
@@ -101,6 +102,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Bienvenida de primer uso (se muestra una sola vez) */}
           <WelcomeModal />
           <div className="min-h-screen flex flex-col">
+            {/* Versión nueva publicada mientras la app ya estaba abierta */}
+            <UpdateBanner />
             {/* TEMPORAL — quitar al salir de etapa de pruebas. Va arriba de todo. */}
             <BetaBanner />
             <NavBar />

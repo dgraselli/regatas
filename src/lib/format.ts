@@ -75,6 +75,15 @@ export function nowInTz(timezone: string, now: Date = new Date()): string {
   return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`;
 }
 
+/** 'hace X min'/'hace X h' a partir de un timestamp ISO. Sin dato o futuro → 'ahora'. */
+export function ageLabel(iso?: string): string {
+  if (!iso) return '';
+  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (min < 0) return 'ahora';
+  if (min < 60) return `hace ${min} min`;
+  return `hace ${Math.round(min / 60)} h`;
+}
+
 /** Horas decimales → 'Xh YYmin'. */
 export function formatDuration(hours: number): string {
   const h = Math.floor(hours);

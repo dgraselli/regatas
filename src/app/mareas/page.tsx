@@ -54,7 +54,12 @@ export default function MareasPage() {
           {water.isError && <ErrorState />}
           {water.data &&
             (water.data.observations.length > 0 ? (
-              <WaterLevelGauge status={water.data} />
+              <WaterLevelGauge
+                status={water.data}
+                fetchedAt={
+                  water.dataUpdatedAt ? new Date(water.dataUpdatedAt).toISOString() : undefined
+                }
+              />
             ) : (
               <p className="text-sm text-slate-500">
                 Sin datos recientes de la estación más cercana.

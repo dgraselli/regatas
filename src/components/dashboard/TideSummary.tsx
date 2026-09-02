@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
-import { formatDate, formatHour } from '@/lib/format';
+import { formatDate, formatHour, ageLabel } from '@/lib/format';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'subiendo', arrow: '↑', color: 'text-orange-600' },
@@ -104,7 +104,9 @@ export function TideSummary({
               {TREND[status!.trend].arrow} {TREND[status!.trend].label}
             </span>
           </div>
-          <span className="text-xs text-slate-400">{status!.stationName} · observado</span>
+          <span className="text-xs text-slate-400">
+            {status!.stationName} · observado {ageLabel(last.time)}
+          </span>
         </div>
       )}
 

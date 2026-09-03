@@ -36,14 +36,17 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
 
   return (
     <div>
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <span className="text-3xl font-semibold text-slate-800">{last.heightM.toFixed(2)} m</span>
           <span className={`ml-2 font-medium ${t.color}`}>
             {t.arrow} {t.label}
           </span>
         </div>
-        <span className="text-xs text-slate-400">{status.stationName}</span>
+        <div className="flex flex-col items-end text-xs text-slate-400">
+          <span>{status.stationName}</span>
+          <span>Observado {ageLabel(last.time)}</span>
+        </div>
       </div>
       <svg width={w} height={h + 6} className="mt-3 max-w-full">
         {/* Eje Y: líneas guía y rótulo de nivel (m) para máx / medio / mín */}
@@ -64,7 +67,6 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
         <span>{formatHour(obs[0].time)}</span>
         <span>últimas {obs.length} h · {formatHour(last.time)}</span>
       </div>
-      <p className="text-xs text-slate-400 mt-1">Observado {ageLabel(last.time)}</p>
     </div>
   );
 }

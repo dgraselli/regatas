@@ -94,7 +94,7 @@ export function TideSummary({
       className="block rounded-lg border border-slate-200 bg-white px-4 py-3 transition hover:border-mar-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-mar-400"
     >
       {last && (
-        <div className="flex items-baseline justify-between gap-2 flex-wrap">
+        <div className="flex items-start justify-between gap-2 flex-wrap">
           <div className="flex items-baseline gap-2">
             <span className="text-slate-700">🌊 Marea</span>
             <span className="text-xl font-semibold text-slate-800">
@@ -104,9 +104,10 @@ export function TideSummary({
               {TREND[status!.trend].arrow} {TREND[status!.trend].label}
             </span>
           </div>
-          <span className="text-xs text-slate-400">
-            {status!.stationName} · observado {ageLabel(last.time)}
-          </span>
+          <div className="flex flex-col items-end text-xs text-slate-400">
+            <span>{status!.stationName}</span>
+            <span>observado {ageLabel(last.time)}</span>
+          </div>
         </div>
       )}
 

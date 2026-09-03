@@ -1,8 +1,7 @@
 'use client';
 
 import type { WaterLevelStatus } from '@/lib/types/water';
-import { formatHour } from '@/lib/format';
-import { useFreshness } from '@/lib/hooks/useFreshness';
+import { formatHour, ageLabel } from '@/lib/format';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
@@ -10,15 +9,7 @@ const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; c
   estable: { label: 'Estable', arrow: '→', color: 'text-slate-500' },
 };
 
-export function WaterLevelGauge({
-  status,
-  fetchedAt,
-}: {
-  status: WaterLevelStatus;
-  /** Cuándo se consultó esta lectura (ISO), para mostrar "Consultado hace X". */
-  fetchedAt?: string;
-}) {
-  const freshness = useFreshness(fetchedAt);
+export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
   if (obs.length === 0) return null;
   const last = obs[obs.length - 1];
@@ -73,11 +64,7 @@ export function WaterLevelGauge({
         <span>{formatHour(obs[0].time)}</span>
         <span>últimas {obs.length} h · {formatHour(last.time)}</span>
       </div>
-      {freshness && (
-        <p className="text-xs text-slate-400 mt-1" title={freshness.absLabel}>
-          Consultado {freshness.agoLabel}
-        </p>
-      )}
+      <p className="text-xs text-slate-400 mt-1">Observado {ageLabel(last.time)}</p>
     </div>
   );
 }

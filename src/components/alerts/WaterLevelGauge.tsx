@@ -1,7 +1,7 @@
 'use client';
 
 import type { WaterLevelStatus } from '@/lib/types/water';
-import { formatHour, ageLabel } from '@/lib/format';
+import { formatHour, ageLabel, isStale } from '@/lib/format';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
@@ -9,11 +9,15 @@ const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; c
   estable: { label: 'Estable', arrow: '→', color: 'text-slate-500' },
 };
 
+/** A partir de acá, la última observación se marca como posible corte de la estación. */
+const STALE_MS = 60 * 60 * 1000; // 1 h
+
 export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
   if (obs.length === 0) return null;
   const last = obs[obs.length - 1];
   const t = TREND[status.trend];
+  const stale = isStale(last.time, STALE_MS);
 
   const heights = obs.map((o) => o.heightM);
   const min = Math.min(...heights);
@@ -43,9 +47,11 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
             {t.arrow} {t.label}
           </span>
         </div>
-        <div className="flex flex-col items-end text-xs text-slate-400">
-          <span>{status.stationName}</span>
-          <span>Observado {ageLabel(last.time)}</span>
+        <div className="flex flex-col items-end text-xs">
+          <span className="text-slate-400">{status.stationName}</span>
+          <span className={stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
+            {stale && '⚠️ '}Observado {ageLabel(last.time)}
+          </span>
         </div>
       </div>
       <svg width={w} height={h + 6} className="mt-3 max-w-full">

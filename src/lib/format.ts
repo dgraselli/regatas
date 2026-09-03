@@ -84,6 +84,11 @@ export function ageLabel(iso?: string): string {
   return `hace ${Math.round(min / 60)} h`;
 }
 
+/** True si el timestamp ISO tiene más de `thresholdMs` de antigüedad. */
+export function isStale(iso: string, thresholdMs: number): boolean {
+  return Date.now() - new Date(iso).getTime() > thresholdMs;
+}
+
 /** Horas decimales → 'Xh YYmin'. */
 export function formatDuration(hours: number): string {
   const h = Math.floor(hours);

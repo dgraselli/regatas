@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
-import { formatDate, formatHour, ageLabel } from '@/lib/format';
+import { formatDate, formatHour, ageLabel, isStale } from '@/lib/format';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'subiendo', arrow: '↑', color: 'text-orange-600' },
   bajando: { label: 'bajando', arrow: '↓', color: 'text-mar-600' },
   estable: { label: 'estable', arrow: '→', color: 'text-slate-500' },
 };
+
+/** A partir de acá, la última observación se marca como posible corte de la estación. */
+const STALE_MS = 60 * 60 * 1000; // 1 h
 
 function windowLabel(a: SurgeAlert): string {
   const sameDay = a.startsAt.slice(0, 10) === a.endsAt.slice(0, 10);
@@ -81,6 +84,7 @@ export function TideSummary({
 }) {
   const obs = status?.observations ?? [];
   const last = obs[obs.length - 1];
+  const stale = !!last && isStale(last.time, STALE_MS);
   // Evento más severo primero.
   const events = [...surge].sort((a, b) => b.severity - a.severity);
   const levelNote = assessLevel(status, last?.heightM, safeMinM, safeMaxM);
@@ -104,9 +108,11 @@ export function TideSummary({
               {TREND[status!.trend].arrow} {TREND[status!.trend].label}
             </span>
           </div>
-          <div className="flex flex-col items-end text-xs text-slate-400">
-            <span>{status!.stationName}</span>
-            <span>observado {ageLabel(last.time)}</span>
+          <div className="flex flex-col items-end text-xs">
+            <span className="text-slate-400">{status!.stationName}</span>
+            <span className={stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
+              {stale && '⚠️ '}observado {ageLabel(last.time)}
+            </span>
           </div>
         </div>
       )}

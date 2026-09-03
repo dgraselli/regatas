@@ -1,8 +1,7 @@
 'use client';
 
 import type { WaterLevelStatus } from '@/lib/types/water';
-import { formatHour } from '@/lib/format';
-import { useFreshness } from '@/lib/hooks/useFreshness';
+import { formatHour, ageLabel } from '@/lib/format';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
@@ -10,15 +9,7 @@ const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; c
   estable: { label: 'Estable', arrow: '→', color: 'text-slate-500' },
 };
 
-export function WaterLevelGauge({
-  status,
-  fetchedAt,
-}: {
-  status: WaterLevelStatus;
-  /** Cuándo se consultó esta lectura (ISO), para mostrar "Consultado hace X". */
-  fetchedAt?: string;
-}) {
-  const freshness = useFreshness(fetchedAt);
+export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
   if (obs.length === 0) return null;
   const last = obs[obs.length - 1];
@@ -45,14 +36,17 @@ export function WaterLevelGauge({
 
   return (
     <div>
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <span className="text-3xl font-semibold text-slate-800">{last.heightM.toFixed(2)} m</span>
           <span className={`ml-2 font-medium ${t.color}`}>
             {t.arrow} {t.label}
           </span>
         </div>
-        <span className="text-xs text-slate-400">{status.stationName}</span>
+        <div className="flex flex-col items-end text-xs text-slate-400">
+          <span>{status.stationName}</span>
+          <span>Observado {ageLabel(last.time)}</span>
+        </div>
       </div>
       <svg width={w} height={h + 6} className="mt-3 max-w-full">
         {/* Eje Y: líneas guía y rótulo de nivel (m) para máx / medio / mín */}
@@ -73,11 +67,6 @@ export function WaterLevelGauge({
         <span>{formatHour(obs[0].time)}</span>
         <span>últimas {obs.length} h · {formatHour(last.time)}</span>
       </div>
-      {freshness && (
-        <p className="text-xs text-slate-400 mt-1" title={freshness.absLabel}>
-          Consultado {freshness.agoLabel}
-        </p>
-      )}
     </div>
   );
 }

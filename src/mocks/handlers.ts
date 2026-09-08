@@ -4,7 +4,7 @@ import type {
   WaterLevelResponse,
 } from '@/lib/services/schemas';
 import type { MetarRaw } from '@/lib/domain/metar';
-import { nowInTz } from '@/lib/format';
+import { nowInTz, todayInTz } from '@/lib/format';
 import { TIMEZONE } from '@/lib/profile/defaults';
 
 /**
@@ -22,9 +22,14 @@ const DAYS = 7; // = PATTERN.length
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+/**
+ * Medianoche de HOY en hora del club. Va por la fecha local y no por la UTC
+ * porque estos timestamps se leen como hora local: con `getUTCDate()` la serie
+ * arrancaba "mañana" a partir de las 21, y el día en curso quedaba sin cubrir
+ * (en el preview con mocks, la ventana de marea desaparecía de noche).
+ */
 function startMidnightToday(): Date {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return new Date(`${todayInTz(TIMEZONE)}T00:00:00Z`);
 }
 
 function isoLocal(base: Date, hourOffset: number): string {

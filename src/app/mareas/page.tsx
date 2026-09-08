@@ -5,17 +5,29 @@ import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
+import { TideWindowChart } from '@/components/alerts/TideWindowChart';
 import { MetodologiaInfo } from '@/components/alerts/MetodologiaInfo';
 import { LocationPicker } from '@/components/common/LocationPicker';
 import { StaleForecastNotice } from '@/components/common/StaleForecastNotice';
 import { Onboarding } from '@/components/common/Onboarding';
 import { Card, CardHeader } from '@/components/ui/Card';
 import { Loading, ErrorState } from '@/components/ui/States';
+import { useNowInTz } from '@/lib/hooks/useNow';
+import { buildTideWindow } from '@/lib/domain/tideWindow';
+import { TIMEZONE } from '@/lib/profile/defaults';
+import { formatHour } from '@/lib/format';
 
 export default function MareasPage() {
   const { profile, hydrated, activeLocation, setActiveLocation } = useProfile();
   const forecast = useForecast(activeLocation, profile.caution, profile.lowWindKt);
   const water = useWaterLevel(activeLocation);
+  const now = useNowInTz(activeLocation?.timezone ?? TIMEZONE);
+  const win = buildTideWindow(
+    water.data?.observations ?? [],
+    forecast.data?.bundle.hourly ?? [],
+    now,
+    { safeMinM: activeLocation?.safeLevelMinM, safeMaxM: activeLocation?.safeLevelMaxM },
+  );
 
   if (!hydrated) return <Loading />;
   if (!activeLocation) {
@@ -62,6 +74,45 @@ export default function MareasPage() {
             ))}
         </div>
       </Card>
+
+      {win.points.length > 1 && (
+        <Card>
+          <CardHeader
+            title="Próximas horas"
+            subtitle="Nivel estimado hasta 12 h, anclado a la última medición del mareógrafo"
+          />
+          <div className="px-4 pb-4 pt-3">
+            {win.unsafe.length > 0 ? (
+              <ul className="mb-3 space-y-1 text-sm">
+                {win.unsafe.map((s, i) => (
+                  <li key={i} className={s.kind === 'bajo' ? 'text-mar-700' : 'text-orange-800'}>
+                    ⚠️ <strong>{s.kind === 'bajo' ? 'Poca agua' : 'Agua alta'}</strong> desde las{' '}
+                    {formatHour(s.startsAt)}{' '}
+                    {s.endsAt ? `hasta las ${formatHour(s.endsAt)}` : 'y sigue así'}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              activeLocation.safeLevelMinM != null || activeLocation.safeLevelMaxM != null ? (
+                <p className="mb-3 text-sm text-emerald-700">
+                  ✓ El nivel se mantiene dentro de tu rango seguro las próximas 12 h.
+                </p>
+              ) : (
+                <p className="mb-3 text-sm text-slate-500">
+                  Definí los niveles seguros de tu amarra en Perfil para que te avise hasta qué hora
+                  podés salir.
+                </p>
+              )
+            )}
+            <TideWindowChart
+              win={win}
+              now={now}
+              safeMinM={activeLocation.safeLevelMinM}
+              safeMaxM={activeLocation.safeLevelMaxM}
+            />
+          </div>
+        </Card>
+      )}
 
       {forecast.isLoading && <Loading />}
       {forecast.isError && !forecast.data && (

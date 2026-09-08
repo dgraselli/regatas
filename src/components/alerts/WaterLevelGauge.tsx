@@ -2,6 +2,7 @@
 
 import type { WaterLevelStatus } from '@/lib/types/water';
 import { formatHour } from '@/lib/format';
+import { useObservationAge } from '@/lib/hooks/useFreshness';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
@@ -11,8 +12,10 @@ const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; c
 
 export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
-  if (obs.length === 0) return null;
   const last = obs[obs.length - 1];
+  // Hace cuánto MIDIÓ el mareógrafo, no hace cuánto lo bajamos nosotros.
+  const age = useObservationAge(last?.time);
+  if (obs.length === 0) return null;
   const t = TREND[status.trend];
 
   const heights = obs.map((o) => o.heightM);
@@ -62,8 +65,20 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
       </svg>
       <div className="flex justify-between text-xs text-slate-400" style={{ paddingLeft: padLeft }}>
         <span>{formatHour(obs[0].time)}</span>
-        <span>últimas {obs.length} h · {formatHour(last.time)}</span>
+        <span>
+          últimas {obs.length} h · {formatHour(last.time)}
+          {age && ` (${age.agoLabel})`}
+        </span>
       </div>
+
+      {age?.stale && (
+        <p className="mt-2 text-sm text-amber-700">
+          ⚠️ La estación no reporta {age.agoLabel.replace('hace', 'desde hace')}.{' '}
+          {age.severe
+            ? 'Probablemente esté caída: tomá el nivel como referencia vieja.'
+            : 'Es más de lo habitual (el INA publica con ~1 h de atraso).'}
+        </p>
+      )}
     </div>
   );
 }

@@ -14,8 +14,10 @@ const STALE_MS = 60 * 60 * 1000; // 1 h
 
 export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
-  if (obs.length === 0) return null;
   const last = obs[obs.length - 1];
+  // Hace cuánto MIDIÓ el mareógrafo, no hace cuánto lo bajamos nosotros.
+  const age = useObservationAge(last?.time);
+  if (obs.length === 0) return null;
   const t = TREND[status.trend];
   const stale = isStale(last.time, STALE_MS);
 
@@ -71,8 +73,20 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
       </svg>
       <div className="flex justify-between text-xs text-slate-400" style={{ paddingLeft: padLeft }}>
         <span>{formatHour(obs[0].time)}</span>
-        <span>últimas {obs.length} h · {formatHour(last.time)}</span>
+        <span>
+          últimas {obs.length} h · {formatHour(last.time)}
+          {age && ` (${age.agoLabel})`}
+        </span>
       </div>
+
+      {age?.stale && (
+        <p className="mt-2 text-sm text-amber-700">
+          ⚠️ La estación no reporta {age.agoLabel.replace('hace', 'desde hace')}.{' '}
+          {age.severe
+            ? 'Probablemente esté caída: tomá el nivel como referencia vieja.'
+            : 'Es más de lo habitual (el INA publica con ~1 h de atraso).'}
+        </p>
+      )}
     </div>
   );
 }

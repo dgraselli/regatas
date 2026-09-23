@@ -17,11 +17,19 @@ import { TIMEZONE } from '@/lib/profile/defaults';
  */
 const BASE = 'https://alerta.ina.gob.ar/a5/obs/puntual/series';
 
-const dayWindow = (days: number) => {
-  const end = new Date();
-  const start = new Date(end.getTime() - days * 24 * 60 * 60 * 1000);
-  const iso = (d: Date) => d.toISOString().slice(0, 10);
-  return { start: iso(start), end: iso(end) };
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Ventana de consulta del endpoint a5, en fechas sin hora.
+ *
+ * El INA interpreta una fecha pelada como MEDIANOCHE (hora argentina), así que
+ * pedir `timeend=hoy` recorta todo el día en curso: la app mostraba el último
+ * nivel de anoche y parecía que la estación llevaba medio día sin reportar. Por
+ * eso el fin va a mañana, no a hoy.
+ */
+export const dayWindow = (days: number, now: number = Date.now()) => {
+  const iso = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+  return { start: iso(now - days * DAY_MS), end: iso(now + DAY_MS) };
 };
 
 export async function fetchWaterLevel(

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { todayInTz, nowInTz } from '@/lib/format';
+import { todayInTz, nowInTz, minutesSince } from '@/lib/format';
 
 const TZ = 'America/Argentina/Buenos_Aires';
 
@@ -49,5 +49,31 @@ describe('nowInTz', () => {
     const value = nowInTz(TZ, now);
     expect(value.slice(0, 10)).toBe(todayInTz(TZ, now));
     expect(value).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/);
+  });
+});
+
+describe('minutesSince', () => {
+  // El nivel del INA llega como texto naive en hora argentina: '2026-09-03T17:45'.
+  const now = new Date('2026-09-03T22:43:00Z'); // = 19:43 en Buenos Aires
+
+  it('mide la antigüedad de una observación naive contra el ahora de esa zona', () => {
+    expect(minutesSince('2026-09-03T17:45', TZ, now)).toBe(118);
+  });
+
+  it('no depende de la zona horaria del dispositivo', () => {
+    // El mismo instante, expresado en otra zona: el desfasaje se cancela porque
+    // el "ahora" también se convierte. Con `new Date(iso)` esto daría 3 h de más.
+    const enMontevideo = minutesSince('2026-09-03T17:45', TZ, now);
+    const enUTC = minutesSince('2026-09-03T20:45', 'UTC', now);
+    expect(enMontevideo).toBe(enUTC);
+  });
+
+  it('da negativo si el timestamp es futuro', () => {
+    expect(minutesSince('2026-09-03T20:43', TZ, now)).toBe(-60);
+  });
+
+  it('devuelve null si el timestamp es inválido', () => {
+    expect(minutesSince('', TZ, now)).toBeNull();
+    expect(minutesSince('no-es-una-fecha', TZ, now)).toBeNull();
   });
 });

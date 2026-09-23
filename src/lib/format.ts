@@ -96,3 +96,36 @@ export function formatDuration(hours: number): string {
   if (h === 0) return `${m} min`;
   return m === 0 ? `${h} h` : `${h} h ${m} min`;
 }
+
+/**
+ * Minutos transcurridos entre un timestamp local "naive" ('YYYY-MM-DDTHH:mm',
+ * sin zona) y el momento actual. Los timestamps del INA y del pronóstico vienen
+ * así, y `new Date(iso)` los interpretaría en la zona del *dispositivo*: al
+ * comparar contra `nowInTz` —el ahora expresado en el mismo formato y zona— el
+ * desfasaje se cancela y la cuenta sale bien aunque el celular esté en otro huso.
+ * Puede dar negativo si el timestamp es futuro. Devuelve null si es inválido.
+ */
+export function minutesSince(
+  localIso: string,
+  timezone: string,
+  now: Date = new Date(),
+): number | null {
+  // Ambos se parsean como UTC: el offset real es el mismo para los dos y se anula.
+  const then = parseLocalIso(localIso);
+  const ahora = parseLocalIso(nowInTz(timezone, now));
+  if (then == null || ahora == null) return null;
+  return Math.round((ahora - then) / 60_000);
+}
+
+/**
+ * Un timestamp local naive ('YYYY-MM-DDTHH:mm') a milisegundos, tratándolo como
+ * si fuera UTC. El valor absoluto no significa nada: sirve para restar dos
+ * timestamps de la MISMA zona, donde el desfasaje se cancela. `Date.parse` es
+ * demasiado permisivo (acepta basura y devuelve fechas absurdas), así que se
+ * exige la forma exacta antes de parsear. Devuelve null si no la cumple.
+ */
+export function parseLocalIso(localIso: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(localIso)) return null;
+  const ms = Date.parse(`${localIso.slice(0, 16)}:00Z`);
+  return Number.isNaN(ms) ? null : ms;
+}

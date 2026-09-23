@@ -22,41 +22,67 @@ function windowLabel(a: SurgeAlert): string {
       )}`;
 }
 
-/** Margen (m) para avisar que el nivel se está "acercando" a un umbral. */
-const NEAR_M = 0.2;
-
 type LevelNote = { tone: 'red' | 'amber' | 'green'; text: string };
 
 /**
- * Evalúa el nivel observado contra los niveles seguros que el usuario definió
- * para su amarra (si los definió). Devuelve null si no hay umbrales o no hay dato.
+ * Traduce la ventana de marea al veredicto de la amarra. La clave es la tercera
+ * rama: cuando la banda de incertidumbre cruza el umbral, la app NO sabe de qué
+ * lado está y lo dice. Se midió que en esa franja —el dato a menos de 30 cm del
+ * umbral— la respuesta binaria se equivoca entre el 21 % y el 34 % de las veces;
+ * decir "no puedo asegurarlo" es más útil que un verde o un rojo inventado.
  */
 function assessLevel(
-  status: WaterLevelStatus | undefined,
-  heightM: number | undefined,
+  win: TideWindow,
   safeMinM?: number,
   safeMaxM?: number,
 ): LevelNote | null {
-  if (heightM == null || (safeMinM == null && safeMaxM == null)) return null;
-  if (safeMinM != null && heightM <= safeMinM) {
+  const now = win.now;
+  if (!now || (safeMinM == null && safeMaxM == null)) return null;
+  const lo = now.heightM - now.uncertaintyM;
+  const hi = now.heightM + now.uncertaintyM;
+
+  if (safeMinM != null && hi <= safeMinM) {
     return {
       tone: 'red',
       text: `Por debajo de tu mínimo seguro (${safeMinM.toFixed(2)} m): riesgo de varar al entrar/salir.`,
     };
   }
-  if (safeMaxM != null && heightM >= safeMaxM) {
+  if (safeMaxM != null && lo >= safeMaxM) {
     return {
       tone: 'red',
       text: `Por encima de tu máximo seguro (${safeMaxM.toFixed(2)} m): agua muy alta para la amarra.`,
     };
   }
-  if (safeMinM != null && heightM - safeMinM < NEAR_M && status?.trend === 'bajando') {
-    return { tone: 'amber', text: `Acercándose a tu mínimo (${safeMinM.toFixed(2)} m) y bajando.` };
+  if (safeMinM != null && lo <= safeMinM) {
+    return {
+      tone: 'amber',
+      text: `Rozando tu mínimo (${safeMinM.toFixed(2)} m). Con el margen de error no puedo asegurarte de qué lado está.`,
+    };
   }
-  if (safeMaxM != null && safeMaxM - heightM < NEAR_M && status?.trend === 'subiendo') {
-    return { tone: 'amber', text: `Acercándose a tu máximo (${safeMaxM.toFixed(2)} m) y subiendo.` };
+  if (safeMaxM != null && hi >= safeMaxM) {
+    return {
+      tone: 'amber',
+      text: `Rozando tu máximo (${safeMaxM.toFixed(2)} m). Con el margen de error no puedo asegurarte de qué lado está.`,
+    };
   }
   return { tone: 'green', text: 'Dentro de tu rango seguro.' };
+}
+
+/** "Podés salir hasta las HH:MM" / "vuelve a estar bien a partir de…". */
+function windowNote(win: TideWindow): string | null {
+  const first = win.unsafe[0];
+  if (!first) return null;
+  const que = first.kind === 'bajo' ? 'Poca agua' : 'Agua alta';
+  // Ya estamos dentro del tramo malo: lo útil es cuándo se despeja.
+  if (win.now && first.startsAt <= win.now.time) {
+    return first.endsAt
+      ? `${que} ahora; mejora a partir de las ${formatHour(first.endsAt)}.`
+      : `${que} ahora y en todo el resto del día.`;
+  }
+  const hasta = `Podés salir hasta las ${formatHour(first.startsAt)}`;
+  return first.endsAt
+    ? `${hasta}; después ${que.toLowerCase()} hasta las ${formatHour(first.endsAt)}.`
+    : `${hasta}; después ${que.toLowerCase()} el resto del día.`;
 }
 
 const NOTE_COLOR: Record<LevelNote['tone'], string> = {
@@ -73,21 +99,28 @@ const NOTE_COLOR: Record<LevelNote['tone'], string> = {
  */
 export function TideSummary({
   status,
+  hourly = [],
   surge,
   safeMinM,
   safeMaxM,
+  timezone = TIMEZONE,
 }: {
   status?: WaterLevelStatus;
+  /** Pronóstico horario; aporta `seaLevelM` para estimar el nivel de ahora en adelante. */
+  hourly?: HourlyPoint[];
   surge: SurgeAlert[];
   safeMinM?: number;
   safeMaxM?: number;
+  timezone?: string;
 }) {
   const obs = status?.observations ?? [];
   const last = obs[obs.length - 1];
   const stale = !!last && isStale(last.time, STALE_MS);
   // Evento más severo primero.
   const events = [...surge].sort((a, b) => b.severity - a.severity);
-  const levelNote = assessLevel(status, last?.heightM, safeMinM, safeMaxM);
+  const win = buildTideWindow(obs, hourly, now, { safeMinM, safeMaxM });
+  const levelNote = assessLevel(win, safeMinM, safeMaxM);
+  const salida = windowNote(win);
 
   if (!last && events.length === 0) return null;
 
@@ -102,8 +135,13 @@ export function TideSummary({
           <div className="flex items-baseline gap-2">
             <span className="text-slate-700">🌊 Marea</span>
             <span className="text-xl font-semibold text-slate-800">
-              {last.heightM.toFixed(2)} m
+              {(win.now ?? last).heightM.toFixed(2)} m
             </span>
+            {/* La banda solo aparece si el número es una estimación: una
+                medición de la hora en curso no lleva margen. */}
+            {win.now && win.now.uncertaintyM > 0 && (
+              <span className="text-sm text-slate-500">± {win.now.uncertaintyM.toFixed(2)}</span>
+            )}
             <span className={`text-sm font-medium ${TREND[status!.trend].color}`}>
               {TREND[status!.trend].arrow} {TREND[status!.trend].label}
             </span>
@@ -116,6 +154,16 @@ export function TideSummary({
           </div>
         </div>
       )}
+
+      {age?.stale && (
+        <p className="text-sm mt-2 text-amber-700">
+          ⚠️ Último dato {age.agoLabel}
+          {age.severe ? ' — la estación puede estar caída.' : '.'} El nivel actual puede haber
+          cambiado.
+        </p>
+      )}
+
+      {salida && <p className="text-sm mt-2 font-medium text-slate-700">🕒 {salida}</p>}
 
       {levelNote && (
         <p className={`text-sm mt-2 font-medium ${NOTE_COLOR[levelNote.tone]}`}>

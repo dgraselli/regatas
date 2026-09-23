@@ -133,9 +133,11 @@ export default function DashboardPage() {
 
           <TideSummary
             status={water.data}
+            hourly={data.bundle.hourly}
             surge={data.surge}
             safeMinM={activeLocation.safeLevelMinM}
             safeMaxM={activeLocation.safeLevelMaxM}
+            timezone={activeLocation.timezone}
           />
 
           {/* La niebla PRONOSTICADA ya se ve en la tarjeta de cada día (ícono +

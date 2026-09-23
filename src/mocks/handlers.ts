@@ -4,6 +4,8 @@ import type {
   WaterLevelResponse,
 } from '@/lib/services/schemas';
 import type { MetarRaw } from '@/lib/domain/metar';
+import { nowInTz, todayInTz } from '@/lib/format';
+import { TIMEZONE } from '@/lib/profile/defaults';
 
 /**
  * Generador determinístico de datos de ejemplo con forma de Open-Meteo / INA.
@@ -20,9 +22,14 @@ const DAYS = 7; // = PATTERN.length
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
+/**
+ * Medianoche de HOY en hora del club. Va por la fecha local y no por la UTC
+ * porque estos timestamps se leen como hora local: con `getUTCDate()` la serie
+ * arrancaba "mañana" a partir de las 21, y el día en curso quedaba sin cubrir
+ * (en el preview con mocks, la ventana de marea desaparecía de noche).
+ */
 function startMidnightToday(): Date {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return new Date(`${todayInTz(TIMEZONE)}T00:00:00Z`);
 }
 
 function isoLocal(base: Date, hourOffset: number): string {
@@ -170,10 +177,14 @@ export function mockMetar(icao: string): MetarRaw[] {
 }
 
 export function mockWaterLevel(): WaterLevelResponse {
-  const base = startMidnightToday();
+  // La serie termina 1 h antes de ahora, que es el atraso típico con que el INA
+  // publica el nivel medido (el a5 lo inserta en un cron horario). Si el mock
+  // diera el dato de "ahora mismo", en dev nunca se vería el aviso de dato viejo
+  // y la app parecería más fresca de lo que puede ser con datos reales.
+  const base = new Date(`${nowInTz(TIMEZONE).slice(0, 13)}:00:00Z`);
   // Últimas 12 horas observadas, con tendencia a subir (coherente con sudestada incipiente).
   const series = Array.from({ length: 12 }, (_, i) => ({
-    time: isoLocal(base, i),
+    time: isoLocal(base, i - 12),
     heightM: Math.round((1.2 + i * 0.04 + Math.sin(i / 3) * 0.1) * 100) / 100,
   }));
   return { stationName: 'San Fernando (INA, ejemplo)', series };

@@ -40,7 +40,7 @@ reconstruir.
   vía TanStack Query (`src/app/providers.tsx`). **Si cambia la FORMA de esos datos**
   (campos nuevos en `ForecastBundle`, `DayScore`, `CrossingPlan`/`DepartureCandidate`),
   hay que **subir el `buster`** (`schema-N`) o la app crashea sirviendo caché viejo. Pasó
-  varias veces. Valor actual: `schema-13`.
+  varias veces. Valor actual: `schema-14`.
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commitear o
   pushear** (no hacerlo automáticamente). `run.sh` y `validar_pronostico.txt` van sin trackear.
 

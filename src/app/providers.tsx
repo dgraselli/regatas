@@ -60,10 +60,13 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <PersistQueryClientProvider
       client={client}
-      // `buster` invalida el caché persistido cuando cambia la forma de los datos
-      // (subir esta versión descarta cachés viejos incompatibles). Ver tipos de
-      // forecast/crossing/water.
-      persistOptions={{ persister, buster: 'schema-13' }}
+      // `buster` invalida el caché persistido. Se sube al cambiar la FORMA de los
+      // datos (ver tipos de forecast/crossing/water), y también cuando un bug
+      // corregido dejó CONTENIDO malo guardado: el caché sobrevive al deploy, así
+      // que si no se lo desaloja el usuario sigue viendo el dato viejo hasta que
+      // venza el staleTime. Pasó con `dayWindow`, que guardaba el nivel de anoche
+      // y disparaba un falso "la estación puede estar caída".
+      persistOptions={{ persister, buster: 'schema-14' }}
     >
       <ProfileProvider>{children}</ProfileProvider>
     </PersistQueryClientProvider>

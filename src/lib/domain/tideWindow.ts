@@ -35,8 +35,15 @@ import { parseLocalIso } from '@/lib/format';
 export const UNCERTAINTY_NOW_M = 0.2;
 export const UNCERTAINTY_12H_M = 0.3;
 const HORIZON_H = 12;
-/** Horas de pasado que se devuelven para dibujar de dónde viene la marea. */
-const PAST_H = 6;
+/**
+ * Horas de pasado que se devuelven por defecto. 24 h muestra las dos últimas
+ * mareas completas —el ciclo del Río de la Plata es semidiurno, ~12 h—, que es
+ * el contexto mínimo para ver si viene subiendo de días o si es sólo la marea
+ * del momento. No se toma toda la serie observada (~80 h) porque entonces las
+ * 12 h de pronóstico, que es lo accionable, quedarían aplastadas en un 13 % del
+ * ancho.
+ */
+const PAST_H = 24;
 /** Observaciones que se promedian para anclar el pronóstico al cero del mareógrafo. */
 const OFFSET_SAMPLES = 3;
 /**
@@ -83,7 +90,7 @@ export interface UnsafeSpan {
 export interface TideWindow {
   /** Mejor estimación para la hora actual. */
   now?: TidePoint;
-  /** Curva horaria, de PAST_H horas atrás a HORIZON_H adelante. */
+  /** Curva horaria, de `pastH` horas atrás a HORIZON_H adelante. */
   points: TidePoint[];
   /**
    * Tramos de acá en adelante en que el nivel queda fuera del rango seguro.
@@ -119,8 +126,9 @@ export function buildTideWindow(
   observations: WaterLevelObservation[],
   hourly: HourlyPoint[],
   now: string,
-  opts: { safeMinM?: number; safeMaxM?: number } = {},
+  opts: { safeMinM?: number; safeMaxM?: number; pastH?: number } = {},
 ): TideWindow {
+  const pastH = opts.pastH ?? PAST_H;
   const nowHour = hourKey(now);
   if (!nowHour || observations.length === 0) return EMPTY;
 
@@ -148,7 +156,7 @@ export function buildTideWindow(
   const lastObsHour = [...obsByHour.keys()].sort().at(-1)!;
 
   const points: TidePoint[] = [];
-  for (let h = -PAST_H; h <= HORIZON_H; h++) {
+  for (let h = -pastH; h <= HORIZON_H; h++) {
     const key = shiftHours(nowHour, h);
     const measured = obsByHour.get(key);
     if (measured != null) {

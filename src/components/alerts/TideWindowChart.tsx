@@ -2,16 +2,18 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { TideWindow } from '@/lib/domain/tideWindow';
-import { formatHour, parseLocalIso } from '@/lib/format';
+import { formatDateShort, formatHour, parseLocalIso } from '@/lib/format';
 
 /**
- * Curva de nivel de las próximas horas con el rango seguro de la amarra dibujado
- * encima, para responder "¿hasta qué hora puedo salir?" de un vistazo.
+ * Curva única de nivel: de dónde viene la marea y hacia dónde va, con el rango
+ * seguro de la amarra encima, para responder "¿hasta qué hora puedo salir?" de
+ * un vistazo.
  *
- * Lo medido tiene línea llena y sin banda; lo estimado va punteado y con la
- * banda de incertidumbre sombreada, porque a partir de ahí la app está
- * estimando: el INA publica el nivel con 1 a 2 h de atraso y no hay forma de
- * saber el presente con menos de ~15 cm de error (ver `tideWindow.ts`).
+ * Es un solo dato y va en un solo gráfico: lo medido en línea llena y sin banda,
+ * lo estimado punteado y con la banda de incertidumbre sombreada. El corte entre
+ * los dos es visible porque ahí está el límite real del conocimiento: el INA
+ * publica con 1 a 2 h de atraso y no hay forma de saber el presente con menos de
+ * ~15 cm de error (ver `tideWindow.ts`).
  */
 export function TideWindowChart({
   win,
@@ -97,11 +99,47 @@ export function TideWindowChart({
   const nowMs = parseLocalIso(now);
   const nowIdx = t0 != null && nowMs != null ? (nowMs - t0) / 3_600_000 : -1;
   const nowVisible = nowIdx >= 0 && nowIdx <= pts.length - 1;
-  const labelEvery = plotW / pts.length >= 26 ? 2 : 3;
+  // Cuántas horas saltear entre rótulos: se calcula con el ancho real en vez de
+  // un paso fijo, porque en un celular (~300 px útiles) un paso de 3 h encimaba
+  // las etiquetas y en escritorio (~800 px) desperdiciaba lugar.
+  const pxPerHour = plotW / Math.max(1, pts.length - 1);
+  const labelEvery = Math.max(1, Math.ceil(30 / pxPerHour));
+
+  // Referencias de altura (m). Sin esto, y si la amarra no tiene niveles seguros
+  // definidos, el eje Y no daría ninguna escala y la curva sería sólo una forma.
+  const yTicks = [hi, (hi + lo) / 2, lo];
+
+  // Cambios de día: la curva cubre más de 24 h, así que la hora sola no ubica.
+  const dayTicks = pts.reduce<{ i: number; time: string }[]>((acc, p, i) => {
+    if (i > 0 && p.time.slice(0, 10) !== pts[i - 1].time.slice(0, 10)) acc.push({ i, time: p.time });
+    return acc;
+  }, []);
 
   return (
     <div ref={wrapRef} className="w-full">
       <svg width={width} height={height + 18} className="max-w-full">
+        {/* Escala de altura: líneas guía y metros, igual que el gráfico de nivel. */}
+        {yTicks.map((m, i) => (
+          <g key={`y${i}`}>
+            <line
+              x1={padLeft}
+              y1={yFor(m)}
+              x2={width}
+              y2={yFor(m)}
+              className="stroke-slate-100"
+              strokeWidth={1}
+            />
+            <text
+              x={padLeft - 4}
+              y={yFor(m) + 3}
+              textAnchor="end"
+              className="fill-slate-400 text-[9px]"
+            >
+              {m.toFixed(2)}
+            </text>
+          </g>
+        ))}
+
         {/* Rango seguro de la amarra: todo lo que quede fuera es problema. */}
         {safeMinM != null && (
           <>
@@ -114,8 +152,8 @@ export function TideWindowChart({
               strokeWidth={1}
               strokeDasharray="4 3"
             />
-            <text x={padLeft - 4} y={yFor(safeMinM) + 3} textAnchor="end" className="fill-red-500 text-[9px]">
-              {safeMinM.toFixed(2)}
+            <text x={width - 2} y={yFor(safeMinM) - 3} textAnchor="end" className="fill-red-500 text-[9px]">
+              mín {safeMinM.toFixed(2)}
             </text>
           </>
         )}
@@ -130,8 +168,8 @@ export function TideWindowChart({
               strokeWidth={1}
               strokeDasharray="4 3"
             />
-            <text x={padLeft - 4} y={yFor(safeMaxM) + 3} textAnchor="end" className="fill-red-500 text-[9px]">
-              {safeMaxM.toFixed(2)}
+            <text x={width - 2} y={yFor(safeMaxM) - 3} textAnchor="end" className="fill-red-500 text-[9px]">
+              máx {safeMaxM.toFixed(2)}
             </text>
           </>
         )}
@@ -159,8 +197,31 @@ export function TideWindowChart({
           />
         )}
 
+        {dayTicks.map((d) => (
+          <g key={`d${d.time}`}>
+            <line
+              x1={xFor(d.i)}
+              y1={0}
+              x2={xFor(d.i)}
+              y2={height}
+              className="stroke-slate-200"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+            />
+            <text
+              x={xFor(d.i)}
+              y={height + 13}
+              textAnchor="middle"
+              className="fill-slate-500 text-[9px] font-medium"
+            >
+              {formatDateShort(d.time)}
+            </text>
+          </g>
+        ))}
+
         {pts.map((p, i) =>
-          i % labelEvery === 0 ? (
+          // La hora se saltea donde va el rótulo de fecha, para no encimarlos.
+          i % labelEvery === 0 && !dayTicks.some((d) => Math.abs(d.i - i) < labelEvery) ? (
             <text
               key={p.time}
               x={xFor(i)}
@@ -175,7 +236,8 @@ export function TideWindowChart({
       </svg>
 
       <p className="mt-1 text-xs text-slate-400">
-        Línea llena = medido · punteado y sombreado = estimado (± margen de error)
+        Altura en metros · línea llena = medido por el mareógrafo · punteado y sombreado =
+        estimado (± margen de error) · la vertical gris es ahora
         {safeMinM != null || safeMaxM != null ? ' · rojo = tu rango seguro' : ''}
       </p>
     </div>

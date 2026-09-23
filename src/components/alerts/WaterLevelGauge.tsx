@@ -1,7 +1,6 @@
 'use client';
 
 import type { WaterLevelStatus } from '@/lib/types/water';
-import { formatHour } from '@/lib/format';
 import { useObservationAge } from '@/lib/hooks/useFreshness';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
@@ -10,6 +9,14 @@ const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; c
   estable: { label: 'Estable', arrow: '→', color: 'text-slate-500' },
 };
 
+/**
+ * Lectura del nivel actual: el número grande, la tendencia y de qué estación
+ * sale, con la antigüedad del dato medido.
+ *
+ * La curva no vive acá: nivel observado y pronóstico son el mismo dato y se
+ * dibujan juntos en `TideWindowChart`, porque en dos gráficos separados había
+ * que reconstruir a ojo la continuidad entre lo medido y lo estimado.
+ */
 export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
   const last = obs[obs.length - 1];
@@ -18,28 +25,9 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   if (obs.length === 0) return null;
   const t = TREND[status.trend];
 
-  const heights = obs.map((o) => o.heightM);
-  const min = Math.min(...heights);
-  const max = Math.max(...heights);
-  const span = max - min || 1;
-  const w = 240;
-  const h = 60;
-  const padLeft = 34; // espacio para los rótulos de nivel (m) del eje Y
-  const plotW = w - padLeft;
-
-  const yFor = (m: number) => h - ((m - min) / span) * h;
-  const xFor = (i: number) => padLeft + (obs.length === 1 ? 0 : (i / (obs.length - 1)) * plotW);
-
-  const path = obs
-    .map((o, i) => `${i === 0 ? 'M' : 'L'}${xFor(i).toFixed(1)},${yFor(o.heightM).toFixed(1)}`)
-    .join(' ');
-
-  // Referencias del eje Y: nivel máximo, medio y mínimo observados (en metros).
-  const yTicks = [max, (max + min) / 2, min];
-
   return (
     <div>
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-2">
         <div>
           <span className="text-3xl font-semibold text-slate-800">{last.heightM.toFixed(2)} m</span>
           <span className={`ml-2 font-medium ${t.color}`}>
@@ -52,27 +40,6 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
             {age?.stale && '⚠️ '}Observado {age?.agoLabel ?? ''}
           </span>
         </div>
-      </div>
-      <svg width={w} height={h + 6} className="mt-3 max-w-full">
-        {/* Eje Y: líneas guía y rótulo de nivel (m) para máx / medio / mín */}
-        {yTicks.map((m, i) => {
-          const y = yFor(m);
-          return (
-            <g key={i}>
-              <line x1={padLeft} y1={y} x2={w} y2={y} className="stroke-slate-100" strokeWidth={1} />
-              <text x={padLeft - 4} y={y + 3} textAnchor="end" className="fill-slate-400 text-[9px]">
-                {m.toFixed(2)}
-              </text>
-            </g>
-          );
-        })}
-        <path d={path} fill="none" className="stroke-mar-500" strokeWidth={2} />
-      </svg>
-      <div className="flex justify-between text-xs text-slate-400" style={{ paddingLeft: padLeft }}>
-        <span>{formatHour(obs[0].time)}</span>
-        <span>
-          últimas {obs.length} h · {formatHour(last.time)}
-        </span>
       </div>
 
       {age?.severe && (

@@ -58,61 +58,55 @@ export default function MareasPage() {
 
       <Card>
         <CardHeader
-          title="Nivel de agua observado"
-          subtitle="Fuente: INA — Sistema de Alerta Hidrológico (estación más cercana)"
+          title="Nivel de agua"
+          subtitle="Medido por el INA (estación más cercana) y estimado hasta 12 h"
         />
         <div className="px-4 pb-4 pt-3">
           {water.isLoading && <Loading />}
           {water.isError && <ErrorState />}
-          {water.data &&
-            (water.data.observations.length > 0 ? (
-              <WaterLevelGauge status={water.data} />
-            ) : (
-              <p className="text-sm text-slate-500">
-                Sin datos recientes de la estación más cercana.
-              </p>
-            ))}
-        </div>
-      </Card>
+          {water.data && water.data.observations.length === 0 && (
+            <p className="text-sm text-slate-500">
+              Sin datos recientes de la estación más cercana.
+            </p>
+          )}
 
-      {win.points.length > 1 && (
-        <Card>
-          <CardHeader
-            title="Próximas horas"
-            subtitle="Nivel estimado hasta 12 h, anclado a la última medición del mareógrafo"
-          />
-          <div className="px-4 pb-4 pt-3">
-            {win.unsafe.length > 0 ? (
-              <ul className="mb-3 space-y-1 text-sm">
-                {win.unsafe.map((s, i) => (
-                  <li key={i} className={s.kind === 'bajo' ? 'text-mar-700' : 'text-orange-800'}>
-                    ⚠️ <strong>{s.kind === 'bajo' ? 'Poca agua' : 'Agua alta'}</strong> desde las{' '}
-                    {formatHour(s.startsAt)}{' '}
-                    {s.endsAt ? `hasta las ${formatHour(s.endsAt)}` : 'y sigue así'}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              activeLocation.safeLevelMinM != null || activeLocation.safeLevelMaxM != null ? (
-                <p className="mb-3 text-sm text-emerald-700">
+          {water.data && water.data.observations.length > 0 && (
+            <>
+              <WaterLevelGauge status={water.data} />
+
+              {win.unsafe.length > 0 ? (
+                <ul className="mt-3 space-y-1 text-sm">
+                  {win.unsafe.map((sp, i) => (
+                    <li key={i} className={sp.kind === 'bajo' ? 'text-mar-700' : 'text-orange-800'}>
+                      ⚠️ <strong>{sp.kind === 'bajo' ? 'Poca agua' : 'Agua alta'}</strong> desde las{' '}
+                      {formatHour(sp.startsAt)}{' '}
+                      {sp.endsAt ? `hasta las ${formatHour(sp.endsAt)}` : 'y sigue así'}
+                    </li>
+                  ))}
+                </ul>
+              ) : activeLocation.safeLevelMinM != null || activeLocation.safeLevelMaxM != null ? (
+                <p className="mt-3 text-sm text-emerald-700">
                   ✓ El nivel se mantiene dentro de tu rango seguro las próximas 12 h.
                 </p>
               ) : (
-                <p className="mb-3 text-sm text-slate-500">
+                <p className="mt-3 text-sm text-slate-500">
                   Definí los niveles seguros de tu amarra en Perfil para que te avise hasta qué hora
                   podés salir.
                 </p>
-              )
-            )}
-            <TideWindowChart
-              win={win}
-              now={now}
-              safeMinM={activeLocation.safeLevelMinM}
-              safeMaxM={activeLocation.safeLevelMaxM}
-            />
-          </div>
-        </Card>
-      )}
+              )}
+
+              <div className="mt-3">
+                <TideWindowChart
+                  win={win}
+                  now={now}
+                  safeMinM={activeLocation.safeLevelMinM}
+                  safeMaxM={activeLocation.safeLevelMaxM}
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </Card>
 
       {forecast.isLoading && <Loading />}
       {forecast.isError && !forecast.data && (

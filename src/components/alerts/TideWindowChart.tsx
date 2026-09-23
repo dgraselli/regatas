@@ -168,7 +168,9 @@ export function TideWindowChart({
               strokeWidth={1}
               strokeDasharray="4 3"
             />
-            <text x={width - 2} y={yFor(safeMaxM) - 3} textAnchor="end" className="fill-red-500 text-[9px]">
+            {/* Debajo de su línea: el máximo suele coincidir con el techo de la
+                escala y arriba quedaba cortado contra el borde del SVG. */}
+            <text x={width - 2} y={yFor(safeMaxM) + 10} textAnchor="end" className="fill-red-500 text-[9px]">
               máx {safeMaxM.toFixed(2)}
             </text>
           </>

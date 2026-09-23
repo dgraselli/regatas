@@ -5,6 +5,7 @@ import { metarVisibilityLevel, type VisibilityLevel } from '@/lib/domain/metar';
 import { scoringFor } from '@/lib/config/boat';
 import type { Caution } from '@/lib/profile/types';
 import { Card } from '@/components/ui/Card';
+import { ageLabel } from '@/lib/format';
 
 const LEVEL: Record<
   Exclude<VisibilityLevel, 'sin-dato'>,
@@ -24,14 +25,6 @@ function fmtVis(m?: number): string {
   if (m >= 9000) return '≥ 10 km';
   if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
   return `${m} m`;
-}
-
-function ageLabel(iso?: string): string {
-  if (!iso) return '';
-  const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
-  if (min < 0) return 'ahora';
-  if (min < 60) return `hace ${min} min`;
-  return `hace ${Math.round(min / 60)} h`;
 }
 
 /** Edad máxima para mostrar la observación: más vieja solo puede venir de un

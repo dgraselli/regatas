@@ -1,14 +1,16 @@
 'use client';
 
 import type { WaterLevelStatus } from '@/lib/types/water';
-import { formatHour } from '@/lib/format';
-import { useObservationAge } from '@/lib/hooks/useFreshness';
+import { formatHour, ageLabel, isStale } from '@/lib/format';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
   bajando: { label: 'Bajando', arrow: '↓', color: 'text-mar-600' },
   estable: { label: 'Estable', arrow: '→', color: 'text-slate-500' },
 };
+
+/** A partir de acá, la última observación se marca como posible corte de la estación. */
+const STALE_MS = 60 * 60 * 1000; // 1 h
 
 export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
@@ -17,6 +19,7 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const age = useObservationAge(last?.time);
   if (obs.length === 0) return null;
   const t = TREND[status.trend];
+  const stale = isStale(last.time, STALE_MS);
 
   const heights = obs.map((o) => o.heightM);
   const min = Math.min(...heights);
@@ -39,14 +42,19 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
 
   return (
     <div>
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <span className="text-3xl font-semibold text-slate-800">{last.heightM.toFixed(2)} m</span>
           <span className={`ml-2 font-medium ${t.color}`}>
             {t.arrow} {t.label}
           </span>
         </div>
-        <span className="text-xs text-slate-400">{status.stationName}</span>
+        <div className="flex flex-col items-end text-xs">
+          <span className="text-slate-400">{status.stationName}</span>
+          <span className={stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
+            {stale && '⚠️ '}Observado {ageLabel(last.time)}
+          </span>
+        </div>
       </div>
       <svg width={w} height={h + 6} className="mt-3 max-w-full">
         {/* Eje Y: líneas guía y rótulo de nivel (m) para máx / medio / mín */}

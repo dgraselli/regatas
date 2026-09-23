@@ -32,20 +32,22 @@ describe('TideSummary — antigüedad del nivel observado', () => {
 
   it('muestra hace cuánto se MIDIÓ el nivel, no hace cuánto lo bajamos', () => {
     // Medido a las 17:45 → 2 h antes del ahora, aunque `fetchedAt` sea de recién.
-    expect(textOf('2026-09-03T17:45')).toContain('medido hace 2 h');
+    expect(textOf('2026-09-03T17:45')).toContain('observado hace 2 h');
   });
 
   it('no avisa nada mientras el atraso sea el normal del INA (~1-2 h)', () => {
     expect(textOf('2026-09-03T18:45')).not.toContain('Último dato');
   });
 
-  it('avisa cuando el dato pasa las 3 h', () => {
+  it('marca en ámbar cuando el dato pasa las 3 h, sin gritar que está caída', () => {
     const t = textOf('2026-09-03T15:45'); // 3 h 58 min
-    expect(t).toContain('Último dato hace 4 h');
+    expect(t).toContain('⚠️');
+    expect(t).toContain('observado hace 4 h');
+    // Una demora larga no es lo mismo que una estación caída.
     expect(t).not.toContain('puede estar caída');
   });
 
-  it('a partir de 6 h sugiere que la estación está caída', () => {
+  it('a partir de 6 h sí sugiere que la estación está caída', () => {
     expect(textOf('2026-09-03T12:45')).toContain('la estación puede estar caída');
   });
 

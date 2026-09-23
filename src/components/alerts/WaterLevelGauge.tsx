@@ -1,16 +1,14 @@
 'use client';
 
 import type { WaterLevelStatus } from '@/lib/types/water';
-import { formatHour, ageLabel, isStale } from '@/lib/format';
+import { formatHour } from '@/lib/format';
+import { useObservationAge } from '@/lib/hooks/useFreshness';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
   bajando: { label: 'Bajando', arrow: '↓', color: 'text-mar-600' },
   estable: { label: 'Estable', arrow: '→', color: 'text-slate-500' },
 };
-
-/** A partir de acá, la última observación se marca como posible corte de la estación. */
-const STALE_MS = 60 * 60 * 1000; // 1 h
 
 export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const obs = status.observations;
@@ -19,7 +17,6 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const age = useObservationAge(last?.time);
   if (obs.length === 0) return null;
   const t = TREND[status.trend];
-  const stale = isStale(last.time, STALE_MS);
 
   const heights = obs.map((o) => o.heightM);
   const min = Math.min(...heights);
@@ -51,8 +48,8 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
         </div>
         <div className="flex flex-col items-end text-xs">
           <span className="text-slate-400">{status.stationName}</span>
-          <span className={stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
-            {stale && '⚠️ '}Observado {ageLabel(last.time)}
+          <span className={age?.stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
+            {age?.stale && '⚠️ '}Observado {age?.agoLabel ?? ''}
           </span>
         </div>
       </div>
@@ -75,16 +72,13 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
         <span>{formatHour(obs[0].time)}</span>
         <span>
           últimas {obs.length} h · {formatHour(last.time)}
-          {age && ` (${age.agoLabel})`}
         </span>
       </div>
 
-      {age?.stale && (
+      {age?.severe && (
         <p className="mt-2 text-sm text-amber-700">
-          ⚠️ La estación no reporta {age.agoLabel.replace('hace', 'desde hace')}.{' '}
-          {age.severe
-            ? 'Probablemente esté caída: tomá el nivel como referencia vieja.'
-            : 'Es más de lo habitual (el INA publica con ~1 h de atraso).'}
+          ⚠️ La estación no reporta {age.agoLabel.replace('hace', 'desde hace')}: probablemente
+          esté caída. Tomá el nivel como referencia vieja.
         </p>
       )}
     </div>

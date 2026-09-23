@@ -2,16 +2,18 @@
 
 import Link from 'next/link';
 import type { WaterLevelStatus, SurgeAlert } from '@/lib/types/water';
-import { formatDate, formatHour, ageLabel, isStale } from '@/lib/format';
+import { formatDate, formatHour } from '@/lib/format';
+import { useObservationAge } from '@/lib/hooks/useFreshness';
+import { useNowInTz } from '@/lib/hooks/useNow';
+import { buildTideWindow, type TideWindow } from '@/lib/domain/tideWindow';
+import type { HourlyPoint } from '@/lib/types/forecast';
+import { TIMEZONE } from '@/lib/profile/defaults';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'subiendo', arrow: '↑', color: 'text-orange-600' },
   bajando: { label: 'bajando', arrow: '↓', color: 'text-mar-600' },
   estable: { label: 'estable', arrow: '→', color: 'text-slate-500' },
 };
-
-/** A partir de acá, la última observación se marca como posible corte de la estación. */
-const STALE_MS = 60 * 60 * 1000; // 1 h
 
 function windowLabel(a: SurgeAlert): string {
   const sameDay = a.startsAt.slice(0, 10) === a.endsAt.slice(0, 10);
@@ -115,7 +117,10 @@ export function TideSummary({
 }) {
   const obs = status?.observations ?? [];
   const last = obs[obs.length - 1];
-  const stale = !!last && isStale(last.time, STALE_MS);
+  // Antigüedad del dato MEDIDO (no de la descarga): el INA publica con ~1 h de
+  // atraso, así que el nivel que mostramos nunca es exactamente el de ahora.
+  const age = useObservationAge(last?.time);
+  const now = useNowInTz(timezone);
   // Evento más severo primero.
   const events = [...surge].sort((a, b) => b.severity - a.severity);
   const win = buildTideWindow(obs, hourly, now, { safeMinM, safeMaxM });
@@ -148,18 +153,18 @@ export function TideSummary({
           </div>
           <div className="flex flex-col items-end text-xs">
             <span className="text-slate-400">{status!.stationName}</span>
-            <span className={stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
-              {stale && '⚠️ '}observado {ageLabel(last.time)}
+            <span className={age?.stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
+              {age?.stale && '⚠️ '}
+              {win.now?.source === 'medido' ? 'medido' : 'estimado'} · observado{' '}
+              {age?.agoLabel ?? ''}
             </span>
           </div>
         </div>
       )}
 
-      {age?.stale && (
+      {age?.severe && (
         <p className="text-sm mt-2 text-amber-700">
-          ⚠️ Último dato {age.agoLabel}
-          {age.severe ? ' — la estación puede estar caída.' : '.'} El nivel actual puede haber
-          cambiado.
+          ⚠️ Último dato {age.agoLabel}: la estación puede estar caída.
         </p>
       )}
 

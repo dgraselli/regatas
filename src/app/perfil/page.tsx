@@ -400,10 +400,10 @@ function AddKnownClubForm({
 
   return (
     <form onSubmit={submit} className="flex gap-2 flex-wrap items-end">
-      <Field label="Agregar club conocido (Río de la Plata)">
+      <Field label="Agregar lugar conocido (Río de la Plata)">
         <select value={idx} onChange={(e) => setIdx(e.target.value)} className="input w-72">
           <option value="" disabled>
-            Elegí un club…
+            Elegí un lugar…
           </option>
           <optgroup label="Argentina 🇦🇷">
             {KNOWN_CLUBS.map((c, i) =>
@@ -417,6 +417,15 @@ function AddKnownClubForm({
           <optgroup label="Uruguay 🇺🇾">
             {KNOWN_CLUBS.map((c, i) =>
               c.country === 'UY' ? (
+                <option key={i} value={i}>
+                  {c.name}
+                </option>
+              ) : null,
+            )}
+          </optgroup>
+          <optgroup label="Medio del río 🌊">
+            {KNOWN_CLUBS.map((c, i) =>
+              c.country === 'RDP' ? (
                 <option key={i} value={i}>
                   {c.name}
                 </option>

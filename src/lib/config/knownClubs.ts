@@ -8,7 +8,12 @@ export interface KnownClub {
   name: string;
   lat: number;
   lon: number;
-  country: 'AR' | 'UY';
+  /**
+   * Orilla, para agrupar el selector. `RDP` es para puntos que no son de
+   * ninguna de las dos: estaciones en medio del estuario que sirven como
+   * referencia de agua abierta.
+   */
+  country: 'AR' | 'UY' | 'RDP';
 }
 
 export const KNOWN_CLUBS: KnownClub[] = [
@@ -42,4 +47,11 @@ export const KNOWN_CLUBS: KnownClub[] = [
   { name: 'Yacht Club de Colonia', lat: -34.472, lon: -57.851, country: 'UY' },
   { name: 'Puerto del Buceo (Montevideo)', lat: -34.912, lon: -56.137, country: 'UY' },
   { name: 'Puerto de Piriápolis', lat: -34.868, lon: -55.275, country: 'UY' },
+
+  // Medio del estuario. No son clubes: son puntos de referencia. Valen por dos
+  // razones — el nivel sale de su propio mareógrafo (Pilote Norden es la
+  // estación más cercana que elige `nearestStation` para la zona), y el viento
+  // pronosticado ahí es de agua abierta, sin la fricción de la costa, más
+  // parecido a lo que se navega de verdad que el viento del club.
+  { name: 'Pilote Norden (mareógrafo, medio del río)', lat: -34.626, lon: -57.927, country: 'RDP' },
 ];

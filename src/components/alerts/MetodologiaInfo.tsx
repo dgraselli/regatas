@@ -1,14 +1,21 @@
 import { SURGE } from '@/lib/config/boat';
 import { compass } from '@/lib/format';
+import { UNCERTAINTY_NOW_M, UNCERTAINTY_12H_M } from '@/lib/domain/tideWindow';
+import { OBSERVED_STALE_MS, OBSERVED_SEVERE_MS } from '@/lib/hooks/useFreshness';
+
+const hs = (ms: number) => ms / 3_600_000;
 
 function sectorLabel([from, to]: [number, number]): string {
   return `${compass(from)}–${compass(to)} (${from}°–${to}°)`;
 }
 
 /**
- * Bloque desplegable que explica de dónde salen los datos y cómo la app
- * calcula la predicción de sudestada/bajante. Lee los umbrales reales de
- * `SURGE` para no quedar desactualizado respecto del código.
+ * Bloque desplegable que explica de dónde salen los datos, cómo se estima el
+ * nivel de agua y cómo la app calcula la predicción de sudestada/bajante.
+ *
+ * Los números salen de las constantes reales (`SURGE`, la banda de
+ * incertidumbre, los umbrales de antigüedad) para que el texto no se
+ * desactualice respecto del código cuando alguno cambie.
  */
 export function MetodologiaInfo({ stationName }: { stationName?: string }) {
   return (
@@ -35,9 +42,68 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
               INA — Sistema de Alerta Hidrológico (API pública), altura hidrométrica de la
               estación más cercana
               {stationName ? <> (hoy: <strong>{stationName}</strong>)</> : null}. Es un dato{' '}
-              <em>medido</em>, no un pronóstico.
+              <em>medido</em>, no un pronóstico. El mareógrafo mide a los :45 de cada hora y el
+              INA lo publica en la hora siguiente, así que lo más nuevo que se puede ver tiene
+              normalmente <strong>entre 1 y 2 h</strong>.
             </li>
           </ul>
+        </div>
+
+        <div>
+          <h3 className="mb-1 font-semibold text-slate-700">
+            Nivel de agua: lo medido y lo estimado
+          </h3>
+          <p className="mb-2">
+            En el gráfico, la <strong>línea llena</strong> es lo que midió el mareógrafo y la{' '}
+            <strong>punteada con banda</strong> es estimación. El corte entre las dos está
+            donde termina lo que se sabe y empieza lo que se calcula.
+          </p>
+          <ul className="space-y-1">
+            <li>
+              <span className="text-slate-300">•</span> <strong>Cómo se estima:</strong> se toma
+              el nivel del mar pronosticado por Open-Meteo Marine y se lo <em>reancla</em> al
+              cero del mareógrafo con las últimas mediciones reales. Hace falta reanclarlo
+              porque la diferencia entre las dos referencias ronda los 0,90 m y se corre con la
+              bajante del río: una constante no alcanzaría.
+            </li>
+            <li>
+              <span className="text-slate-300">•</span> <strong>Margen de error:</strong> ±
+              {UNCERTAINTY_NOW_M.toFixed(2)} m para el ahora, creciendo hasta ±
+              {UNCERTAINTY_12H_M.toFixed(2)} m a las 12 h. Salen de comparar el método contra el
+              nivel realmente observado durante 14 días en 4 estaciones del Río de la Plata.
+            </li>
+            <li>
+              <span className="text-slate-300">•</span> <strong>Por qué no se afina más:</strong>{' '}
+              también se probó arrastrar el último dato y proyectar la pendiente de las últimas
+              2 h. Dan el mismo error o peor: proyectar la pendiente se pasa de largo cerca de
+              las paradas de marea. Hay un piso de ~15 cm que ningún método baja, así que se
+              muestra en vez de esconderlo.
+            </li>
+            <li>
+              <span className="text-slate-300">•</span> <strong>Si la estación deja de
+              reportar:</strong> a partir de {hs(OBSERVED_STALE_MS)} h el dato se marca en
+              ámbar, y a partir de {hs(OBSERVED_SEVERE_MS)} h se avisa que probablemente esté
+              caída.
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="mb-1 font-semibold text-slate-700">
+            Tu amarra: cuándo la app admite que no sabe
+          </h3>
+          <p className="mb-2">
+            Si cargaste los niveles seguros de tu amarra en Perfil, el nivel estimado se compara
+            contra ellos usando el <strong>borde pesimista</strong> de la banda: un tramo se
+            marca como poca agua o agua alta apenas el margen toca el umbral, no cuando lo cruza
+            el valor central. Para «¿voy a varar?» conviene errar hacia salir antes.
+          </p>
+          <p>
+            Y cuando la banda queda a caballo del umbral, la app lo dice en vez de dar un
+            veredicto. No es prudencia de más: sobre los mismos 14 días, con el nivel a menos de
+            30 cm del umbral la respuesta binaria se equivoca <strong>entre el 21 % y el 34 %</strong>{' '}
+            de las veces.
+          </p>
         </div>
 
         <div>

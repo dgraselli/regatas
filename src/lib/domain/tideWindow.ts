@@ -231,3 +231,62 @@ function unsafeSpans(
     return acc;
   }, []);
 }
+
+/**
+ * Mínimo (cm/h) para considerar que la marea se está moviendo de verdad. Por
+ * debajo está en el entorno de la parada, y el signo no significa nada.
+ */
+export const SLACK_CM_H = 3;
+
+export interface TideRate {
+  /** Velocidad de cambio del nivel, en cm/h. Positivo = subiendo. */
+  cmPerH: number;
+  /** 'entrando' mientras sube, 'saliendo' mientras baja, 'parada' cerca del cambio. */
+  stream: 'entrando' | 'saliendo' | 'parada';
+}
+
+/**
+ * Velocidad de cambio del nivel MEDIDO, sobre las últimas `hours` horas.
+ *
+ * Es lo más cerca que se puede estar de informar la corriente sin inventarla:
+ * en el estuario la corriente de marea va aproximadamente en fase con la
+ * variación del nivel —entra mientras sube, sale mientras baja—, así que el
+ * signo dice de qué lado la vas a tener al cruzar. NO es una corriente medida y
+ * deliberadamente no se expresa en nudos: no hay ninguna fuente pública de
+ * corriente para el Río de la Plata (el catálogo del a5 no tiene la variable).
+ *
+ * Se calcula sólo con observaciones reales, nunca con la parte estimada de la
+ * curva, para que el número no herede el error del pronóstico.
+ *
+ * Devuelve null si no hay dos mediciones separadas por al menos media hora.
+ */
+export function tideRate(
+  observations: WaterLevelObservation[],
+  hours = 2,
+): TideRate | null {
+  if (observations.length < 2) return null;
+  const last = observations[observations.length - 1];
+  const tLast = parseLocalIso(last.time);
+  if (tLast == null) return null;
+
+  // La medición más vieja que TODAVÍA cae dentro de la ventana. Si la estación
+  // tuvo un hueco y no hay ninguna, se devuelve null en vez de promediar sobre
+  // un tramo largo: sobre media marea entera el promedio da casi cero y diría
+  // "parada" justo cuando el agua corre más.
+  const objetivo = tLast - hours * HOUR_MS;
+  const ref =
+    observations.slice(0, -1).find((o) => {
+      const t = parseLocalIso(o.time);
+      return t != null && t >= objetivo;
+    }) ?? null;
+  if (!ref) return null;
+
+  const tRef = parseLocalIso(ref.time)!;
+  const horas = (tLast - tRef) / HOUR_MS;
+  if (horas < 0.5) return null;
+
+  const cmPerH = ((last.heightM - ref.heightM) * 100) / horas;
+  const stream =
+    Math.abs(cmPerH) < SLACK_CM_H ? 'parada' : cmPerH > 0 ? 'entrando' : 'saliendo';
+  return { cmPerH, stream };
+}

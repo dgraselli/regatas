@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   buildTideWindow,
   uncertaintyAt,
+  tideRate,
   UNCERTAINTY_NOW_M,
   UNCERTAINTY_12H_M,
 } from '@/lib/domain/tideWindow';
@@ -167,5 +168,43 @@ describe('buildTideWindow — ventana segura', () => {
 
   it('sin umbrales definidos no evalúa nada', () => {
     expect(buildTideWindow(medido, bajante, NOW).unsafe).toEqual([]);
+  });
+});
+
+describe('tideRate — corriente de marea a partir del nivel medido', () => {
+  it('sube → entrando, con la velocidad en cm/h', () => {
+    // 1.00 → 1.30 en 2 h = 15 cm/h.
+    const r = tideRate(obs('2026-09-04T11', [1.0, 1.15, 1.3]));
+    expect(r?.stream).toBe('entrando');
+    expect(r?.cmPerH).toBeCloseTo(15, 6);
+  });
+
+  it('baja → saliendo, con signo negativo', () => {
+    const r = tideRate(obs('2026-09-04T11', [1.3, 1.15, 1.0]));
+    expect(r?.stream).toBe('saliendo');
+    expect(r?.cmPerH).toBeCloseTo(-15, 6);
+  });
+
+  it('cerca del cambio de marea dice parada, sin inventar un sentido', () => {
+    // 2 cm en 2 h = 1 cm/h: por debajo del umbral, el signo no significa nada.
+    const r = tideRate(obs('2026-09-04T11', [1.0, 1.01, 1.02]));
+    expect(r?.stream).toBe('parada');
+  });
+
+  it('usa sólo la ventana pedida, no toda la serie', () => {
+    // 6 h de serie, pero la ventana son las últimas 2 h: 1.20 → 1.40 = 10 cm/h.
+    const r = tideRate(obs('2026-09-04T08', [0.2, 0.5, 0.9, 1.1, 1.2, 1.3, 1.4]));
+    expect(r?.cmPerH).toBeCloseTo(10, 6);
+  });
+
+  it('devuelve null si la estación tuvo un hueco y no hay dato en la ventana', () => {
+    const viejo = obs('2026-09-04T02', [1.0, 1.1]); // 02:45 y 03:45
+    const reciente = { time: '2026-09-04T13:45', heightM: 1.9 }; // 10 h después
+    expect(tideRate([...viejo, reciente])).toBeNull();
+  });
+
+  it('devuelve null sin suficientes mediciones', () => {
+    expect(tideRate([])).toBeNull();
+    expect(tideRate(obs('2026-09-04T11', [1.0]))).toBeNull();
   });
 });

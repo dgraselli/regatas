@@ -2,6 +2,7 @@
 
 import type { WaterLevelStatus } from '@/lib/types/water';
 import { useObservationAge } from '@/lib/hooks/useFreshness';
+import { tideRate } from '@/lib/domain/tideWindow';
 
 const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; color: string }> = {
   subiendo: { label: 'Subiendo', arrow: '↑', color: 'text-orange-600' },
@@ -24,6 +25,8 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
   const age = useObservationAge(last?.time);
   if (obs.length === 0) return null;
   const t = TREND[status.trend];
+  // Sentido y fuerza de la corriente de marea, derivados del nivel MEDIDO.
+  const rate = tideRate(obs);
 
   return (
     <div>
@@ -33,6 +36,17 @@ export function WaterLevelGauge({ status }: { status: WaterLevelStatus }) {
           <span className={`ml-2 font-medium ${t.color}`}>
             {t.arrow} {t.label}
           </span>
+          {rate && (
+            <p className="mt-1 text-sm text-slate-500">
+              {rate.stream === 'parada' ? (
+                <>Marea casi parada — poca corriente.</>
+              ) : (
+                <>
+                  Marea <strong>{rate.stream}</strong> · {Math.abs(rate.cmPerH).toFixed(0)} cm/h
+                </>
+              )}
+            </p>
+          )}
         </div>
         <div className="flex flex-col items-end text-xs">
           <span className="text-slate-400">{status.stationName}</span>

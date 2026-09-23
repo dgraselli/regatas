@@ -1,6 +1,6 @@
 import { SURGE } from '@/lib/config/boat';
 import { compass } from '@/lib/format';
-import { UNCERTAINTY_NOW_M, UNCERTAINTY_12H_M } from '@/lib/domain/tideWindow';
+import { UNCERTAINTY_NOW_M, UNCERTAINTY_12H_M, SLACK_CM_H } from '@/lib/domain/tideWindow';
 import { OBSERVED_STALE_MS, OBSERVED_SEVERE_MS } from '@/lib/hooks/useFreshness';
 
 const hs = (ms: number) => ms / 3_600_000;
@@ -78,6 +78,15 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
               2 h. Dan el mismo error o peor: proyectar la pendiente se pasa de largo cerca de
               las paradas de marea. Hay un piso de ~15 cm que ningún método baja, así que se
               muestra en vez de esconderlo.
+            </li>
+            <li>
+              <span className="text-slate-300">•</span> <strong>Marea entrando o saliendo:</strong>{' '}
+              es la velocidad a la que cambia el nivel medido (cm/h) en las últimas 2 h, no una
+              corriente medida —y por eso no se expresa en nudos—. En el estuario la corriente
+              de marea va aproximadamente en fase con esa variación, así que el sentido sirve
+              para saber de qué lado vas a tenerla al cruzar. Por debajo de {SLACK_CM_H} cm/h se
+              considera parada, porque ahí el signo no significa nada. No hay ninguna fuente
+              pública de corriente para el Río de la Plata.
             </li>
             <li>
               <span className="text-slate-300">•</span> <strong>Si la estación deja de

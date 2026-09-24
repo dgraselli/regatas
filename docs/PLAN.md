@@ -146,6 +146,29 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       en vivo (con fallback). Hoy el acumulador se llena por cron pero **nadie lo consume**,
       así que la validación de niebla sigue limitada a la ventana corta. Rinde recién con
       varias semanas juntadas (~fin de agosto 2026).
+- [ ] **El "observado" del validador subestima el viento fuerte** (medido el 2026-09-23 con
+      `node scripts/carp-eval.mjs referencia`). `forecast-eval.mjs` compara el pronóstico
+      contra Open-Meteo `past_days`, o sea contra el mismo modelo evaluándose a sí mismo.
+      Contra las estaciones de la CARP —las únicas que miden viento SOBRE el río— esa
+      referencia, en Pilote Norden y sobre 1134 horas:
+
+      | viento real | horas medidas | las vio la referencia | se le escapan |
+      |---|---|---|---|
+      | ≥ 18 kt (amarillo) | 248 | 96 | **152 (61 %)** |
+      | ≥ 25 kt (rojo) | 31 | 4 | **27 (87 %)** |
+
+      Si la referencia no registra el viento fuerte, el validador **no puede** encontrar los
+      fallos peligrosos que busca: el 78 % / 70 % / 60 % es un techo, no una medición. Esto
+      NO dice que el pronóstico sea malo —dice que no sabemos cuán bueno es donde importa—.
+      Antes de mover umbrales por esto hay que repetirlo sobre más meses (el archivo de la
+      CARP tiene desde 2015) y sobre las zonas costeras del validador, no sólo Norden.
+- [ ] **Sesgo del pronóstico con viento fuerte** (`node scripts/carp-eval.mjs viento`). En
+      Pilote Norden el cociente medido/pronosticado **crece con la intensidad**: 1.05 con
+      viento flojo, 1.18 de 10 a 18 kt, 1.25 de 18 a 25, 1.30 por encima. En la franja de
+      18-25 kt las cuatro estaciones coinciden (1.25 a 1.51). Descartada la explicación por
+      altura del anemómetro: el perfil logarítmico predice un cociente constante y chico
+      (1.04 a 15 m, 1.10 a 30 m) y el medido crece. Es una segunda causa de fallos
+      peligrosos además de la niebla.
 - [ ] **Sudestada / bajante: sin validar.** Cero eventos observados en 5 semanas. No es un
       bug a arreglar, es esperar a que pase una de verdad.
 - [ ] **Fragilidad del pipeline:** la retención real de aviationweather.gov es **~3-4 días**

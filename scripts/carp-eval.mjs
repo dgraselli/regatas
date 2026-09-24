@@ -15,6 +15,13 @@
  *     -> Baja (y cachea) el archivo de la CARP, lo promedia a horario y lo cruza
  *        con el viento de Open-Meteo en las mismas coordenadas y horas.
  *
+ *   node scripts/carp-eval.mjs referencia [--dias 92] [--estacion norden]
+ *     -> Audita el "observado" que usa `forecast-eval.mjs`. Ese validador compara
+ *        el pronóstico contra Open-Meteo `past_days`, o sea contra el mismo modelo
+ *        evaluándose a sí mismo. Esto cuenta cuántas horas de viento fuerte REAL
+ *        esa referencia no registra: si se le escapan, el validador no puede ver
+ *        los fallos peligrosos que justamente busca.
+ *
  * El caché vive en validation/.cache/ y va sin trackear: a diferencia de los
  * snapshots del pronóstico, este archivo se puede volver a bajar siempre.
  */
@@ -116,6 +123,30 @@ async function evaluar(station, dias) {
   };
 }
 
+/**
+ * Cuántas horas de viento fuerte medido NO registra la referencia del validador.
+ * Es la pregunta que decide si las cifras de acierto del semáforo son creíbles en
+ * el régimen que importa.
+ */
+async function auditarReferencia(station, dias) {
+  const zip = await fetchArchivo(station, 'wind');
+  const anio = new Date().getFullYear();
+  const csv = (await leerAnio(zip, station, 'wind', anio - 1)) + (await leerAnio(zip, station, 'wind', anio));
+  const med = aHorario(parseViento(csv), 'kt');
+  const fc = await openMeteo(station, dias);
+  const desde = new Date(Date.now() - dias * 86400_000).toISOString().slice(0, 10);
+  const horas = [...med.keys()].filter((h) => h.slice(0, 10) >= desde && fc.vel.has(h)).sort();
+  if (horas.length < 24) return null;
+
+  // Umbrales del semáforo con tolerancia normal (ver SCORING en src/lib/config/boat.ts).
+  const filas = [18, 25].map((u) => {
+    const reales = horas.filter((h) => med.get(h) >= u);
+    const vistas = reales.filter((h) => fc.vel.get(h) >= u);
+    return { u, reales: reales.length, vistas: vistas.length, perdidas: reales.length - vistas.length };
+  });
+  return { horas: horas.length, desde: horas[0], hasta: horas[horas.length - 1], filas };
+}
+
 async function main() {
   const dias = Number(arg('dias', 60));
   const filtro = arg('estacion', null);
@@ -123,6 +154,28 @@ async function main() {
   if (!estaciones.length) {
     console.error(`Estación desconocida. Opciones: ${CARP_STATIONS.map((s) => s.id).join(', ')}`);
     process.exit(1);
+  }
+
+  if (process.argv[2] === 'referencia') {
+    console.log(`\nAuditoría del "observado" del validador — últimos ${dias} días\n`);
+    for (const s of estaciones) {
+      const r = await auditarReferencia(s, dias);
+      if (!r) {
+        console.log(`${s.nombre}: sin datos suficientes\n`);
+        continue;
+      }
+      console.log(`${s.nombre} — ${r.horas} horas, ${r.desde.slice(0, 10)} a ${r.hasta.slice(0, 10)}`);
+      for (const f of r.filas) {
+        const pct = ((100 * f.perdidas) / Math.max(f.reales, 1)).toFixed(0);
+        console.log(
+          `  viento real ≥ ${f.u} kt: ${f.reales} h medidas · la referencia vio ${f.vistas} h → se le escapan ${f.perdidas} h (${pct} %)`,
+        );
+      }
+      console.log();
+    }
+    console.log('Si la referencia no registra el viento fuerte, el validador no puede');
+    console.log('encontrar los fallos peligrosos: sus cifras son un techo, no una medición.\n');
+    return;
   }
 
   console.log(`\nViento medido (CARP) vs pronosticado (Open-Meteo) — últimos ${dias} días\n`);

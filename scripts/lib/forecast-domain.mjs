@@ -10,6 +10,22 @@
  */
 
 export const BASE = 'https://api.open-meteo.com/v1/forecast';
+/**
+ * Archivo (reanálisis ERA5). La API de pronóstico rellena el pasado sólo ~58
+ * días —más atrás devuelve el eje temporal con valores nulos—, así que sin esto
+ * los snapshots viejos no se pueden validar por más que se sigan juntando.
+ *
+ * Medido en el solapamiento (1283 horas, Buenos Aires): las dos fuentes difieren
+ * 0.06 kt de sesgo y 0.08 kt de MAE, y sólo el 2 % de las horas se aparta más de
+ * 2 kt. O sea que combinarlas no mete un escalón en la serie.
+ *
+ * Lo que ERA5 NO trae es visibilidad: devuelve la columna entera en null. La
+ * niebla, entonces, se sigue validando sólo sobre la ventana de la API de
+ * pronóstico.
+ */
+export const ARCHIVE = 'https://archive-api.open-meteo.com/v1/archive';
+/** Latencia del archivo ERA5: pedirle los últimos días devuelve 400. */
+const ARCHIVE_LAG_D = 6;
 export const TZ = 'America/Argentina/Buenos_Aires';
 
 // Umbrales del semáforo (mirror de src/lib/config/boat.ts, perfil normal).
@@ -33,18 +49,11 @@ export const inSector = (d, [a, b]) => { const x = ((d % 360) + 360) % 360; retu
 /** Diferencia angular mínima entre dos rumbos (0..180). */
 export const angularDiff = (a, b) => { const d = Math.abs(((a - b) % 360 + 360) % 360); return Math.min(d, 360 - d); };
 
-export async function fetchHourly(lat, lon, { pastDays = 0, forecastDays = 7 } = {}) {
-  const p = new URLSearchParams({
-    latitude: String(lat), longitude: String(lon),
-    hourly: 'temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,visibility,cloud_cover',
-    wind_speed_unit: 'kn', timezone: TZ,
-    past_days: String(pastDays), forecast_days: String(forecastDays),
-  });
-  const r = await fetch(`${BASE}?${p}`);
-  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
-  const d = await r.json();
-  const h = d.hourly;
-  return h.time.map((time, i) => ({
+const HOURLY_VARS =
+  'temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m,wind_direction_10m,visibility,cloud_cover';
+
+const mapHourly = (h) =>
+  h.time.map((time, i) => ({
     time,
     windKt: h.wind_speed_10m[i],
     gustKt: h.wind_gusts_10m[i],
@@ -54,6 +63,49 @@ export async function fetchHourly(lat, lon, { pastDays = 0, forecastDays = 7 } =
     visibilityM: h.visibility?.[i] ?? null,
     cloudCoverPct: h.cloud_cover?.[i] ?? null,
   }));
+
+const isoDia = (ms) => new Date(ms).toISOString().slice(0, 10);
+
+/**
+ * Serie horaria OBSERVADA desde `from` (YYYY-MM-DD) hasta hoy, combinando el
+ * archivo ERA5 para el grueso y la API de pronóstico para los últimos días, que
+ * el archivo todavía no tiene. Es lo que el validador debe usar como "real":
+ * `fetchHourly` con `pastDays` sólo alcanza ~58 días hacia atrás.
+ */
+export async function fetchObservedHourly(lat, lon, from) {
+  const corte = isoDia(Date.now() - ARCHIVE_LAG_D * 86400_000);
+  const porHora = new Map();
+
+  if (from < corte) {
+    const p = new URLSearchParams({
+      latitude: String(lat), longitude: String(lon), hourly: HOURLY_VARS,
+      wind_speed_unit: 'kn', timezone: TZ, start_date: from, end_date: corte,
+    });
+    const r = await fetch(`${ARCHIVE}?${p}`);
+    if (r.ok) for (const p2 of mapHourly((await r.json()).hourly)) porHora.set(p2.time, p2);
+  }
+
+  // La cola se pide con la ventana COMPLETA, no sólo los días que al archivo le
+  // faltan: ERA5 devuelve la columna `visibility` entera en null, así que la
+  // niebla sólo se puede validar con lo que sirve la API de pronóstico. Pedir de
+  // más no cuesta (una sola llamada) y evita que validar más días de viento
+  // achique la ventana de niebla.
+  const cola = await fetchHourly(lat, lon, { pastDays: 92, forecastDays: 1 });
+  for (const p2 of cola) if (Number.isFinite(p2.windKt)) porHora.set(p2.time, p2);
+
+  return [...porHora.values()].sort((a, b) => a.time.localeCompare(b.time));
+}
+
+export async function fetchHourly(lat, lon, { pastDays = 0, forecastDays = 7 } = {}) {
+  const p = new URLSearchParams({
+    latitude: String(lat), longitude: String(lon),
+    hourly: HOURLY_VARS,
+    wind_speed_unit: 'kn', timezone: TZ,
+    past_days: String(pastDays), forecast_days: String(forecastDays),
+  });
+  const r = await fetch(`${BASE}?${p}`);
+  if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
+  return mapHourly((await r.json()).hourly);
 }
 
 /** Mirror de src/lib/domain/surge.ts (detección de eventos; sin corroboración marina). */

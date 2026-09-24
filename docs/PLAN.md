@@ -176,17 +176,21 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       de acierto del semáforo está medido contra una vara que no ve el peligro: es un techo,
       no una medición. No dice que el pronóstico sea malo, dice que no sabemos cuán bueno es
       donde importa.
-- [ ] **Sólo se validan los últimos ~59 días, aunque el archivo de snapshots crezca.**
-      Open-Meteo devuelve el eje temporal completo del rango pedido pero con valores NULOS
-      más allá de su retención real: con `past_days=92` llegan unos 58 días de datos y el
-      resto viene vacío. Hasta el 2026-09-24 `scoreDays` armaba igual esos días con viento 0
-      y el validador los contaba como fallos, lo que hacía caer el acierto de viento de 84 %
-      a 56 % a medida que crecía el archivo —una degradación inventada—. Arreglado saltando
-      los días sin dato, pero eso deja **los snapshots viejos sin usar**: hoy se comparan
-      1616 de 2434 días capturados. Para aprovechar la serie larga hay que traer el observado
-      del **archivo ERA5** (`archive-api.open-meteo.com`, el mismo que usa `carp-eval.mjs`)
-      para las fechas fuera de la ventana. Es lo que justifica haber estado juntando
-      snapshots desde junio.
+- [x] **Validar toda la serie, no sólo la ventana de la API de pronóstico.** (hecho el
+      2026-09-24) Open-Meteo devuelve el eje temporal completo del rango pedido pero con
+      valores NULOS más allá de su retención real (~58 días con `past_days=92`). `scoreDays`
+      armaba igual esos días con viento 0 y el validador los contaba como fallos: el acierto
+      de viento caía de 84 % a 56 % **a medida que crecía el archivo**, una degradación
+      inventada que iba a empeorar sola. Arreglado saltando los días sin dato, y el observado
+      pasa a combinar el archivo **ERA5** para el grueso con la API de pronóstico para la
+      cola (`fetchObservedHourly`). Se validan 2446 comparaciones sobre los 3 meses
+      capturados en vez de 1616 sobre 59 días, con el mismo resultado por mes (81-88 %), que
+      es la señal de que la extensión no distorsiona nada.
+
+      **Queda una limitación**: ERA5 devuelve `visibility` entera en null, así que la
+      **niebla se sigue validando sólo sobre ~58 días** (n=1570 de 2446). Es otra razón para
+      terminar el consumo del `metar-observado.jsonl`, que sí tiene visibilidad medida y
+      serie larga.
 - [ ] **Sudestada / bajante: sin validar.** Cero eventos observados en 5 semanas. No es un
       bug a arreglar, es esperar a que pase una de verdad.
 - [ ] **Fragilidad del pipeline:** la retención real de aviationweather.gov es **~3-4 días**

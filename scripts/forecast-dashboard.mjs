@@ -30,7 +30,7 @@
  */
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import {
-  fetchHourly, scoreDays, dateOf, angularDiff, SCORING, SAFE, DANGER,
+  fetchObservedHourly, scoreDays, dateOf, angularDiff, SCORING, SAFE, DANGER,
 } from './lib/forecast-domain.mjs';
 
 const OUT_DIR = 'public/validacion';
@@ -75,7 +75,10 @@ function judge(s) {
     rafaga: { hit: Math.abs(s.predGust - s.obsGust) <= GUST_OK, ev: null },
     direccion: { hit: (s.predWind >= DIR_MIN_WIND && s.obsWind >= DIR_MIN_WIND) ? angularDiff(s.predDir, s.obsDir) <= DIR_OK : null, ev: null },
     lluvia: { hit: rainCat(s.predRain) === rainCat(s.obsRain), ev: rainCat(s.obsRain) !== 'seco' },
-    niebla: { hit: s.predFog == null ? null : s.predFog === s.obsFog, ev: s.predFog == null ? null : s.obsFog },
+    niebla: {
+      hit: s.predFog == null || s.obsFog == null ? null : s.predFog === s.obsFog,
+      ev: s.predFog == null || s.obsFog == null ? null : s.obsFog,
+    },
     marea: { hit: s.predSurge === s.obsSurge, ev: s.obsSurge },
     decision: { hit: SAFE.has(s.predLevel) === SAFE.has(s.obsLevel), ev: null },
     severidad: { hit: decisionOf(s.predLevel) === decisionOf(s.obsLevel), ev: null },
@@ -110,8 +113,7 @@ async function main() {
     const dates = ss.flatMap((s) => s.days.map((d) => d.date)).filter((d) => d <= today);
     if (!dates.length) continue;
     const minDate = dates.reduce((a, b) => (a < b ? a : b));
-    const back = Math.ceil((Date.now() - new Date(minDate + 'T00:00').getTime()) / 86400000) + 1;
-    const hourly = await fetchHourly(loc.lat, loc.lon, { pastDays: Math.min(92, Math.max(1, back)), forecastDays: 1 });
+    const hourly = await fetchObservedHourly(loc.lat, loc.lon, minDate);
     const { days, surge } = scoreDays(hourly);
     observed.set(name, { daysByDate: new Map(days.map((d) => [d.date, d])), surge });
   }
@@ -141,7 +143,11 @@ async function main() {
         predDir: p.metrics.windDirDominant, obsDir: a.metrics.windDirDominant,
         predRain: p.metrics.precipTotalMm, obsRain: a.metrics.precipTotalMm,
         predFog: fogFlag(p.metrics.visibilityMinM ?? null),
-        obsFog: fogFlag(a.metrics.visibilityMinM ?? null) ?? false,
+        // Sin visibilidad observada no se puede juzgar: dejarlo en `false` contaría
+        // como "no hubo niebla" y convertiría cada día sin dato en un fallo del
+        // pronóstico. Es el mismo error que el viento 0 de los días fuera de
+        // ventana. ERA5 no trae visibilidad, así que estos días existen.
+        obsFog: fogFlag(a.metrics.visibilityMinM ?? null),
         predSurge: surgeOn(s.surge, p.date), obsSurge: surgeOn(obs.surge, p.date),
         predLevel: p.level, obsLevel: a.level,
       };

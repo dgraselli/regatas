@@ -32,13 +32,13 @@ offline) · Zod (validación de APIs) · Vitest (tests de dominio). PWA con mani
 - **Panel `/`** — semáforo 🟢🟡🔴 por día (viento/ráfagas/lluvia/**niebla**/**olas**/surge), con:
   - **Ícono de cielo** por tarjeta (☀️ ⛅ ☁️ 🌦️ 🌧️) según nubosidad/lluvia.
   - **Motivos con íconos** (🌬️ 💨 🌧️ 🌫️ 🌊…) — `src/lib/reasonIcon.ts`.
-  - **Resumen de marea**: nivel observado (INA) + tendencia + aviso de agua alta/baja para
+  - **Resumen de marea**: nivel observado (SHN, respaldo INA) + tendencia + aviso de agua alta/baja para
     la amarra (usa los niveles seguros de la amarra si están definidos).
   - **Gráfico horario**: barras viento/ráfagas, **flechas de dirección** por hora, líneas de
     umbral (poco viento azul —solo si aplica—, precaución, peligro) y **bandas de
     visibilidad reducida**.
 - **Alertas `/alertas`** — sudestada/bajante + **niebla/visibilidad** (con ventana horaria)
-  + nivel de agua observado del INA.
+  + nivel de agua observado (SHN, respaldo INA).
 - **Cruce `/cruce`** — rankea salidas con la polar del barco. Considera **niebla, marea y
   olas** (ola por tramo respecto del rumbo: proa→cabeceo, través→balanceo), da **semáforo por
   salida**, lista en **orden cronológico**, evalúa **7 días**, usa la **tolerancia** del usuario
@@ -49,8 +49,8 @@ offline) · Zod (validación de APIs) · Vitest (tests de dominio). PWA con mani
 - **Ayuda `/ayuda`** — guía de uso.
 - **Polar generada por eslora** (`polarModel.ts`): velocidad de casco ≈ 1.34·√LWL.
 - **Datos**: Open-Meteo (forecast: viento/ráfagas/dir/lluvia/temp/**visibility**/
-  **cloud_cover**; marine: nivel del mar/olas) e INA (nivel observado). **Switch de mocks**.
-  SMN/SHN: solo referencia, no se consultan.
+  **cloud_cover**; marine: nivel del mar/olas) y nivel observado del SHN (vía Worker; INA de respaldo).
+  **Switch de mocks**. SMN: solo referencia, no se consulta.
 - **Niebla** (`src/lib/domain/fog.ts` + visibilidad en scoring): la niebla matinal que
   despeja **no** marca el día rojo si queda ventana navegable (`FOG_NAVIGABLE_WINDOW_H`).
 - **~70 tests** en verde. `tsc`, `lint` y `build` OK. PWA instalable + offline.
@@ -102,6 +102,12 @@ Preview "de producción": es `output: export`, así que **`next start` no sirve*
       CORS abierto), variable altura hidrométrica (var=2). La estación se elige por cercanía
       al lugar activo (`src/lib/config/inaStations.ts`, `inaHidrologico.ts`). Pendiente menor:
       ampliar/curar el catálogo de estaciones.
+- [x] **Nivel observado desde el SHN** (2026-09-24): el INA republica los mareógrafos del
+      SHN con 1–2 h de atraso; el SHN los publica minutos después de medir. Se lee el CSV
+      `hidro.gov.ar/oceanografia/AlturasHorarias.asp?export=csv` vía el Worker
+      (`api.regatas.com.ar/shn/alturas`, 5 min de caché) y el INA queda de respaldo.
+      Pendiente: volver a medir el margen ±0.20 m del "ahora" (se midió con el atraso del
+      INA) y evaluar bajar `OBSERVED_STALE_MS` de 3 h a ~2 h.
 - [ ] **Editar** barcos/lugares existentes (hoy solo alta/baja/selección).
       Ya existe `updateBoat` / `updateLocation` en `ProfileContext` — falta UI.
 - [ ] **Importar/exportar perfil** (JSON) para llevarlo a otro dispositivo, ya que no

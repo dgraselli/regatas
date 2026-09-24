@@ -19,7 +19,7 @@ npx tsc --noEmit  # typecheck
 
 **Mocks vs datos reales:** `NEXT_PUBLIC_USE_MOCKS` (default `true`). En este repo el
 `.env.local` lo pone en **`false`**, así que `npm run dev` usa **datos reales** (Open-Meteo /
-INA). Para correr sin red: `NEXT_PUBLIC_USE_MOCKS=true npm run dev`.
+SHN / INA). Para correr sin red: `NEXT_PUBLIC_USE_MOCKS=true npm run dev`.
 
 **Preview "de producción":** el proyecto es `output: export` → **`next start` NO sirve**.
 Es `npm run build` y luego `npx serve out -l 3000`. El export estático **no tiene HMR**:
@@ -53,7 +53,7 @@ reconstruir.
   visibilidad/niebla; lo usa el validador `scripts/metar-eval.mjs` y el panel vía `services/metar.ts` → proxy `api.regatas.com.ar/metar`, Cloudflare Worker en `worker/` —
   subdominio propio porque el sitio (GitHub Pages) tiene el apex en DNS-only)…
 - `src/lib/profile/` — perfil del usuario en localStorage.
-- `src/lib/services/` — borde de red (Open-Meteo / INA) + mocks.
+- `src/lib/services/` — borde de red (Open-Meteo / SHN / INA) + mocks.
 - `src/lib/config/` — umbrales del semáforo y construcción de rutas/polar.
 - `scripts/` — **ops de validación, no son parte de la app** (Node suelto, sin build):
   `snapshot-diario.sh` (cron 6:10, captura las 6 zonas), `forecast-report.mjs` (reporte
@@ -111,5 +111,8 @@ regenerar y commitear.
   lugares (con niveles seguros de amarra), tolerancia, y **umbral de poco viento**
   configurable (`lowWindKt`, default 6).
 - Datos: Open-Meteo (forecast: viento, ráfagas, dir, lluvia, temp, **visibility**,
-  **cloud_cover**; marine: nivel del mar, **olas: altura/dirección/período**) e INA (nivel
-  observado). SMN/SHN: solo referencia, no se consultan (ver memoria/PLAN).
+  **cloud_cover**; marine: nivel del mar, **olas: altura/dirección/período**) y nivel
+  observado del **SHN** (CSV de alturas horarias vía el Worker, ruta
+  `api.regatas.com.ar/shn/alturas`, porque el SHN no trae CORS; lo parsea
+  `domain/shn.ts`) con **INA como respaldo** (mismos mareógrafos, pero publica con 1–2 h de
+  atraso contra minutos del SHN). SMN: solo referencia, no se consulta.

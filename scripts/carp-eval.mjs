@@ -31,10 +31,39 @@
  *        esa referencia no registra: si se le escapan, el validador no puede ver
  *        los fallos peligrosos que justamente busca.
  *
- * El caché vive en validation/.cache/ y va sin trackear: a diferencia de los
- * snapshots del pronóstico, este archivo se puede volver a bajar siempre.
+ * Cada subcomando guarda su resumen en validation/carp-viento.json (sólo su
+ * sección: correr uno no borra lo de los otros). Ese archivo SÍ se versiona —son
+ * pocas KB y diffearlo entre corridas es como se va a notar si el sesgo se
+ * mueve—; el caché de ZIPs, en cambio, vive en validation/.cache/ y va sin
+ * trackear, porque a diferencia de los snapshots del pronóstico se puede volver
+ * a bajar siempre.
  */
+import { readFile, writeFile } from 'node:fs/promises';
 import { CARP_STATIONS, fetchArchivo, leerAnio, parseViento, aHorario } from './lib/carp.mjs';
+
+/**
+ * Resumen persistido. Sin esto el resultado se iba con la terminal: los números
+ * quedaban sólo en la conversación en que se corrió el script. Son pocas KB y se
+ * versionan, así que se pueden diffear entre corridas —que es como se va a notar
+ * si el sesgo se mueve— y los puede leer el dashboard sin recalcular nada. El
+ * histórico de 11 años son ~40 pedidos a ERA5: no es algo para rehacer seguido.
+ */
+const RESUMEN = 'validation/carp-viento.json';
+
+/** Escribe una sección sin pisar las otras: cada subcomando actualiza la suya. */
+async function guardar(seccion, datos) {
+  let previo = {};
+  try {
+    previo = JSON.parse(await readFile(RESUMEN, 'utf8'));
+  } catch {
+    /* primera corrida */
+  }
+  const salida = { ...previo, [seccion]: { corridaEl: new Date().toISOString(), ...datos } };
+  await writeFile(RESUMEN, `${JSON.stringify(salida, null, 2)}\n`);
+  console.log(`Resumen guardado en ${RESUMEN} (sección "${seccion}").\n`);
+}
+
+const deMapa = (m) => Object.fromEntries([...m].map(([k, v]) => [k, { n: v.a.length, medido: media(v.a), modelo: media(v.b), cociente: media(v.a) / media(v.b) }]));
 
 const arg = (nombre, def) => {
   const i = process.argv.indexOf(`--${nombre}`);
@@ -264,6 +293,7 @@ async function main() {
   if (process.argv[2] === 'historico') {
     const desde = Number(arg('desde', 2016));
     const hasta = Number(arg('hasta', new Date().getFullYear()));
+    const guardadas = [];
     for (const s of estaciones) {
       console.log(`\n${s.nombre} — medido (CARP) vs ERA5, ${desde} a ${hasta}`);
       console.log('(ERA5 no es el producto que sirve la app; mide si el modelo subestima, no el error del pronóstico)\n');
@@ -293,14 +323,18 @@ async function main() {
         console.log(`    ${etiqueta.padEnd(9)} n=${String(t.a.length).padStart(6)}  cociente ${(media(t.a) / media(t.b)).toFixed(2)}`);
       }
       console.log();
+      guardadas.push({ id: s.id, nombre: s.nombre, abierta: s.abierta, porAnio, franjas: deMapa(franjas), temporadas: deMapa(temporadas) });
     }
+    await guardar('historico', { desde, hasta, fuente: 'ERA5 (archive-api.open-meteo.com)', estaciones: guardadas });
     return;
   }
 
   if (process.argv[2] === 'referencia') {
     console.log(`\nAuditoría del "observado" del validador — últimos ${dias} días\n`);
+    const guardadas = [];
     for (const s of estaciones) {
       const r = await auditarReferencia(s, dias);
+      if (r) guardadas.push({ id: s.id, nombre: s.nombre, ...r });
       if (!r) {
         console.log(`${s.nombre}: sin datos suficientes\n`);
         continue;
@@ -316,6 +350,7 @@ async function main() {
     }
     console.log('Si la referencia no registra el viento fuerte, el validador no puede');
     console.log('encontrar los fallos peligrosos: sus cifras son un techo, no una medición.\n');
+    await guardar('referencia', { dias, fuente: 'Open-Meteo past_days (lo que usa forecast-eval.mjs)', estaciones: guardadas });
     return;
   }
 
@@ -369,6 +404,29 @@ async function main() {
     );
     console.log();
   }
+
+  await guardar('reciente', {
+    dias,
+    fuente: 'Open-Meteo past_days (el mismo producto que sirve la app)',
+    estaciones: ok.map((r) => ({
+      id: r.station.id,
+      nombre: r.station.nombre,
+      abierta: r.station.abierta,
+      n: r.n,
+      desde: r.desde,
+      hasta: r.hasta,
+      medido: r.medido,
+      pronosticado: r.pronosticado,
+      cociente: r.cociente,
+      mae: r.mae,
+      r: r.r,
+      dirMae: r.dirMae,
+      dirMediana: r.dirMediana,
+      cuantiles: r.cuantiles,
+      porMedido: r.rangos,
+      porModelo: r.rangosModelo,
+    })),
+  });
 }
 
 main().catch((e) => {

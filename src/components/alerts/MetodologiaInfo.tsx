@@ -39,12 +39,13 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
             </li>
             <li>
               <span className="text-slate-300">•</span> <strong>Nivel de agua observado:</strong>{' '}
-              INA — Sistema de Alerta Hidrológico (API pública), altura hidrométrica de la
+              SHN — Servicio de Hidrografía Naval (alturas horarias), mareógrafo de la
               estación más cercana
               {stationName ? <> (hoy: <strong>{stationName}</strong>)</> : null}. Es un dato{' '}
               <em>medido</em>, no un pronóstico. El mareógrafo mide a los :45 de cada hora y el
-              INA lo publica en la hora siguiente, así que lo más nuevo que se puede ver tiene
-              normalmente <strong>entre 1 y 2 h</strong>.
+              SHN lo publica minutos después, así que el último dato tiene{' '}
+              <strong>menos de 1 h</strong>. Si el SHN no responde se usa el INA (Sistema de
+              Alerta Hidrológico), que publica los mismos mareógrafos con 1 a 2 h de atraso.
             </li>
           </ul>
         </div>

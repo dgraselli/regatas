@@ -117,8 +117,9 @@ export function TideSummary({
 }) {
   const obs = status?.observations ?? [];
   const last = obs[obs.length - 1];
-  // Antigüedad del dato MEDIDO (no de la descarga): el INA publica con ~1 h de
-  // atraso, así que el nivel que mostramos nunca es exactamente el de ahora.
+  // Antigüedad del dato MEDIDO (no de la descarga): el SHN publica minutos
+  // después de medir a los :45 (el INA, de respaldo, con 1–2 h), así que el
+  // nivel que mostramos nunca es exactamente el de ahora.
   const age = useObservationAge(last?.time);
   const now = useNowInTz(timezone);
   // Evento más severo primero.

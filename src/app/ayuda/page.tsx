@@ -196,7 +196,7 @@ export default function AyudaPage() {
           </p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
-              <strong>Nivel de agua observado</strong> del INA (estación más cercana): un dato{' '}
+              <strong>Nivel de agua observado</strong> del SHN (estación más cercana): un dato{' '}
               <em>medido</em>, no un pronóstico.
             </li>
             <li>

@@ -26,10 +26,11 @@ describe('MetodologiaInfo', () => {
     expect(screen.getByText(/La Plata \(INA\)/)).toBeDefined();
   });
 
-  it('distingue lo medido de lo estimado y avisa del atraso del INA', () => {
+  it('distingue lo medido de lo estimado y avisa del atraso de cada fuente', () => {
     const { container } = render(<MetodologiaInfo />);
     const t = container.textContent ?? '';
-    expect(t).toContain('entre 1 y 2 h');
+    expect(t).toContain('menos de 1 h');
+    expect(t).toContain('1 a 2 h de atraso');
     expect(t).toMatch(/línea llena/);
     expect(t).toMatch(/reancla/);
   });

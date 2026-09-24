@@ -11,5 +11,11 @@ export function useWaterLevel(loc: { lat: number; lon: number } | null) {
     queryKey: ['water-level', station?.seriesId ?? 'none'],
     queryFn: () => getWaterStatus(loc!),
     enabled: !!loc,
+    // El INA publica una medición por hora: 30 min de staleTime (el default)
+    // dejaba el nivel hasta una hora y media atrás. Y como con el pronóstico,
+    // una PWA abierta en pantalla no pierde el foco: sin intervalo no se
+    // renovaba nunca.
+    staleTime: 10 * 60 * 1000,
+    refetchInterval: 15 * 60 * 1000,
   });
 }

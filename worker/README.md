@@ -1,4 +1,4 @@
-# Worker METAR (proxy de visibilidad observada)
+# Worker METAR + SHN (proxy de visibilidad y marea observadas)
 
 Proxy serverless de solo lectura para METAR (aviationweather.gov). Resuelve que la
 app estática (GitHub Pages, detrás de Cloudflare) no puede llamar a la API por falta
@@ -15,6 +15,19 @@ de CORS. Ver el porqué en `metar.js` y en `docs/PLAN.md`.
 > El sitio (GitHub Pages) tiene el apex en **DNS-only** (no proxeado por Cloudflare),
 > así que una Route sobre `regatas.com.ar/...` no interceptaría. Por eso el Worker
 > usa un subdominio propio y la app lo llama cross-origin (habilitado por el CORS).
+
+### Ruta `/shn/alturas` (marea)
+
+- `api.regatas.com.ar/shn/alturas` → CSV de alturas horarias del SHN
+  (`hidro.gov.ar/oceanografia/AlturasHorarias.asp?export=csv`), pasado a UTF-8,
+  cacheado 5 min y con CORS. URL fija, sin parámetros.
+- Es la fuente principal del nivel observado: el SHN publica minutos después de
+  medir y el INA (respaldo) con 1 a 2 h de atraso. Si esta ruta falla, la app cae
+  al INA sola.
+
+```bash
+curl "https://api.regatas.com.ar/shn/alturas" | head -3
+```
 
 ## Requisitos
 

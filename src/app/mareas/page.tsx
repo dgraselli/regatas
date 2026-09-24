@@ -59,7 +59,7 @@ export default function MareasPage() {
       <Card>
         <CardHeader
           title="Nivel de agua"
-          subtitle="Medido por el INA (estación más cercana) y estimado hasta 12 h"
+          subtitle="Medido por el SHN (estación más cercana) y estimado hasta 12 h"
         />
         <div className="px-4 pb-4 pt-3">
           {water.isLoading && <Loading />}

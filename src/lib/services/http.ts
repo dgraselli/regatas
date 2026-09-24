@@ -11,7 +11,18 @@ export interface FetchOptions {
 }
 
 export async function getJson<T>(url: string, opts: FetchOptions = {}): Promise<T> {
-  const { timeoutMs = 12_000 } = opts;
+  return (await get(url, opts, (res) => res.json())) as T;
+}
+
+export async function getText(url: string, opts: FetchOptions = {}): Promise<string> {
+  return get(url, opts, (res) => res.text());
+}
+
+async function get<T>(
+  url: string,
+  { timeoutMs = 12_000 }: FetchOptions,
+  read: (res: Response) => Promise<T>,
+): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -19,7 +30,7 @@ export async function getJson<T>(url: string, opts: FetchOptions = {}): Promise<
     if (!res.ok) {
       throw new Error(`HTTP ${res.status} al pedir ${url}`);
     }
-    return (await res.json()) as T;
+    return await read(res);
   } finally {
     clearTimeout(timer);
   }

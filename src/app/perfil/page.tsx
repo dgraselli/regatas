@@ -498,7 +498,7 @@ function LocationLevels({
           />
         </Field>
         <p className="text-xs text-slate-400 max-w-sm">
-          Referidos al mismo nivel que muestra el INA. Si los definís, el panel avisa cuando
+          Referidos al mismo nivel que muestran el SHN y el INA. Si los definís, el panel avisa cuando
           el agua queda por debajo del mínimo (riesgo de varar) o por encima del máximo.
         </p>
       </div>

@@ -15,6 +15,15 @@
  *     -> Baja (y cachea) el archivo de la CARP, lo promedia a horario y lo cruza
  *        con el viento de Open-Meteo en las mismas coordenadas y horas.
  *
+ *   node scripts/carp-eval.mjs historico [--estacion norden] [--desde 2016] [--hasta 2026]
+ *     -> La misma comparación pero sobre AÑOS, contra el archivo ERA5 de
+ *        Open-Meteo. Ojo: ERA5 no es el mismo producto que sirve la app (la API
+ *        de pronóstico sólo llega 92 días hacia atrás), así que esto responde
+ *        "¿el modelo subestima el viento sobre el río?" y no "¿cuánto se
+ *        equivoca el pronóstico que ve el usuario?". Sirve para saber si el
+ *        sesgo es estable entre años y estaciones del año, que es lo que falta
+ *        para animarse a mover un umbral.
+ *
  *   node scripts/carp-eval.mjs referencia [--dias 92] [--estacion norden]
  *     -> Audita el "observado" que usa `forecast-eval.mjs`. Ese validador compara
  *        el pronóstico contra Open-Meteo `past_days`, o sea contra el mismo modelo
@@ -43,6 +52,10 @@ const correlacion = (A, B) => {
   const cov = media(A.map((a, i) => (a - ma) * (B[i] - mb)));
   return cov / (desvio(A) * desvio(B));
 };
+const cuantil = (a, p) => {
+  const z = [...a].sort((x, y) => x - y);
+  return z[Math.floor(p * (z.length - 1))];
+};
 /** Diferencia angular con signo, en [-180, 180]. */
 const difAngular = (a, b) => ((((a - b) % 360) + 540) % 360) - 180;
 
@@ -69,6 +82,38 @@ async function openMeteo(station, dias) {
   return { vel, dir };
 }
 
+/** Viento de ERA5 (archivo) para un año calendario completo. */
+async function era5(station, anio) {
+  const p = new URLSearchParams({
+    latitude: String(station.lat),
+    longitude: String(station.lon),
+    hourly: 'wind_speed_10m',
+    wind_speed_unit: 'kn',
+    timezone: 'America/Argentina/Buenos_Aires',
+    start_date: `${anio}-01-01`,
+    // ERA5 tiene ~5 días de latencia: pedir hasta fin del año en curso da 400.
+    end_date: [`${anio}-12-31`, new Date(Date.now() - 6 * 86400_000).toISOString().slice(0, 10)]
+      .sort()[0],
+  });
+  const res = await fetch(`https://archive-api.open-meteo.com/v1/archive?${p}`);
+  if (!res.ok) throw new Error(`Archivo Open-Meteo devolvió ${res.status} para ${anio}`);
+  const d = await res.json();
+  const vel = new Map();
+  d.hourly.time.forEach((t, i) => {
+    if (d.hourly.wind_speed_10m[i] != null) vel.set(t.slice(0, 16), d.hourly.wind_speed_10m[i]);
+  });
+  return vel;
+}
+
+/** Trimestre austral, para ver si el sesgo depende de la época del año. */
+const estacionDelAnio = (iso) => {
+  const m = Number(iso.slice(5, 7));
+  if (m <= 2 || m === 12) return 'verano';
+  if (m <= 5) return 'otoño';
+  if (m <= 8) return 'invierno';
+  return 'primavera';
+};
+
 async function evaluar(station, dias) {
   const zip = await fetchArchivo(station, 'wind');
   const anio = new Date().getFullYear();
@@ -88,20 +133,37 @@ async function evaluar(station, dias) {
   const A = horas.map((h) => medKt.get(h)); // medido
   const B = horas.map((h) => fc.vel.get(h)); // pronosticado
 
-  // Sesgo por rango de intensidad: un modelo puede acertar con viento flojo y
-  // quedarse corto justo donde el semáforo decide.
-  const rangos = [
+  // Se agrupa por intensidad de LAS DOS series a propósito.
+  //
+  // Agrupar sólo por el valor medido parece mostrar que el sesgo crece con el
+  // viento, pero es un espejismo: al quedarse con las horas de medición alta se
+  // eligen también las horas en que la medición estuvo alta POR RUIDO, y el
+  // cociente se infla. Es regresión a la media, y agrupando por el modelo el
+  // efecto se da vuelta. Si el cociente sube en una vista y baja en la otra, el
+  // sesgo es plano y lo que se ve es el artefacto. La prueba limpia son los
+  // cuantiles, que no condicionan por nada.
+  const franjas = [
     ['0-10 kt', (v) => v < 10],
     ['10-18 kt', (v) => v >= 10 && v < 18],
     ['18-25 kt', (v) => v >= 18 && v < 25],
     ['> 25 kt', (v) => v >= 25],
-  ].map(([etiqueta, test]) => {
-    const idx = A.map((v, i) => (test(v) ? i : -1)).filter((i) => i >= 0);
-    if (idx.length < 10) return { etiqueta, n: idx.length };
-    const a = idx.map((i) => A[i]);
-    const b = idx.map((i) => B[i]);
-    return { etiqueta, n: idx.length, medido: media(a), pronosticado: media(b), cociente: media(a) / media(b) };
-  });
+  ];
+  const agrupar = (porSerie) =>
+    franjas.map(([etiqueta, test]) => {
+      const idx = porSerie.map((v, i) => (test(v) ? i : -1)).filter((i) => i >= 0);
+      if (idx.length < 10) return { etiqueta, n: idx.length };
+      const a = idx.map((i) => A[i]);
+      const b = idx.map((i) => B[i]);
+      return { etiqueta, n: idx.length, medido: media(a), pronosticado: media(b), cociente: media(a) / media(b) };
+    });
+  const rangos = agrupar(A);
+  const rangosModelo = agrupar(B);
+  const cuantiles = [0.5, 0.75, 0.9, 0.95, 0.99].map((q) => ({
+    q,
+    medido: cuantil(A, q),
+    pronosticado: cuantil(B, q),
+    cociente: cuantil(A, q) / cuantil(B, q),
+  }));
 
   const dirs = horas
     .filter((h) => medDir.has(h) && fc.dir.has(h))
@@ -118,6 +180,8 @@ async function evaluar(station, dias) {
     mae: media(A.map((v, i) => Math.abs(v - B[i]))),
     r: correlacion(A, B),
     rangos,
+    rangosModelo,
+    cuantiles,
     dirMediana: dirs.length ? dirs.slice().sort((x, y) => x - y)[Math.floor(dirs.length / 2)] : null,
     dirMae: dirs.length ? media(dirs.map(Math.abs)) : null,
   };
@@ -147,6 +211,47 @@ async function auditarReferencia(station, dias) {
   return { horas: horas.length, desde: horas[0], hasta: horas[horas.length - 1], filas };
 }
 
+/**
+ * Recorre año por año para no tener en memoria una década de serie de 6 minutos.
+ * Devuelve el acumulado por franja de intensidad y por estación del año.
+ */
+async function historico(station, desde, hasta) {
+  const zip = await fetchArchivo(station, 'wind');
+  const porAnio = [];
+  const franjas = new Map(); // etiqueta -> { a: [], b: [] }
+  const temporadas = new Map();
+
+  const guardar = (mapa, clave, medido, pronosticado) => {
+    const cur = mapa.get(clave) ?? { a: [], b: [] };
+    cur.a.push(medido);
+    cur.b.push(pronosticado);
+    mapa.set(clave, cur);
+  };
+
+  for (let anio = desde; anio <= hasta; anio++) {
+    const csv = await leerAnio(zip, station, 'wind', anio);
+    if (!csv) continue;
+    const med = aHorario(parseViento(csv), 'kt');
+    if (med.size < 100) continue;
+    const ref = await era5(station, anio);
+    const horas = [...med.keys()].filter((h) => ref.has(h)).sort();
+    if (horas.length < 500) continue;
+
+    const A = horas.map((h) => med.get(h));
+    const B = horas.map((h) => ref.get(h));
+    porAnio.push({ anio, n: horas.length, medido: media(A), pronosticado: media(B), cociente: media(A) / media(B), r: correlacion(A, B) });
+
+    horas.forEach((h, i) => {
+      const v = A[i];
+      const franja = v < 10 ? '0-10 kt' : v < 18 ? '10-18 kt' : v < 25 ? '18-25 kt' : '> 25 kt';
+      guardar(franjas, franja, v, B[i]);
+      guardar(temporadas, estacionDelAnio(h), v, B[i]);
+    });
+    process.stderr.write(`  …${anio} (${horas.length} h)\n`);
+  }
+  return { porAnio, franjas, temporadas };
+}
+
 async function main() {
   const dias = Number(arg('dias', 60));
   const filtro = arg('estacion', null);
@@ -154,6 +259,42 @@ async function main() {
   if (!estaciones.length) {
     console.error(`Estación desconocida. Opciones: ${CARP_STATIONS.map((s) => s.id).join(', ')}`);
     process.exit(1);
+  }
+
+  if (process.argv[2] === 'historico') {
+    const desde = Number(arg('desde', 2016));
+    const hasta = Number(arg('hasta', new Date().getFullYear()));
+    for (const s of estaciones) {
+      console.log(`\n${s.nombre} — medido (CARP) vs ERA5, ${desde} a ${hasta}`);
+      console.log('(ERA5 no es el producto que sirve la app; mide si el modelo subestima, no el error del pronóstico)\n');
+      const { porAnio, franjas, temporadas } = await historico(s, desde, hasta);
+      if (!porAnio.length) {
+        console.log('  sin años comparables\n');
+        continue;
+      }
+      console.log('  año      horas   medido  ERA5   cociente      r');
+      for (const a of porAnio) {
+        console.log(`  ${a.anio}   ${String(a.n).padStart(6)}   ${a.medido.toFixed(2).padStart(5)}  ${a.pronosticado.toFixed(2).padStart(5)}    ${a.cociente.toFixed(2)}      ${a.r >= 0 ? '+' : ''}${a.r.toFixed(2)}`);
+      }
+      const cocientes = porAnio.map((a) => a.cociente);
+      console.log(`  → cociente entre ${Math.min(...cocientes).toFixed(2)} y ${Math.max(...cocientes).toFixed(2)} (desvío ${desvio(cocientes).toFixed(3)})`);
+
+      console.log('\n  por intensidad medida (todos los años juntos)');
+      for (const etiqueta of ['0-10 kt', '10-18 kt', '18-25 kt', '> 25 kt']) {
+        const f = franjas.get(etiqueta);
+        if (!f || f.a.length < 50) continue;
+        console.log(`    ${etiqueta.padEnd(9)} n=${String(f.a.length).padStart(6)}  medido ${media(f.a).toFixed(1).padStart(5)}  ERA5 ${media(f.b).toFixed(1).padStart(5)}  cociente ${(media(f.a) / media(f.b)).toFixed(2)}`);
+      }
+
+      console.log('\n  por estación del año');
+      for (const etiqueta of ['verano', 'otoño', 'invierno', 'primavera']) {
+        const t = temporadas.get(etiqueta);
+        if (!t || t.a.length < 50) continue;
+        console.log(`    ${etiqueta.padEnd(9)} n=${String(t.a.length).padStart(6)}  cociente ${(media(t.a) / media(t.b)).toFixed(2)}`);
+      }
+      console.log();
+    }
+    return;
   }
 
   if (process.argv[2] === 'referencia') {
@@ -194,9 +335,19 @@ async function main() {
     if (r.dirMediana != null) {
       console.log(`  dirección: error medio ${r.dirMae.toFixed(0)}°, sesgo mediano ${r.dirMediana >= 0 ? '+' : ''}${r.dirMediana.toFixed(0)}°`);
     }
-    for (const b of r.rangos) {
-      if (b.cociente == null) continue;
-      console.log(`    ${b.etiqueta.padEnd(9)} n=${String(b.n).padStart(4)}  medido ${b.medido.toFixed(1)}  pron. ${b.pronosticado.toFixed(1)}  cociente ${b.cociente.toFixed(2)}`);
+    console.log('  cuantiles (sin condicionar: es la vista limpia del sesgo)');
+    for (const c of r.cuantiles) {
+      console.log(`    p${String(c.q * 100).padStart(2)}  medido ${c.medido.toFixed(1).padStart(5)}  pron. ${c.pronosticado.toFixed(1).padStart(5)}  cociente ${c.cociente.toFixed(2)}`);
+    }
+    for (const [etiqueta, lista] of [
+      ['agrupando por MEDIDO (infla las franjas altas)', r.rangos],
+      ['agrupando por MODELO (las desinfla)', r.rangosModelo],
+    ]) {
+      console.log(`  ${etiqueta}`);
+      for (const b of lista) {
+        if (b.cociente == null) continue;
+        console.log(`    ${b.etiqueta.padEnd(9)} n=${String(b.n).padStart(4)}  medido ${b.medido.toFixed(1)}  pron. ${b.pronosticado.toFixed(1)}  cociente ${b.cociente.toFixed(2)}`);
+      }
     }
     console.log();
   }

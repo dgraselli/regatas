@@ -146,29 +146,36 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       en vivo (con fallback). Hoy el acumulador se llena por cron pero **nadie lo consume**,
       así que la validación de niebla sigue limitada a la ventana corta. Rinde recién con
       varias semanas juntadas (~fin de agosto 2026).
-- [ ] **El "observado" del validador subestima el viento fuerte** (medido el 2026-09-23 con
-      `node scripts/carp-eval.mjs referencia`). `forecast-eval.mjs` compara el pronóstico
-      contra Open-Meteo `past_days`, o sea contra el mismo modelo evaluándose a sí mismo.
-      Contra las estaciones de la CARP —las únicas que miden viento SOBRE el río— esa
-      referencia, en Pilote Norden y sobre 1134 horas:
+- [ ] **El pronóstico subestima el viento sobre el río, ~15%, de forma pareja** (medido el
+      2026-09-24 con `node scripts/carp-eval.mjs historico`). Contra las estaciones de la
+      CARP —las únicas que miden viento SOBRE el agua— en Pilote Norden, **11 años y 76.000
+      horas** contra ERA5: cociente medido/modelo entre 1.12 y 1.27 según el año (desvío
+      0.037), 1.11 en invierno y 1.19 en verano. Las otras tres estaciones dan lo mismo en
+      magnitud.
 
-      | viento real | horas medidas | las vio la referencia | se le escapan |
-      |---|---|---|---|
-      | ≥ 18 kt (amarillo) | 248 | 96 | **152 (61 %)** |
-      | ≥ 25 kt (rojo) | 31 | 4 | **27 (87 %)** |
+      **El sesgo es PLANO, no crece con la intensidad.** Los cuantiles, que es la vista
+      limpia, dan 1.12 / 1.14 / 1.15 / 1.13 / 1.12 en p50 / p75 / p90 / p95 / p99. Si se
+      agrupa por el valor medido *parece* crecer (0.91 → 1.23) pero agrupando por el modelo
+      *parece* decrecer (1.38 → 1.04): esa reversión es regresión a la media, no física. El
+      script muestra las tres vistas juntas para que el espejismo no se pueda repetir.
 
-      Si la referencia no registra el viento fuerte, el validador **no puede** encontrar los
-      fallos peligrosos que busca: el 78 % / 70 % / 60 % es un techo, no una medición. Esto
-      NO dice que el pronóstico sea malo —dice que no sabemos cuán bueno es donde importa—.
-      Antes de mover umbrales por esto hay que repetirlo sobre más meses (el archivo de la
-      CARP tiene desde 2015) y sobre las zonas costeras del validador, no sólo Norden.
-- [ ] **Sesgo del pronóstico con viento fuerte** (`node scripts/carp-eval.mjs viento`). En
-      Pilote Norden el cociente medido/pronosticado **crece con la intensidad**: 1.05 con
-      viento flojo, 1.18 de 10 a 18 kt, 1.25 de 18 a 25, 1.30 por encima. En la franja de
-      18-25 kt las cuatro estaciones coinciden (1.25 a 1.51). Descartada la explicación por
-      altura del anemómetro: el perfil logarítmico predice un cociente constante y chico
-      (1.04 a 15 m, 1.10 a 30 m) y el medido crece. Es una segunda causa de fallos
-      peligrosos además de la niebla.
+      Acción posible: un factor de corrección único (~1.15) sobre el viento de Open-Meteo,
+      o equivalentemente bajar los umbrales. Antes hace falta verificarlo en las zonas que
+      la app realmente sirve —las cuatro estaciones de la CARP están todas en el Canal
+      Martín García, ninguna frente a Buenos Aires o San Fernando— y decidir si el factor
+      aplica a lugares costeros o sólo a agua abierta.
+- [ ] **El "observado" del validador no registra el viento fuerte** (`node
+      scripts/carp-eval.mjs referencia`). `forecast-eval.mjs` compara el pronóstico contra
+      Open-Meteo `past_days`, o sea contra el mismo modelo evaluándose a sí mismo. Sobre
+      1151 horas en Pilote Norden, de las **253 horas con viento real ≥ 18 kt la referencia
+      registró 95 (38%)**, y de las 31 con ≥ 25 kt registró 4 (13%).
+
+      Corrigiendo el sesgo (×1.14) la detección sube a 66% y 52%, con 40 y 7 falsas alarmas
+      respectivamente: o sea que **la mitad del problema es sesgo y la otra mitad dispersión**
+      (MAE 3 kt, r 0.81), que no se arregla con un factor. Mientras tanto el 78% / 70% / 60%
+      de acierto del semáforo está medido contra una vara que no ve el peligro: es un techo,
+      no una medición. No dice que el pronóstico sea malo, dice que no sabemos cuán bueno es
+      donde importa.
 - [ ] **Sudestada / bajante: sin validar.** Cero eventos observados en 5 semanas. No es un
       bug a arreglar, es esperar a que pase una de verdad.
 - [ ] **Fragilidad del pipeline:** la retención real de aviationweather.gov es **~3-4 días**

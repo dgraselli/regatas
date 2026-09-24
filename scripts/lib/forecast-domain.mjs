@@ -146,6 +146,13 @@ export function scoreDays(hourly, t = SCORING) {
   for (const p of hourly) { const d = dateOf(p.time); if (!byDay.has(d)) byDay.set(d, []); byDay.get(d).push(p); }
   const days = [];
   for (const [date, pts] of byDay) {
+    // Open-Meteo devuelve el eje temporal COMPLETO del rango pedido, pero con
+    // valores nulos más allá de su retención real (con past_days=92 llegan ~58
+    // días de datos y el resto viene vacío). Sin este filtro esos días entraban
+    // con viento 0 y el validador los contaba como fallos del pronóstico: el
+    // acierto de viento caía de ~85 % a 56 % a medida que crecía el archivo de
+    // snapshots, simulando una degradación que no existía.
+    if (!pts.some((p) => Number.isFinite(p.windKt))) continue;
     const onDay = surge.filter((a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date);
     days.push(scoreDay(date, pts, onDay, t));
   }

@@ -1,0 +1,130 @@
+{
+  "capturedAt": "2026-08-11T09:10:06.293Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "La Plata",
+    "lat": -34.8399,
+    "lon": -57.9234
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-08-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 18,
+        "windDirDominant": 98,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44480
+      }
+    },
+    {
+      "date": "2026-08-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 19,
+        "windDirDominant": 106,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44340
+      }
+    },
+    {
+      "date": "2026-08-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 22,
+        "windDirDominant": 114,
+        "precipTotalMm": 0,
+        "visibilityMinM": 21000
+      }
+    },
+    {
+      "date": "2026-08-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 88,
+        "precipTotalMm": 0,
+        "visibilityMinM": 36280
+      }
+    },
+    {
+      "date": "2026-08-15",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 16,
+        "windDirDominant": 102,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 9340
+      }
+    },
+    {
+      "date": "2026-08-16",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 180 m, 6 h)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 19,
+        "windDirDominant": 179,
+        "precipTotalMm": 0,
+        "visibilityMinM": 180
+      }
+    },
+    {
+      "date": "2026-08-17",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 21,
+        "windDirDominant": 152,
+        "precipTotalMm": 0,
+        "visibilityMinM": 39860
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-08-16T03:00",
+      "endsAt": "2026-08-16T12:00",
+      "durationH": 10,
+      "severity": 2,
+      "minVisibilityM": 180
+    }
+  ]
+}

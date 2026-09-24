@@ -1,0 +1,122 @@
+{
+  "capturedAt": "2026-09-08T09:10:02.883Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-09-08",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 23,
+        "precipTotalMm": 0,
+        "visibilityMinM": 41320
+      }
+    },
+    {
+      "date": "2026-09-09",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 39,
+        "precipTotalMm": 0,
+        "visibilityMinM": 37340
+      }
+    },
+    {
+      "date": "2026-09-10",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 16,
+        "windDirDominant": 85,
+        "precipTotalMm": 0,
+        "visibilityMinM": 32300
+      }
+    },
+    {
+      "date": "2026-09-11",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 16,
+        "windDirDominant": 119,
+        "precipTotalMm": 0,
+        "visibilityMinM": 37400
+      }
+    },
+    {
+      "date": "2026-09-12",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.4 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 24,
+        "windDirDominant": 162,
+        "precipTotalMm": 2.4,
+        "visibilityMinM": 5380
+      }
+    },
+    {
+      "date": "2026-09-13",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 17,
+        "windDirDominant": 101,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46760
+      }
+    },
+    {
+      "date": "2026-09-14",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 14,
+        "windDirDominant": 34,
+        "precipTotalMm": 0,
+        "visibilityMinM": 45640
+      }
+    }
+  ],
+  "surge": [],
+  "fog": []
+}

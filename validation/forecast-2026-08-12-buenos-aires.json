@@ -1,0 +1,130 @@
+{
+  "capturedAt": "2026-08-12T09:10:02.791Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-08-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 23,
+        "windDirDominant": 108,
+        "precipTotalMm": 0,
+        "visibilityMinM": 41000
+      }
+    },
+    {
+      "date": "2026-08-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 24,
+        "windDirDominant": 126,
+        "precipTotalMm": 0,
+        "visibilityMinM": 39980
+      }
+    },
+    {
+      "date": "2026-08-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 97,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 12100
+      }
+    },
+    {
+      "date": "2026-08-15",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 19,
+        "windDirDominant": 88,
+        "precipTotalMm": 1.3,
+        "visibilityMinM": 10220
+      }
+    },
+    {
+      "date": "2026-08-16",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 16,
+        "windDirDominant": 183,
+        "precipTotalMm": 1.2,
+        "visibilityMinM": 7080
+      }
+    },
+    {
+      "date": "2026-08-17",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 23,
+        "windDirDominant": 143,
+        "precipTotalMm": 0.5,
+        "visibilityMinM": 20420
+      }
+    },
+    {
+      "date": "2026-08-18",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 27,
+        "windDirDominant": 182,
+        "precipTotalMm": 0.9,
+        "visibilityMinM": 18060
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-08-18T03:00",
+      "endsAt": "2026-08-18T03:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3840
+    }
+  ]
+}

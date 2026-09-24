@@ -1,0 +1,130 @@
+{
+  "capturedAt": "2026-09-08T09:10:04.204Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-09-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 9,
+        "windDirDominant": 11,
+        "precipTotalMm": 0,
+        "visibilityMinM": 31980
+      }
+    },
+    {
+      "date": "2026-09-09",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 9,
+        "windDirDominant": 43,
+        "precipTotalMm": 0.5,
+        "visibilityMinM": 31380
+      }
+    },
+    {
+      "date": "2026-09-10",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 11,
+        "windDirDominant": 142,
+        "precipTotalMm": 0,
+        "visibilityMinM": 220
+      }
+    },
+    {
+      "date": "2026-09-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 14,
+        "windDirDominant": 151,
+        "precipTotalMm": 0,
+        "visibilityMinM": 32040
+      }
+    },
+    {
+      "date": "2026-09-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~13 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 13,
+        "gustPeakKt": 22,
+        "windDirDominant": 157,
+        "precipTotalMm": 1.1,
+        "visibilityMinM": 8500
+      }
+    },
+    {
+      "date": "2026-09-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 12,
+        "windDirDominant": 148,
+        "precipTotalMm": 0,
+        "visibilityMinM": 45160
+      }
+    },
+    {
+      "date": "2026-09-14",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 9,
+        "windDirDominant": 357,
+        "precipTotalMm": 0,
+        "visibilityMinM": 43860
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-09-10T06:00",
+      "endsAt": "2026-09-10T08:00",
+      "durationH": 3,
+      "severity": 2,
+      "minVisibilityM": 220
+    }
+  ]
+}

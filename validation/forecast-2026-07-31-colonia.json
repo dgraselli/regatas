@@ -1,0 +1,180 @@
+{
+  "capturedAt": "2026-07-31T09:10:05.836Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-07-31",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas peligrosas (36 kt)",
+        "Lluvia fuerte (27.4 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 16,
+        "gustPeakKt": 36,
+        "windDirDominant": 20,
+        "precipTotalMm": 27.4,
+        "visibilityMinM": 1840
+      }
+    },
+    {
+      "date": "2026-08-01",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~10 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 23,
+        "windDirDominant": 197,
+        "precipTotalMm": 1.7,
+        "visibilityMinM": 6180
+      }
+    },
+    {
+      "date": "2026-08-02",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 20,
+        "windDirDominant": 46,
+        "precipTotalMm": 0,
+        "visibilityMinM": 1880
+      }
+    },
+    {
+      "date": "2026-08-03",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (3.3 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 23,
+        "windDirDominant": 128,
+        "precipTotalMm": 3.3,
+        "visibilityMinM": 2880
+      }
+    },
+    {
+      "date": "2026-08-04",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 19,
+        "windDirDominant": 117,
+        "precipTotalMm": 0,
+        "visibilityMinM": 25800
+      }
+    },
+    {
+      "date": "2026-08-05",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (4 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 104,
+        "precipTotalMm": 4,
+        "visibilityMinM": 10900
+      }
+    },
+    {
+      "date": "2026-08-06",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (32 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 32,
+        "windDirDominant": 267,
+        "precipTotalMm": 0,
+        "visibilityMinM": 37020
+      }
+    }
+  ],
+  "surge": [],
+  "fog": [
+    {
+      "startsAt": "2026-07-31T11:00",
+      "endsAt": "2026-07-31T13:00",
+      "durationH": 3,
+      "severity": 1,
+      "minVisibilityM": 1840
+    },
+    {
+      "startsAt": "2026-07-31T21:00",
+      "endsAt": "2026-08-01T01:00",
+      "durationH": 5,
+      "severity": 1,
+      "minVisibilityM": 1280
+    },
+    {
+      "startsAt": "2026-08-01T03:00",
+      "endsAt": "2026-08-01T04:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 3060
+    },
+    {
+      "startsAt": "2026-08-01T06:00",
+      "endsAt": "2026-08-01T06:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 4000
+    },
+    {
+      "startsAt": "2026-08-02T01:00",
+      "endsAt": "2026-08-02T02:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2260
+    },
+    {
+      "startsAt": "2026-08-02T04:00",
+      "endsAt": "2026-08-02T07:00",
+      "durationH": 4,
+      "severity": 2,
+      "minVisibilityM": 640
+    },
+    {
+      "startsAt": "2026-08-03T05:00",
+      "endsAt": "2026-08-03T06:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2720
+    },
+    {
+      "startsAt": "2026-08-03T11:00",
+      "endsAt": "2026-08-03T11:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2880
+    }
+  ]
+}

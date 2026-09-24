@@ -1,0 +1,122 @@
+{
+  "capturedAt": "2026-08-08T09:10:05.795Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-08-08",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 12,
+        "gustPeakKt": 27,
+        "windDirDominant": 269,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 37280
+      }
+    },
+    {
+      "date": "2026-08-09",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 20,
+        "windDirDominant": 247,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48020
+      }
+    },
+    {
+      "date": "2026-08-10",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 19,
+        "windDirDominant": 139,
+        "precipTotalMm": 0,
+        "visibilityMinM": 40640
+      }
+    },
+    {
+      "date": "2026-08-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 23,
+        "windDirDominant": 94,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44440
+      }
+    },
+    {
+      "date": "2026-08-12",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 26,
+        "windDirDominant": 107,
+        "precipTotalMm": 1.9,
+        "visibilityMinM": 37240
+      }
+    },
+    {
+      "date": "2026-08-13",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (26 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 26,
+        "windDirDominant": 123,
+        "precipTotalMm": 0.7,
+        "visibilityMinM": 14380
+      }
+    },
+    {
+      "date": "2026-08-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 18,
+        "windDirDominant": 120,
+        "precipTotalMm": 0,
+        "visibilityMinM": 20820
+      }
+    }
+  ],
+  "surge": [],
+  "fog": []
+}

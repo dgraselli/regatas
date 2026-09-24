@@ -1,0 +1,122 @@
+{
+  "capturedAt": "2026-08-08T09:10:07.125Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "La Plata",
+    "lat": -34.8399,
+    "lon": -57.9234
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-08-08",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 25,
+        "windDirDominant": 264,
+        "precipTotalMm": 0,
+        "visibilityMinM": 45240
+      }
+    },
+    {
+      "date": "2026-08-09",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 20,
+        "windDirDominant": 241,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48080
+      }
+    },
+    {
+      "date": "2026-08-10",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 15,
+        "windDirDominant": 149,
+        "precipTotalMm": 0,
+        "visibilityMinM": 36660
+      }
+    },
+    {
+      "date": "2026-08-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 17,
+        "windDirDominant": 116,
+        "precipTotalMm": 0,
+        "visibilityMinM": 44480
+      }
+    },
+    {
+      "date": "2026-08-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 23,
+        "windDirDominant": 110,
+        "precipTotalMm": 1,
+        "visibilityMinM": 44340
+      }
+    },
+    {
+      "date": "2026-08-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 138,
+        "precipTotalMm": 0,
+        "visibilityMinM": 26740
+      }
+    },
+    {
+      "date": "2026-08-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 115,
+        "precipTotalMm": 0,
+        "visibilityMinM": 26020
+      }
+    }
+  ],
+  "surge": [],
+  "fog": []
+}

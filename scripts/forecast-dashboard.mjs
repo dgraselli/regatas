@@ -35,6 +35,8 @@ import {
 
 const OUT_DIR = 'public/validacion';
 const OUT_FILE = `${OUT_DIR}/index.html`;
+/** Resumen que deja `carp-eval.mjs`. Si no está, la sección simplemente no sale. */
+const CARP_FILE = 'validation/carp-viento.json';
 const TZ = 'America/Argentina/Buenos_Aires';
 const FOG_M = SCORING.fogYellowM;
 const DIR_MIN_WIND = 5;
@@ -173,6 +175,7 @@ async function main() {
         idealWindMin: SCORING.idealWindMin, fogRedM: SCORING.fogRedM,
       },
     },
+    carp: await leerCarp(),
     overall: toPct(overall),
     byLead: Object.fromEntries(DIMS.map((d) => [d.key, toPct(byLead[d.key] ?? {})])),
     byZone: Object.fromEntries(DIMS.map((d) => [d.key, toPct(byZone[d.key] ?? {})])),
@@ -188,6 +191,121 @@ async function main() {
   console.log(`Snapshots ${data.meta.snapshots} · zonas ${data.meta.zones} · comparaciones ${compared} · ${firstDate}→${lastDate}`);
   console.log(`Abrir con:  xdg-open ${OUT_FILE}`);
   console.log('Para publicarlo en regatas.com.ar/validacion hay que commitear ese archivo y pushear.');
+}
+
+/** El resumen de la CARP es opcional: el dashboard tiene que salir igual sin él. */
+async function leerCarp() {
+  try {
+    return JSON.parse(await readFile(CARP_FILE, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+const fmt = (x, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : '—');
+
+/**
+ * Sección de contraste contra medición real. Va aparte del resto del dashboard
+ * porque mide algo distinto: las demás secciones comparan el pronóstico contra
+ * reanálisis Open-Meteo —el modelo contra sí mismo— y ésta contra las únicas
+ * estaciones que miden viento SOBRE el Río de la Plata.
+ */
+function renderCarp(carp) {
+  if (!carp) return '';
+  const h = carp.historico;
+  const rec = carp.reciente;
+  const ref = carp.referencia;
+
+  const filaHist = (e) => {
+    const anios = e.porAnio ?? [];
+    if (!anios.length) return '';
+    const cs = anios.map((a) => a.cociente);
+    const n = anios.reduce((t, a) => t + a.n, 0);
+    const medio = cs.reduce((t, c) => t + c, 0) / cs.length;
+    // Una estación que se aparta tanto del resto durante años no está midiendo un
+    // sesgo del modelo: tiene el anemómetro abrigado o mal calibrado. Se marca
+    // para que no se promedie con las demás como si fuera el mismo fenómeno.
+    const sospechosa = medio < 0.8 || medio > 1.4;
+    return `<tr><td>${e.nombre}${e.abierta ? ' <span class="tag">agua abierta</span>' : ''}${sospechosa ? ' <span class="tag" style="background:hsl(45 85% 50%);color:#222">instrumento dudoso</span>' : ''}</td>
+      <td class="num">${anios.length}</td><td class="num">${n.toLocaleString('es-AR')}</td>
+      <td class="num"><strong>${fmt(medio)}</strong></td>
+      <td class="num">${fmt(Math.min(...cs))}–${fmt(Math.max(...cs))}</td></tr>`;
+  };
+
+  const filaRec = (e) => {
+    const q = (p) => (e.cuantiles ?? []).find((c) => c.q === p);
+    return `<tr><td>${e.nombre}</td><td class="num">${e.n}</td>
+      <td class="num">${fmt(e.medido)}</td><td class="num">${fmt(e.pronosticado)}</td>
+      <td class="num">${fmt(q(0.5)?.cociente)}</td><td class="num">${fmt(q(0.9)?.cociente)}</td>
+      <td class="num">${fmt(e.mae)}</td><td class="num">${e.r >= 0 ? '+' : ''}${fmt(e.r)}</td></tr>`;
+  };
+
+  const filaRef = (e) =>
+    (e.filas ?? [])
+      .map((f) => {
+        const pct = f.reales ? Math.round((100 * f.vistas) / f.reales) : null;
+        return `<tr><td>${e.nombre}</td><td class="num">≥ ${f.u} kt</td>
+          <td class="num">${f.reales}</td><td class="num">${f.vistas}</td>
+          <td class="num"><strong>${pct == null ? '—' : pct + ' %'}</strong></td></tr>`;
+      })
+      .join('');
+
+  return `
+  <h2>④ Contra medición real (estaciones de la CARP)</h2>
+  <div class="panel">
+    <div class="desc">Todo lo de arriba compara el pronóstico contra reanálisis de Open-Meteo,
+    o sea <strong>el modelo contra sí mismo</strong>. Las cuatro estaciones de la Comisión
+    Administradora del Río de la Plata son las únicas que <strong>miden</strong> viento sobre el
+    agua; una, Pilote Norden, está en medio del estuario. Archivo público con serie de 6 minutos
+    desde 2015. Generado por <code>scripts/carp-eval.mjs</code>.</div>
+
+    ${h ? `<h3 style="margin-top:16px">Sesgo del modelo, ${h.desde}–${h.hasta} (contra ERA5)</h3>
+    <div style="overflow-x:auto;margin-top:8px"><table>
+      <tr><th>estación</th><th>años</th><th>horas</th><th>cociente medido/modelo</th><th>rango anual</th></tr>
+      ${h.estaciones.map(filaHist).join('')}
+    </table></div>
+    <div class="desc" style="margin-top:8px">Un cociente de 1.15 significa que el modelo lee un
+    15&nbsp;% por debajo de lo medido. Las estaciones marcadas <em>instrumento dudoso</em> se
+    apartan tanto del resto, y de forma sostenida durante años, que lo más probable es que el
+    anemómetro esté abrigado o descalibrado: no miden un sesgo del modelo y no hay que
+    promediarlas con las demás.</div>` : ''}
+
+    ${rec ? `<h3 style="margin-top:20px">Últimos ${rec.dias} días, contra el producto que sirve la app</h3>
+    <div style="overflow-x:auto;margin-top:8px"><table>
+      <tr><th>estación</th><th>horas</th><th>medido kt</th><th>pron. kt</th><th>cociente p50</th><th>cociente p90</th><th>MAE kt</th><th>r</th></tr>
+      ${rec.estaciones.map(filaRec).join('')}
+    </table></div>` : ''}
+
+    ${ref ? `<h3 style="margin-top:20px">Qué tanto ve el «observado» del validador</h3>
+    <div class="desc">De las horas en que <em>realmente</em> sopló fuerte, cuántas registró la
+    referencia contra la que se mide todo lo demás.</div>
+    <div style="overflow-x:auto;margin-top:8px"><table>
+      <tr><th>estación</th><th>umbral</th><th>horas reales</th><th>las vio</th><th>detección</th></tr>
+      ${ref.estaciones.map(filaRef).join('')}
+    </table></div>
+    <div class="desc" style="margin-top:8px"><strong>Consecuencia:</strong> si la referencia no
+    registra el viento fuerte, el validador no puede encontrar los fallos peligrosos que busca.
+    Los porcentajes de acierto de las secciones ① a ③ son un <strong>techo</strong>, no una
+    medición. No dice que el pronóstico sea malo: dice que no sabemos cuán bueno es donde importa.</div>` : ''}
+
+    <details class="doc" style="margin-top:16px">
+      <summary>Por qué acá se miran cuantiles y no promedios por franja de viento</summary>
+      <div class="docbody">
+        <p>Agrupar por el valor <em>medido</em> y comparar promedios hace <strong>parecer</strong>
+        que el modelo se queda más corto cuanto más sopla (cociente 0.91 con viento flojo, 1.23
+        arriba de 25&nbsp;kt). Es un espejismo: al quedarse con las horas de medición alta se
+        eligen también aquellas en que la medición estuvo alta <em>por ruido</em>.</p>
+        <p>La prueba es que agrupando por el <em>modelo</em> el efecto se da vuelta (1.38 → 1.04).
+        Esa reversión es la firma de la <strong>regresión a la media</strong>. Los cuantiles no
+        condicionan por nada, y dan un cociente <strong>plano</strong>: 1.12 / 1.14 / 1.15 / 1.13 /
+        1.12 en p50 / p75 / p90 / p95 / p99.</p>
+        <p>Importa para decidir: un sesgo plano se corrige con un factor único; uno que creciera
+        con la intensidad justificaría tocar sólo el umbral rojo. No conviene tomar esa decisión
+        sobre un artefacto estadístico.</p>
+      </div>
+    </details>
+  </div>
+`;
 }
 
 function renderHtml(data) {
@@ -228,6 +346,8 @@ h3{font-size:15px;margin:0 0 8px}
 .card .n{font-size:12px;color:var(--muted);margin-top:2px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-top:14px}
 table{border-collapse:collapse;width:100%;font-size:13px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{font-size:11px;padding:1px 6px;border-radius:99px;background:var(--na);opacity:.8}
 th,td{padding:8px 10px;text-align:center;border-bottom:1px solid var(--line)}
 th{color:var(--muted);font-weight:600}
 td.lab,th.lab{text-align:left;font-weight:600;white-space:nowrap}
@@ -301,7 +421,9 @@ details.doc>summary:hover{color:var(--accent)}
     <div id="byZone" style="overflow-x:auto;margin-top:10px"></div>
   </div>
 
-  <h2>④ Cómo se calcula cada número</h2>
+  ${renderCarp(data.carp)}
+
+  <h2>⑤ Cómo se calcula cada número</h2>
 
   <details class="doc">
     <summary>Los tres semáforos: decisión, severidad y exacto</summary>

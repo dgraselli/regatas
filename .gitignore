@@ -40,3 +40,6 @@ next-env.d.ts
 # NO se pueden regenerar (Open-Meteo no devuelve el pronóstico que emitió tal día);
 # si se pierden hay que volver a acumular desde cero. El dashboard derivado de ellas
 # vive en public/validacion/index.html (se publica con el sitio).
+
+# caché de ops re-descargable (archivo histórico de la CARP)
+validation/.cache/

@@ -2,6 +2,7 @@ import { SURGE } from '@/lib/config/boat';
 import { compass } from '@/lib/format';
 import { UNCERTAINTY_NOW_M, UNCERTAINTY_12H_M, SLACK_CM_H } from '@/lib/domain/tideWindow';
 import { OBSERVED_STALE_MS, OBSERVED_SEVERE_MS } from '@/lib/hooks/useFreshness';
+import { WATER_SOURCES } from '@/components/alerts/WaterLevelGauge';
 
 const hs = (ms: number) => ms / 3_600_000;
 
@@ -39,13 +40,19 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
             </li>
             <li>
               <span className="text-slate-300">•</span> <strong>Nivel de agua observado:</strong>{' '}
-              SHN — Servicio de Hidrografía Naval (alturas horarias), mareógrafo de la
+              <a className="underline" href={WATER_SOURCES.SHN.url} target="_blank" rel="noreferrer">
+                SHN — Servicio de Hidrografía Naval (alturas horarias)
+              </a>
+              , mareógrafo de la
               estación más cercana
               {stationName ? <> (hoy: <strong>{stationName}</strong>)</> : null}. Es un dato{' '}
               <em>medido</em>, no un pronóstico. El mareógrafo mide a los :45 de cada hora y el
               SHN lo publica minutos después, así que el último dato tiene{' '}
-              <strong>menos de 1 h</strong>. Si el SHN no responde se usa el INA (Sistema de
-              Alerta Hidrológico), que publica los mismos mareógrafos con 1 a 2 h de atraso.
+              <strong>menos de 1 h</strong>. Si el SHN no responde se usa el{' '}
+              <a className="underline" href={WATER_SOURCES.INA.url} target="_blank" rel="noreferrer">
+                INA (Sistema de Alerta Hidrológico)
+              </a>
+              , que publica los mismos mareógrafos con 1 a 2 h de atraso.
             </li>
           </ul>
         </div>

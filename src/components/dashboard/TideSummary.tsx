@@ -154,13 +154,26 @@ export function TideSummary({
           </div>
           <div className="flex flex-col items-end text-xs">
             <span className="text-slate-400">{status!.stationName}</span>
-            <span className={age?.stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
-              {age?.stale && '⚠️ '}
-              {win.now?.source === 'medido' ? 'medido' : 'estimado'} · observado{' '}
-              {age?.agoLabel ?? ''}
-            </span>
+            {/* El número grande puede ser una estimación para la hora en curso
+                (puente anclado a lo medido) y no coincidir con la última
+                medición, que es lo que muestra Mareas: se rotulan por separado
+                para que no parezcan dos datos contradictorios. */}
+            {win.now && win.now.source !== 'medido' ? (
+              <span className="text-slate-400">estimado para las {formatHour(win.now.time)}</span>
+            ) : (
+              <span className={age?.stale ? 'font-medium text-amber-700' : 'text-slate-400'}>
+                {age?.stale && '⚠️ '}medido {age?.agoLabel ?? ''}
+              </span>
+            )}
           </div>
         </div>
+      )}
+
+      {last && win.now && win.now.source !== 'medido' && (
+        <p className={`text-xs mt-1 ${age?.stale ? 'font-medium text-amber-700' : 'text-slate-500'}`}>
+          {age?.stale && '⚠️ '}Última medición: {last.heightM.toFixed(2)} m a las{' '}
+          {formatHour(last.time)} ({age?.agoLabel ?? ''})
+        </p>
       )}
 
       {age?.severe && (

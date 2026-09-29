@@ -72,7 +72,7 @@ export default function MareasPage() {
 
           {water.data && water.data.observations.length > 0 && (
             <>
-              <WaterLevelGauge status={water.data} />
+              <WaterLevelGauge status={water.data} estimate={win.now} />
 
               {win.unsafe.length > 0 ? (
                 <ul className="mt-3 space-y-1 text-sm">

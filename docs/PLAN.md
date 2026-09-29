@@ -149,7 +149,7 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       banda o histéresis limpiaría ruido sin perder señal. **Barato y no depende de juntar
       más datos** → es lo primero que conviene hacer.
 - [ ] **Que `metar-eval.mjs report` lea `validation/metar-observado.jsonl`** en vez de la API
-      en vivo (con fallback). Hoy el acumulador se llena por cron pero **nadie lo consume**,
+      en vivo (con fallback). Hoy el acumulador se llena a diario pero **nadie lo consume**,
       así que la validación de niebla sigue limitada a la ventana corta. Rinde recién con
       varias semanas juntadas (~fin de agosto 2026).
 - [ ] **El pronóstico subestima el viento sobre el río, ~15%, de forma pareja** (medido el
@@ -199,10 +199,13 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       serie larga.
 - [ ] **Sudestada / bajante: sin validar.** Cero eventos observados en 5 semanas. No es un
       bug a arreglar, es esperar a que pase una de verdad.
-- [ ] **Fragilidad del pipeline:** la retención real de aviationweather.gov es **~3-4 días**
-      (aunque se pidan 168 h), y los snapshots de pronóstico tampoco se pueden regenerar. Si
-      la máquina queda apagada una semana, esos datos se pierden para siempre. Conviene
-      mirar `validation/snapshot.log` cada tanto, o mover el cron a algo siempre encendido.
+- [x] **Fragilidad del pipeline** (resuelto el 2026-09-29): el cron local perdía los días en
+      que la máquina estaba apagada a las 6:10 (**36 de 100** entre el 06-22 y el 09-29), y un
+      solo timeout contra aviationweather hizo perder todo el METAR del 09-25 (guarda ~3-4
+      días, así que no se recupera). Ahora la captura corre en **GitHub Actions**
+      (`.github/workflows/snapshot-diario.yml`, 09:10 UTC) y commitea a `main`, y los fetch de
+      las capturas reintentan (`scripts/lib/fetch-retry.mjs`). Si alguna captura falla, el
+      job queda en rojo (llega mail) pero igual commitea lo que sí se bajó.
 
 ### UX / PWA
 - [ ] Notificaciones push de alerta de sudestada/bajante.
@@ -223,12 +226,13 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commit/push**.
   `run.sh`, `run_mock.sh`, `pendiente.txt` y `validar_pronostico.txt` van sin trackear (ya
   están en `.gitignore`).
-- **Ops de validación (`scripts/`, `validation/`):** el cron de las 6:10 corre
-  `scripts/snapshot-diario.sh`, que captura el pronóstico de las 6 zonas **y** la serie
+- **Ops de validación (`scripts/`, `validation/`):** GitHub Actions corre todos los días a las
+  6:10 ART `scripts/snapshot-diario.sh` y commitea el resultado a `main` (hacer `git pull`
+  antes de trabajar), que captura el pronóstico de las 6 zonas **y** la serie
   horaria METAR. Los `validation/*.json` y `metar-observado.jsonl` **se versionan porque NO
   se pueden regenerar** (Open-Meteo no devuelve el pronóstico que emitió tal día). El
   dashboard se genera en `public/validacion/index.html` → se publica en
-  **regatas.com.ar/validacion/**; el cron actualiza los datos pero **no** la página: hay que
+  **regatas.com.ar/validacion/**; la captura diaria actualiza los datos pero **no** la página: hay que
   regenerarla y commitearla. Guía de uso: `validar_pronostico.txt`.
   Ojo: `snapshot-diario.sh` **no rehace** la captura si ya hay una de hoy (`FORZAR=1` para
   pisarla) — correrlo a la tarde reemplazaría el pronóstico de la mañana por datos que para
@@ -236,8 +240,8 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
 - **METAR (aviación) como observación real de visibilidad** para la niebla (el pronóstico es
   flojo). **Fase A hecha:** parser/normalizador de dominio puro (`src/lib/domain/metar.ts` +
   tests) y validador de niebla contra METAR observado (`scripts/metar-eval.mjs report`, ya
-  versionado; aviationweather.gov dice 7 días de historia pero **devuelve ~3-4**, por eso el
-  cron acumula la serie horaria en `validation/metar-observado.jsonl`). Primer resultado: ~79% de aciertos de nivel de
+  versionado; aviationweather.gov dice 7 días de historia pero **devuelve ~3-4**, por eso la
+  captura diaria acumula la serie horaria en `validation/metar-observado.jsonl`). Primer resultado: ~79% de aciertos de nivel de
   niebla y 4 subestimaciones (pronóstico "despejado" con niebla real, mañana del 2026-06-30).
   Aprendizaje: **la visibilidad manda**, MIFG/BCFG (niebla superficial) con buena visibilidad NO
   es niebla navegable. **Fase B hecha (producto):** el panel muestra "Visibilidad observada ahora"

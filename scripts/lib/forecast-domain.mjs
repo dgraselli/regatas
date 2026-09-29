@@ -9,6 +9,8 @@
  *   src/lib/services/openMeteoForecast.ts (campos hourly)
  */
 
+import { fetchRetry } from './fetch-retry.mjs';
+
 export const BASE = 'https://api.open-meteo.com/v1/forecast';
 /**
  * Archivo (reanálisis ERA5). La API de pronóstico rellena el pasado sólo ~58
@@ -103,7 +105,7 @@ export async function fetchHourly(lat, lon, { pastDays = 0, forecastDays = 7 } =
     wind_speed_unit: 'kn', timezone: TZ,
     past_days: String(pastDays), forecast_days: String(forecastDays),
   });
-  const r = await fetch(`${BASE}?${p}`);
+  const r = await fetchRetry(`${BASE}?${p}`, { label: 'Open-Meteo' });
   if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
   return mapHourly((await r.json()).hourly);
 }

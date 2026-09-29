@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 # Captura diaria del pronóstico (7 días) en las 6 zonas del Río de la Plata.
-# Pensado para correr por cron. Guarda en validation/forecast-<fecha>-<zona>.json
-# y deja un log en validation/snapshot.log.
+# Lo corre GitHub Actions todos los días (.github/workflows/snapshot-diario.yml),
+# que commitea lo capturado; también se puede correr a mano. Guarda en
+# validation/forecast-<fecha>-<zona>.json y acumula validation/metar-observado.jsonl.
+# Sale con código != 0 si alguna captura falló (lo que sí se bajó queda guardado).
 set -euo pipefail
 
 # cron arranca con PATH mínimo: aseguramos node.
 export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
 
-REPO="/home/chaca/workspace/ZAMBA/regatas"
-cd "$REPO"
+cd "$(dirname "$0")/.."
+
+# La fecha del snapshot es la de Buenos Aires, no la de la máquina que lo corre.
+export TZ="America/Argentina/Buenos_Aires"
+FALLOS=0
 
 # zona: "lat lon Nombre"
 ZONAS=(
@@ -31,13 +36,18 @@ if compgen -G "validation/forecast-${HOY}-*.json" > /dev/null && [ "${FORZAR:-0}
 else
   for z in "${ZONAS[@]}"; do
     read -r lat lon nombre <<<"$z"
-    node scripts/forecast-eval.mjs capture "$lat" "$lon" "$nombre" || echo "FALLO: $nombre"
+    node scripts/forecast-eval.mjs capture "$lat" "$lon" "$nombre" || { echo "FALLO: $nombre"; FALLOS=$((FALLOS + 1)); }
   done
 fi
 
 # Observación REAL de visibilidad (METAR de aeropuertos). aviationweather.gov sólo
-# expone 7 días de historia, así que si no se acumula día a día se pierde: esto va
+# dice exponer 7 días de historia pero devuelve ~3-4, así que si no se acumula día a día se pierde: esto va
 # armando la serie larga para validar niebla contra dato medido y no contra
 # reanálisis. Es idempotente (no duplica), así que correrlo de más es inofensivo.
 echo "--- METAR (visibilidad observada) ---"
-node scripts/metar-eval.mjs capture || echo "FALLO: captura METAR"
+node scripts/metar-eval.mjs capture || { echo "FALLO: captura METAR"; FALLOS=$((FALLOS + 1)); }
+
+if [ "$FALLOS" -gt 0 ]; then
+  echo "$FALLOS captura(s) fallida(s)."
+  exit 1
+fi

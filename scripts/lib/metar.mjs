@@ -5,6 +5,8 @@
  * aeropuertos (aviationweather.gov / NOAA), que da hasta 7 días de historia.
  */
 
+import { fetchRetry } from './fetch-retry.mjs';
+
 const SM_TO_M = 1609.344;
 
 export function parseVisibilityMeters(visib) {
@@ -88,7 +90,7 @@ export function nearestMetarStation(lat, lon) {
 export async function fetchMetarHistory(icaoIds, hours = 168) {
   const ids = icaoIds.join(',');
   const url = `https://aviationweather.gov/api/data/metar?ids=${ids}&format=json&hours=${hours}`;
-  const res = await fetch(url);
+  const res = await fetchRetry(url, { label: 'METAR' });
   if (!res.ok) throw new Error(`METAR HTTP ${res.status}`);
   return res.json();
 }

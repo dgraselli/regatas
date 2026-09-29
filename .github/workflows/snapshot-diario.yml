@@ -1,0 +1,62 @@
+name: Snapshot diario del pronóstico
+
+# Captura el pronóstico de las 6 zonas y la serie METAR, y lo commitea en
+# validation/. Antes lo hacía un cron en una máquina local, que perdía los días
+# en que estaba apagada a la hora de la captura (36 de 100 hasta el 2026-09-29).
+# Lo que no se captura ese día no se recupera: Open-Meteo no devuelve el
+# pronóstico que emitió en el pasado y aviationweather guarda ~3-4 días.
+
+on:
+  schedule:
+    # 09:10 UTC = 06:10 en Buenos Aires. Es a la mañana a propósito: capturado a
+    # la tarde, el día +0 ya es casi observación e infla el acierto. GitHub puede
+    # atrasar los schedule unos minutos (a veces más); para esto da igual.
+    - cron: '10 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot-diario
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Los scripts son Node suelto, sin dependencias: no hace falta npm ci.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Capturar pronóstico y METAR
+        id: captura
+        # Si falla una zona, igual se commitea lo que sí se bajó; el job se
+        # marca como fallido al final para que llegue el aviso por mail.
+        continue-on-error: true
+        run: scripts/snapshot-diario.sh
+
+      - name: Commitear lo capturado
+        run: |
+          git add validation/
+          if git diff --cached --quiet; then
+            echo "Nada nuevo para commitear."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "Validación: snapshot $(TZ=America/Argentina/Buenos_Aires date +%F)"
+          # Por si se pusheó algo a main mientras corría la captura.
+          git pull --rebase
+          git push
+          # Un push hecho con GITHUB_TOKEN no dispara otros workflows, así que
+          # esto no redeploya el sitio.
+
+      - name: Avisar si alguna captura falló
+        if: steps.captura.outcome == 'failure'
+        run: |
+          echo "::error::Alguna captura falló; ver el log del paso 'Capturar pronóstico y METAR'."
+          exit 1

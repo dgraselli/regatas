@@ -1,0 +1,122 @@
+{
+  "capturedAt": "2026-09-25T09:10:04.362Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-09-25",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 16,
+        "windDirDominant": 288,
+        "precipTotalMm": 0,
+        "visibilityMinM": 45680
+      }
+    },
+    {
+      "date": "2026-09-26",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 27,
+        "windDirDominant": 116,
+        "precipTotalMm": 0,
+        "visibilityMinM": 32140
+      }
+    },
+    {
+      "date": "2026-09-27",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 23,
+        "windDirDominant": 88,
+        "precipTotalMm": 1.8,
+        "visibilityMinM": 5960
+      }
+    },
+    {
+      "date": "2026-09-28",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 20,
+        "windDirDominant": 119,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 7700
+      }
+    },
+    {
+      "date": "2026-09-29",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (31 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 13,
+        "gustPeakKt": 31,
+        "windDirDominant": 201,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 11000
+      }
+    },
+    {
+      "date": "2026-09-30",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 19,
+        "windDirDominant": 203,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38700
+      }
+    },
+    {
+      "date": "2026-10-01",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 12,
+        "windDirDominant": 332,
+        "precipTotalMm": 0,
+        "visibilityMinM": 41240
+      }
+    }
+  ],
+  "surge": [],
+  "fog": []
+}

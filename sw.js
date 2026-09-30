@@ -8,12 +8,12 @@
      podía servir una respuesta de días atrás: React Query la tomaba como fresca y
      el filtro de días pasados del panel descartaba todo → panel en blanco.) */
 
-// CI reemplaza d9487a0db6e49c1680d8e03904376b956c052c6e con el SHA del commit (ver deploy.yml y
+// CI reemplaza f569fafcdfe8f6d111d08920be53285e85bcdd2e con el SHA del commit (ver deploy.yml y
 // pr-preview.yml) después de `next build`. Sin esto el service worker es
 // byte-idéntico entre deploys que no tocan este archivo, así que el navegador
 // nunca detecta que hay una versión nueva para instalar. No se usa en ninguna
 // lógica de abajo: solo existe para que el contenido del archivo cambie.
-const BUILD = 'd9487a0db6e49c1680d8e03904376b956c052c6e';
+const BUILD = 'f569fafcdfe8f6d111d08920be53285e85bcdd2e';
 
 const CACHE = 'regatas-v4';
 // Rutas relativas al scope del SW: en dev resuelven a la raíz; en GitHub Pages, a /regatas/.

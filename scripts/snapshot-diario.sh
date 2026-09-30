@@ -2,7 +2,8 @@
 # Captura diaria del pronóstico (7 días) en las 6 zonas del Río de la Plata.
 # Lo corre GitHub Actions todos los días (.github/workflows/snapshot-diario.yml),
 # que commitea lo capturado; también se puede correr a mano. Guarda en
-# validation/forecast-<fecha>-<zona>.json y acumula validation/metar-observado.jsonl.
+# validation/forecast-<fecha>-<zona>.json y acumula validation/metar-observado.jsonl
+# y validation/nivel-observado.jsonl.
 # Sale con código != 0 si alguna captura falló (lo que sí se bajó queda guardado).
 set -euo pipefail
 
@@ -46,6 +47,11 @@ fi
 # reanálisis. Es idempotente (no duplica), así que correrlo de más es inofensivo.
 echo "--- METAR (visibilidad observada) ---"
 node scripts/metar-eval.mjs capture || { echo "FALLO: captura METAR"; FALLOS=$((FALLOS + 1)); }
+
+# Nivel de agua OBSERVADO (mareógrafos del SHN): es lo que dice si una sudestada
+# o bajante pronosticada se cumplió. El CSV del SHN trae ~10 días; se acumula acá.
+echo "--- Nivel de agua observado (SHN) ---"
+node scripts/nivel-eval.mjs capture || { echo "FALLO: captura nivel SHN"; FALLOS=$((FALLOS + 1)); }
 
 if [ "$FALLOS" -gt 0 ]; then
   echo "$FALLOS captura(s) fallida(s)."

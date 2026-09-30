@@ -57,8 +57,9 @@ reconstruir.
 - `src/lib/config/` — umbrales del semáforo y construcción de rutas/polar.
 - `scripts/` — **ops de validación, no son parte de la app** (Node suelto, sin build):
   `snapshot-diario.sh` (lo corre GitHub Actions a las 6:10 ART, `.github/workflows/snapshot-diario.yml`,
-  y commitea a `main`: **hacer `git pull` antes de trabajar**; captura las 6 zonas + METAR), `forecast-report.mjs` (reporte
-  agregado, lo principal), `forecast-dashboard.mjs`, `forecast-eval.mjs`, `metar-eval.mjs`.
+  y commitea a `main`: **hacer `git pull` antes de trabajar**; captura las 6 zonas + METAR + nivel del SHN), `forecast-report.mjs` (reporte
+  agregado, lo principal), `forecast-dashboard.mjs`, `forecast-eval.mjs`, `metar-eval.mjs`,
+  `nivel-eval.mjs` (nivel observado de los mareógrafos vs alertas de sudestada/bajante).
   El dominio replicado vive en `scripts/lib/forecast-domain.mjs` (**una sola copia**: no
   volver a duplicar los umbrales dentro de cada script). Guía de uso: `validar_pronostico.txt`.
 

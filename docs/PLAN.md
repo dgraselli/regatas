@@ -197,8 +197,18 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       **niebla se sigue validando sólo sobre ~58 días** (n=1570 de 2446). Es otra razón para
       terminar el consumo del `metar-observado.jsonl`, que sí tiene visibilidad medida y
       serie larga.
-- [ ] **Sudestada / bajante: sin validar.** Cero eventos observados en 5 semanas. No es un
-      bug a arreglar, es esperar a que pase una de verdad.
+- [ ] **Sudestada / bajante: el detector se pierde la mayoría de los eventos** (medido el
+      2026-09-30 con `node scripts/nivel-eval.mjs report`). Ahora se acumula el nivel
+      OBSERVADO de los mareógrafos en `validation/nivel-observado.jsonl` (captura diaria del
+      SHN + relleno histórico del INA desde el 06-20). Mirando la anomalía del nivel MEDIO
+      diario (cancela la marea astronómica semidiurna), entre junio y septiembre hubo ~15
+      días con el agua ≥ +0.5 m sobre lo normal en toda la costa argentina (picos de +0.9 a
+      +1.0 m el 07-19, 08-18, 08-21 y 09-12) y **sólo dos episodios tuvieron alerta**
+      (08-17/18 y 09-11/12, éste con un día de adelanto), en ninguna captura para La Plata ni
+      Buenos Aires. La regla actual (≥ 18 kt del SE durante ≥ 6 h, por zona) no ve la
+      sudestada que sube el agua en la costa argentina. Siguiente paso: cruzar esos días con
+      el viento pronosticado/observado para recalibrar sector, umbral y persistencia, y
+      decidir si la detección debe mirar el viento sobre el río y no el de cada punto.
 - [x] **Fragilidad del pipeline** (resuelto el 2026-09-29): el cron local perdía los días en
       que la máquina estaba apagada a las 6:10 (**36 de 100** entre el 06-22 y el 09-29), y un
       solo timeout contra aviationweather hizo perder todo el METAR del 09-25 (guarda ~3-4

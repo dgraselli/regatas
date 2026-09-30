@@ -40,7 +40,7 @@ reconstruir.
   vía TanStack Query (`src/app/providers.tsx`). **Si cambia la FORMA de esos datos**
   (campos nuevos en `ForecastBundle`, `DayScore`, `CrossingPlan`/`DepartureCandidate`),
   hay que **subir el `buster`** (`schema-N`) o la app crashea sirviendo caché viejo. Pasó
-  varias veces. Valor actual: `schema-14`.
+  varias veces. Valor actual: `schema-15`.
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commitear o
   pushear** (no hacerlo automáticamente). `run.sh` y `validar_pronostico.txt` van sin trackear.
 
@@ -99,6 +99,10 @@ regenerar y commitear.
   alta/baja para la amarra), y gráfico horario (barras viento/ráfagas, **flechas de
   dirección**, líneas de umbral precaución/peligro y **poco viento** —solo si aplica—,
   bandas de visibilidad reducida).
+- **Sudestada / bajante**: `detectSurge` usa el **nivel del mar de Marine filtrado a 25 h**
+  (cancela la marea astronómica); el viento es sólo respaldo si no hay nivel. Calibrado contra
+  el mareógrafo (`nivel-eval.mjs`): 24/25 agua alta y 11/11 agua baja hasta 5 días antes. En el
+  semáforo sólo la severidad 3 pone rojo. Umbrales y números en `SURGE` (`config/boat.ts`).
 - **Niebla**: `detectFog` + visibilidad en el scoring (niebla matinal que despeja **no**
   hunde el día; ver `FOG_NAVIGABLE_WINDOW_H`). Aparece en panel, alertas y gráfico.
 - **Cruce**: considera niebla, marea y **olas**, da **semáforo por salida**, lista en **orden

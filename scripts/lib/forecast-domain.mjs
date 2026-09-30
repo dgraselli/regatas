@@ -36,7 +36,11 @@ export const SCORING = {
   gustYellow: 25, gustRed: 33, rainYellow: 2, rainRed: 12,
   fogYellowM: 4000, fogRedM: 1000,
 };
-export const SURGE = { sudestadaSector: [112, 157], bajanteSector: [292, 22], minWindKt: 18, minHours: 6 };
+// Mirror de SURGE (src/lib/config/boat.ts): por nivel del mar filtrado; viento sólo de respaldo.
+export const SURGE = {
+  seaLevelHighM: 0.45, seaLevelLowM: -0.15, seaLevelHighSevM: [0.6, 0.75], seaLevelLowSevM: [-0.25, -0.35], seaLevelMinHours: 3,
+  sudestadaSector: [150, 210], bajanteSector: [292, 22], minWindKt: 10, minHours: 6,
+};
 export const DAYLIGHT = { sunriseHour: 7, sunsetHour: 19 };
 
 // Ventanas de niebla en el scoring (mirror de scoring.ts).
@@ -68,6 +72,31 @@ const mapHourly = (h) =>
 
 const isoDia = (ms) => new Date(ms).toISOString().slice(0, 10);
 
+const MARINE = 'https://marine-api.open-meteo.com/v1/marine';
+
+/**
+ * Nivel del mar de Open-Meteo Marine por hora (Map time → m), que es con lo que
+ * la app detecta sudestada/bajante. `range` es { pastDays, forecastDays } o
+ * { start, end }. Si Marine falla devuelve un Map vacío y la detección cae al
+ * respaldo por viento, igual que en la app.
+ */
+export async function fetchSeaLevel(lat, lon, range) {
+  const p = new URLSearchParams({ latitude: String(lat), longitude: String(lon), hourly: 'sea_level_height_msl', timezone: TZ });
+  if (range.start) { p.set('start_date', range.start); p.set('end_date', range.end); }
+  else { p.set('past_days', String(range.pastDays ?? 0)); p.set('forecast_days', String(range.forecastDays ?? 7)); }
+  try {
+    const r = await fetchRetry(`${MARINE}?${p}`, { label: 'Marine' });
+    if (!r.ok) throw new Error(`Marine HTTP ${r.status}`);
+    const h = (await r.json()).hourly;
+    return new Map(h.time.map((t, i) => [t, h.sea_level_height_msl[i]]).filter(([, v]) => v != null));
+  } catch (err) {
+    console.error(`  Marine sin datos (${err.message}): la marea se detecta por viento.`);
+    return new Map();
+  }
+}
+
+const withSeaLevel = (points, sea) => points.map((p) => ({ ...p, seaLevelM: sea.get(p.time) ?? null }));
+
 /**
  * Serie horaria OBSERVADA desde `from` (YYYY-MM-DD) hasta hoy, combinando el
  * archivo ERA5 para el grueso y la API de pronóstico para los últimos días, que
@@ -95,7 +124,10 @@ export async function fetchObservedHourly(lat, lon, from) {
   const cola = await fetchHourly(lat, lon, { pastDays: 92, forecastDays: 1 });
   for (const p2 of cola) if (Number.isFinite(p2.windKt)) porHora.set(p2.time, p2);
 
-  return [...porHora.values()].sort((a, b) => a.time.localeCompare(b.time));
+  // El "observado" de la marea es el análisis de Marine (día 0), que sigue al
+  // mareógrafo con r = 0.96; el dato medido de verdad lo cruza nivel-eval.mjs.
+  const sea = await fetchSeaLevel(lat, lon, { start: from, end: isoDia(Date.now()) });
+  return withSeaLevel([...porHora.values()], sea).sort((a, b) => a.time.localeCompare(b.time));
 }
 
 export async function fetchHourly(lat, lon, { pastDays = 0, forecastDays = 7 } = {}) {
@@ -107,23 +139,43 @@ export async function fetchHourly(lat, lon, { pastDays = 0, forecastDays = 7 } =
   });
   const r = await fetchRetry(`${BASE}?${p}`, { label: 'Open-Meteo' });
   if (!r.ok) throw new Error(`Open-Meteo HTTP ${r.status}`);
-  return mapHourly((await r.json()).hourly);
+  const points = mapHourly((await r.json()).hourly);
+  return withSeaLevel(points, await fetchSeaLevel(lat, lon, { pastDays, forecastDays }));
 }
 
-/** Mirror de src/lib/domain/surge.ts (detección de eventos; sin corroboración marina). */
+/** Mirror de tidalFilter (src/lib/domain/surge.ts): media móvil centrada de 25 h. */
+export function tidalFilter(levels) {
+  return levels.map((_, i) => {
+    let sum = 0, n = 0;
+    for (let j = i - 12; j <= i + 12; j++) if (levels[j] != null) { sum += levels[j]; n++; }
+    return n >= 13 ? sum / n : null;
+  });
+}
+
+/** Mirror de src/lib/domain/surge.ts: por nivel del mar si lo hay, si no por viento. */
 export function detectSurge(hourly, t = SURGE) {
-  const classify = (p) => { if (p.windKt < t.minWindKt) return null; if (inSector(p.windDir, t.sudestadaSector)) return 'sudestada'; if (inSector(p.windDir, t.bajanteSector)) return 'bajante'; return null; };
-  const runs = []; let cur = null;
-  hourly.forEach((p, i) => { const ty = classify(p); if (cur && ty === cur.type) cur.end = i; else { if (cur) runs.push(cur); cur = ty ? { type: ty, start: i, end: i } : null; } });
-  if (cur) runs.push(cur);
+  const group = (typeAt) => { const runs = []; let cur = null; hourly.forEach((_, i) => { const ty = typeAt(i); if (cur && ty === cur.type) cur.end = i; else { if (cur) runs.push(cur); cur = ty ? { type: ty, start: i, end: i } : null; } }); if (cur) runs.push(cur); return runs; };
   const alerts = [];
-  for (const run of runs) {
+  const levels = hourly.map((p) => p.seaLevelM ?? null);
+  if (levels.filter((v) => v != null).length >= 24) {
+    const f = tidalFilter(levels);
+    for (const run of group((i) => f[i] == null ? null : f[i] >= t.seaLevelHighM ? 'sudestada' : f[i] <= t.seaLevelLowM ? 'bajante' : null)) {
+      const dur = run.end - run.start + 1; if (dur < t.seaLevelMinHours) continue;
+      const sl = hourly.slice(run.start, run.end + 1), lv = f.slice(run.start, run.end + 1);
+      const alta = run.type === 'sudestada', peak = alta ? Math.max(...lv) : Math.min(...lv);
+      const [s2, s3] = alta ? t.seaLevelHighSevM : t.seaLevelLowSevM; const past = (c) => (alta ? peak >= c : peak <= c);
+      alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: past(s3) ? 3 : past(s2) ? 2 : 1,
+        avgWindKt: Math.round(sl.reduce((s, p) => s + p.windKt, 0) / dur), source: 'nivel', peakLevelM: Math.round(peak * 100) / 100 });
+    }
+    return alerts;
+  }
+  const classify = (p) => { if (p.windKt < t.minWindKt) return null; if (inSector(p.windDir, t.sudestadaSector)) return 'sudestada'; if (inSector(p.windDir, t.bajanteSector)) return 'bajante'; return null; };
+  for (const run of group((i) => classify(hourly[i]))) {
     const sl = hourly.slice(run.start, run.end + 1); const dur = sl.length;
     if (dur < t.minHours) continue;
     const avg = sl.reduce((s, p) => s + p.windKt, 0) / dur;
-    const strong = avg >= 28, long = dur >= 12;
-    const sev = strong && long ? 3 : (strong || long || dur >= 9 ? 2 : 1);
-    alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: sev, avgWindKt: Math.round(avg) });
+    const strong = avg >= 18, long = dur >= 12;
+    alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: strong && long ? 3 : strong || long ? 2 : 1, avgWindKt: Math.round(avg), source: 'viento' });
   }
   return alerts;
 }
@@ -185,7 +237,7 @@ export function scoreDay(date, points, surgeOnDay = [], t = SCORING) {
     // else: niebla temporal que despeja, no degrada (partialFog en la app).
   }
 
-  for (const a of surgeOnDay) esc(a.severity >= 2 ? 'rojo' : 'amarillo', `${a.type} sev ${a.severity}`);
+  for (const a of surgeOnDay) esc(a.severity >= 3 ? 'rojo' : 'amarillo', `${a.type} sev ${a.severity}`);
   if (level === 'verde' && windMedianKt < t.idealWindMin) { level = 'poco-viento'; reasons.push(`Poco viento (~${windMedianKt} kt)`); }
   if (level === 'verde' && !reasons.length) reasons.push(`Buenas condiciones (~${windMedianKt} kt)`);
 

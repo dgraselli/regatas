@@ -16,6 +16,13 @@ export interface SurgeAlert {
   confidence: number;
   /** Viento medio sostenido del evento (nudos). */
   avgWindKt: number;
+  /** De qué sale la alerta: el nivel del mar pronosticado o, sin él, sólo el viento. */
+  source: 'nivel' | 'viento';
+  /**
+   * Cuánto se estima que se aparta el agua de lo normal en el pico (m, con
+   * signo), en la escala del mareógrafo. Sólo si la alerta sale del nivel.
+   */
+  anomalyM?: number;
   /** Mensaje legible en español. */
   message: string;
 }

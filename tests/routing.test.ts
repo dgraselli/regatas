@@ -114,8 +114,8 @@ describe('routing', () => {
   });
 
   it('sudestada en la ventana agrega advertencia de marea', () => {
-    // Viento del SE (135°) sostenido y fuerte (≥18 kt) => sudestada.
-    const plan = planCrossing(route, forecastSeq(135, 20));
+    // Sin nivel del mar cae al respaldo por viento: S-SSE (170°) sostenido => sudestada.
+    const plan = planCrossing(route, forecastSeq(170, 20));
     const allWarnings = plan.ranked.flatMap((c) => c.warnings).join(' ');
     expect(allWarnings).toMatch(/sudestada|agua alta/i);
   });

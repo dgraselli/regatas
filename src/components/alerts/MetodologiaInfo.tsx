@@ -1,4 +1,5 @@
 import { SURGE } from '@/lib/config/boat';
+import { levelToAnomalyM } from '@/lib/domain/surge';
 import { compass } from '@/lib/format';
 import { UNCERTAINTY_NOW_M, UNCERTAINTY_12H_M, SLACK_CM_H } from '@/lib/domain/tideWindow';
 import { OBSERVED_STALE_MS, OBSERVED_SEVERE_MS } from '@/lib/hooks/useFreshness';
@@ -126,35 +127,49 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
         <div>
           <h3 className="mb-1 font-semibold text-slate-700">Cómo se predice la marea meteorológica</h3>
           <p className="mb-2">
-            En el Río de la Plata la marea astronómica es chica: lo que mueve el agua es el{' '}
-            <strong>viento sostenido</strong>. La app analiza hora por hora el pronóstico y
-            marca un evento cuando el viento viene de un sector de riesgo con fuerza y
-            persistencia suficientes:
+            En el Río de la Plata la marea astronómica es chica: lo que mueve el agua es el viento
+            sostenido sobre <em>todo</em> el río y el mar de afuera, no el de tu amarra. Por eso la
+            app no mira el viento sino el <strong>nivel del río pronosticado</strong> (Open-Meteo
+            Marine), promediado en 25 horas: ese promedio borra la marea astronómica —dos
+            pleamares por día— y deja lo que sube o baja por el viento.
           </p>
           <ul className="space-y-1">
             <li>
-              <span className="text-slate-300">•</span> <strong>Sudestada</strong> (sube el agua,
-              riesgo de inundar el club): viento del {sectorLabel(SURGE.sudestadaSector)}.
+              <span className="text-slate-300">•</span> <strong>Agua alta / sudestada</strong>{' '}
+              (riesgo de inundar el club): cuando el nivel promediado pasa{' '}
+              <strong>{SURGE.seaLevelHighM.toFixed(2)} m</strong> durante{' '}
+              {SURGE.seaLevelMinHours} h o más, que en el mareógrafo es ~
+              {levelToAnomalyM(SURGE.seaLevelHighM).toFixed(1)} m sobre lo normal.
             </li>
             <li>
-              <span className="text-slate-300">•</span> <strong>Bajante</strong> (baja el agua,
-              riesgo de varadura): viento del {sectorLabel(SURGE.bajanteSector)}.
+              <span className="text-slate-300">•</span> <strong>Agua baja / bajante</strong>{' '}
+              (riesgo de varar): cuando baja de <strong>{SURGE.seaLevelLowM.toFixed(2)} m</strong>, ~
+              {Math.abs(levelToAnomalyM(SURGE.seaLevelLowM)).toFixed(1)} m bajo lo normal.
             </li>
             <li>
-              <span className="text-slate-300">•</span> En ambos casos hace falta viento de{' '}
-              <strong>≥ {SURGE.minWindKt} kt</strong> sostenido durante{' '}
-              <strong>≥ {SURGE.minHours} horas</strong> seguidas.
+              <span className="text-slate-300">•</span> La <strong>severidad</strong> crece con el
+              pico. Sólo la severa pone el día en rojo: agua alta o baja moderada complica la
+              amarra (eso lo evalúa el resumen de marea contra tus niveles seguros), no la
+              navegación.
             </li>
           </ul>
           <p className="mt-2">
-            La <strong>severidad</strong> (leve / marcada / severa) crece con la duración y la
-            intensidad del viento. Además, si el nivel del mar pronosticado (Open-Meteo Marine)
-            acompaña la tendencia esperada, sube la <strong>confianza</strong> de la alerta; si la
-            contradice, baja.
+            <strong>Qué tan bien funciona:</strong> se comparó con lo que midieron los mareógrafos
+            del SHN entre junio y septiembre de 2026. De 25 días con el agua medio metro o más
+            arriba de lo normal en La Plata, avisó 24, y lo sigue haciendo con hasta{' '}
+            <strong>5 días de anticipación</strong>; de 11 bajantes, las 11. Falsas alarmas: 2 a 5
+            en esos cuatro meses. En la costa uruguaya (Montevideo) todavía no está validado.
+          </p>
+          <p className="mt-2">
+            Si el nivel del río no está disponible, la app cae a una regla por viento (del{' '}
+            {sectorLabel(SURGE.sudestadaSector)} para la sudestada, del{' '}
+            {sectorLabel(SURGE.bajanteSector)} para la bajante, ≥ {SURGE.minWindKt} kt durante ≥{' '}
+            {SURGE.minHours} h). Es mucho menos confiable —con el viento de un solo punto se pierde
+            la mayoría de los eventos— y la alerta lo aclara.
           </p>
         </div>
 
-        <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-400">
           Es un modelo propio y <strong>orientativo</strong>, no un pronóstico oficial. El
           pronóstico oficial de altura de agua y sudestadas lo emite el{' '}
           <a className="underline" href="https://www.hidro.gob.ar" target="_blank" rel="noreferrer">

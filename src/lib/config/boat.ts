@@ -48,12 +48,38 @@ export function scoringFor(caution: 'prudente' | 'normal' | 'audaz'): ScoringThr
   return SCORING;
 }
 
+/**
+ * Marea meteorológica (sudestada / bajante). Calibrado el 2026-09-30 contra el
+ * nivel OBSERVADO de los mareógrafos (validation/nivel-observado.jsonl, jun–sep
+ * 2026, `node scripts/nivel-eval.mjs report`).
+ *
+ * Método principal: el nivel del mar de Open-Meteo Marine filtrado a 25 h (la
+ * media móvil cancela la marea astronómica semidiurna y deja la meteorológica).
+ * Sigue al residuo observado de La Plata / Buenos Aires con r = 0.96, y con
+ * hasta 5 días de anticipación todavía r = 0.93: detectó 24 de 25 días de agua
+ * alta (≥ +0.5 m) y 11 de 11 de agua baja (≤ −0.5 m), con 2-5 falsas alarmas.
+ * Los umbrales están en la escala de Marine (MSL del modelo, cuya mediana en el
+ * estuario es ~+0.17 m); la conversión aproximada al mareógrafo es
+ * `anomalía ≈ 1.26 × nivel − 0.20`.
+ *
+ * Respaldo sólo por viento, si Marine no responde: el sector y la persistencia
+ * viejos (SE 112-157°, ≥ 18 kt, ≥ 6 h) no detectaban NINGUNO de esos eventos.
+ * Lo que mejor explica la subida es viento del S-SSE (165-175°) acumulado en
+ * 12-18 h; con el viento del punto de la amarra la regla de abajo detecta 8 de
+ * 25 sin falsas alarmas: es un respaldo pobre, pero no inventa.
+ */
 export const SURGE: SurgeThresholds = {
-  // Sudestada: viento del sector SE (de dónde viene).
-  sudestadaSector: [112, 157],
-  // Bajante: viento del N / NW (de dónde viene). Cruza el 0 (de 292° a 22°).
+  seaLevelHighM: 0.45,
+  seaLevelLowM: -0.15,
+  /** Severidad 2 / 3 del agua alta (nivel filtrado, m). */
+  seaLevelHighSevM: [0.6, 0.75],
+  /** Severidad 2 / 3 del agua baja (nivel filtrado, m). */
+  seaLevelLowSevM: [-0.25, -0.35],
+  seaLevelMinHours: 3,
+  // Respaldo por viento (de dónde viene).
+  sudestadaSector: [150, 210],
   bajanteSector: [292, 22],
-  minWindKt: 18,
+  minWindKt: 10,
   minHours: 6,
 };
 

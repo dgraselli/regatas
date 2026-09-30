@@ -227,9 +227,12 @@ export function scoreDay(
     }
   }
 
-  // Surge meteorológico
+  // Marea meteorológica. Sólo la severa pone el día en rojo: agua alta o baja
+  // moderada complica la amarra (eso lo evalúa el panel de marea contra los
+  // niveles seguros de cada uno), no la navegación. Con la detección por nivel
+  // del mar hay agua alta/baja moderada en ~1 de cada 3 días.
   for (const alert of surgeOnDay) {
-    const to: TrafficLevel = alert.severity >= 2 ? 'rojo' : 'amarillo';
+    const to: TrafficLevel = alert.severity >= 3 ? 'rojo' : 'amarillo';
     escalate(to, alert.message);
   }
 

@@ -12,7 +12,7 @@ Decisión de producto clave: **multiusuario sin registro**. Cada usuario carga s
 barcos y lugares; todo se guarda en el navegador (localStorage). No hay backend ni login.
 
 **Matiz del dominio (Río de la Plata):** la marea astronómica es chica; domina la
-**marea meteorológica** por viento. Viento **SE persistente → sudestada** (sube el agua,
+**marea meteorológica** por viento. Viento **S/SE persistente → sudestada** (sube el agua,
 inunda el club). Viento **N/NW persistente → bajante** (baja el agua, varadura). Por eso
 las alertas se derivan de dirección + persistencia del viento.
 
@@ -197,18 +197,22 @@ metodología en `validar_pronostico.txt` y en https://regatas.com.ar/validacion/
       **niebla se sigue validando sólo sobre ~58 días** (n=1570 de 2446). Es otra razón para
       terminar el consumo del `metar-observado.jsonl`, que sí tiene visibilidad medida y
       serie larga.
-- [ ] **Sudestada / bajante: el detector se pierde la mayoría de los eventos** (medido el
-      2026-09-30 con `node scripts/nivel-eval.mjs report`). Ahora se acumula el nivel
-      OBSERVADO de los mareógrafos en `validation/nivel-observado.jsonl` (captura diaria del
-      SHN + relleno histórico del INA desde el 06-20). Mirando la anomalía del nivel MEDIO
-      diario (cancela la marea astronómica semidiurna), entre junio y septiembre hubo ~15
-      días con el agua ≥ +0.5 m sobre lo normal en toda la costa argentina (picos de +0.9 a
-      +1.0 m el 07-19, 08-18, 08-21 y 09-12) y **sólo dos episodios tuvieron alerta**
-      (08-17/18 y 09-11/12, éste con un día de adelanto), en ninguna captura para La Plata ni
-      Buenos Aires. La regla actual (≥ 18 kt del SE durante ≥ 6 h, por zona) no ve la
-      sudestada que sube el agua en la costa argentina. Siguiente paso: cruzar esos días con
-      el viento pronosticado/observado para recalibrar sector, umbral y persistencia, y
-      decidir si la detección debe mirar el viento sobre el río y no el de cada punto.
+- [x] **Sudestada / bajante recalibrada contra el nivel observado** (2026-09-30). La regla
+      vieja (viento SE 112-157° ≥ 18 kt ≥ 6 h en el punto) no detectaba **ninguno** de los ~25
+      días de agua alta (≥ +0.5 m) ni de las 11 bajantes (≤ −0.5 m) de La Plata entre junio y
+      septiembre: el viento que sube el agua es el de todo el río y el mar de afuera, S-SSE
+      (165-175°), no el de la amarra. Lo que sí los sigue es el **nivel del mar de Open-Meteo
+      Marine filtrado a 25 h** (cancela la marea astronómica): r = 0.96 con el residuo del
+      mareógrafo, y con las corridas de hasta 5 días antes (`sea_level_height_msl_previous_dayN`)
+      todavía r = 0.93 → 24/25 agua alta y 11/11 agua baja, 2-5 falsas alarmas. `detectSurge`
+      ahora usa eso (umbrales +0.45 / −0.15 m en escala Marine, `SURGE` en `config/boat.ts`) y
+      cae al viento (S-SSE 150-210° ≥ 10 kt ≥ 6 h, 8/25) sólo si no hay nivel. En el semáforo
+      sólo la severidad 3 pone rojo (antes ≥ 2): con la detección nueva hay agua alta o baja
+      moderada ~1 de cada 3 días y eso complica la amarra, no la navegación.
+      Pendiente: validar Montevideo (no hay mareógrafo uruguayo en la serie); revisar los
+      umbrales con más meses (hay variación estacional del nivel medio); los snapshots desde
+      el 2026-10-01 ya traen la regla nueva, así que `nivel-eval.mjs report` va a mostrar su
+      acierto real con el pronóstico guardado.
 - [x] **Fragilidad del pipeline** (resuelto el 2026-09-29): el cron local perdía los días en
       que la máquina estaba apagada a las 6:10 (**36 de 100** entre el 06-22 y el 09-29), y un
       solo timeout contra aviationweather hizo perder todo el METAR del 09-25 (guarda ~3-4

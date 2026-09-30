@@ -257,7 +257,7 @@ function simulate(
   }, 0);
   if (peakEffWaveM >= thresholds.waveRedM) escLevel('rojo');
   else if (peakEffWaveM >= thresholds.waveYellowM) escLevel('amarillo');
-  for (const a of overlapSurge) escLevel(a.severity >= 2 ? 'rojo' : 'amarillo');
+  for (const a of overlapSurge) escLevel(a.severity >= 3 ? 'rojo' : 'amarillo');
 
   // Una sola advertencia de ráfaga, con el máximo del cruce (no una por hora).
   if (isMotor) {

@@ -87,22 +87,29 @@ describe('scoring', () => {
     expect(s.level).toBe('rojo');
   });
 
-  it('alerta de surge severa degrada a rojo', () => {
-    const surge: SurgeAlert[] = [
-      {
-        type: 'sudestada',
-        startsAt: '2026-06-18T08:00',
-        endsAt: '2026-06-18T20:00',
-        durationH: 12,
-        severity: 3,
-        confidence: 0.8,
-        avgWindKt: 25,
-        message: 'Sudestada severa',
-      },
-    ];
-    const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, surge);
+  const surgeAlert = (severity: 1 | 2 | 3): SurgeAlert => ({
+    type: 'sudestada',
+    startsAt: '2026-06-18T08:00',
+    endsAt: '2026-06-18T20:00',
+    durationH: 12,
+    severity,
+    confidence: 0.85,
+    avgWindKt: 15,
+    source: 'nivel',
+    anomalyM: 0.9,
+    message: 'Agua alta prevista',
+  });
+
+  it('alerta de marea severa degrada a rojo', () => {
+    const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, [surgeAlert(3)]);
     expect(s.level).toBe('rojo');
-    expect(s.reasons).toContain('Sudestada severa');
+    expect(s.reasons).toContain('Agua alta prevista');
+  });
+
+  it('alerta de marea moderada degrada sólo a amarillo', () => {
+    // Agua alta/baja moderada complica la amarra, no la navegación: es ~1 de
+    // cada 3 días con la detección por nivel, no puede pintar el día de rojo.
+    expect(scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, [surgeAlert(2)]).level).toBe('amarillo');
   });
 
   it('niebla densa todo el día => rojo', () => {

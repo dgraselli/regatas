@@ -13,12 +13,14 @@ describe('MetodologiaInfo', () => {
   });
 
   it('muestra los umbrales reales de SURGE', () => {
-    render(<MetodologiaInfo />);
-    // Viento mínimo y persistencia salen del config, no hardcodeados en el texto.
-    expect(screen.getByText(new RegExp(`${SURGE.minWindKt} kt`))).toBeDefined();
-    expect(screen.getByText(new RegExp(`${SURGE.minHours} horas`))).toBeDefined();
-    expect(screen.getByText(/Sudestada/)).toBeDefined();
-    expect(screen.getByText(/Bajante/)).toBeDefined();
+    const { container } = render(<MetodologiaInfo />);
+    // Los umbrales salen del config, no hardcodeados en el texto.
+    const text = container.textContent ?? '';
+    expect(text).toContain(`${SURGE.seaLevelHighM.toFixed(2)} m`);
+    expect(text).toContain(`${SURGE.seaLevelLowM.toFixed(2)} m`);
+    expect(text).toContain(`≥ ${SURGE.minWindKt} kt`);
+    expect(text).toMatch(/sudestada/i);
+    expect(text).toMatch(/bajante/i);
   });
 
   it('nombra la estación cuando se le pasa', () => {

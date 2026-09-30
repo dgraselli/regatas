@@ -73,13 +73,23 @@ export interface ScoringThresholds {
 }
 
 export interface SurgeThresholds {
-  /** Sector de viento del SE (sudestada): [min, max] en grados. */
+  /** Nivel del mar filtrado a 25 h (Marine, m) a partir del cual hay agua alta. */
+  seaLevelHighM: number;
+  /** Nivel del mar filtrado a 25 h (Marine, m) por debajo del cual hay agua baja. */
+  seaLevelLowM: number;
+  /** Cortes de severidad 2 y 3 del agua alta. */
+  seaLevelHighSevM: [number, number];
+  /** Cortes de severidad 2 y 3 del agua baja. */
+  seaLevelLowSevM: [number, number];
+  /** Horas mínimas por encima/debajo del umbral para alertar. */
+  seaLevelMinHours: number;
+  /** Respaldo por viento: sector de sudestada [min, max] en grados. */
   sudestadaSector: [number, number];
-  /** Sector de viento del N/NW (bajante). Puede cruzar el 0. */
+  /** Respaldo por viento: sector de bajante. Puede cruzar el 0. */
   bajanteSector: [number, number];
-  /** Velocidad mínima de viento sostenido (nudos) para considerar el evento. */
+  /** Respaldo por viento: velocidad mínima sostenida (nudos). */
   minWindKt: number;
-  /** Horas consecutivas mínimas para disparar la alerta. */
+  /** Respaldo por viento: horas consecutivas mínimas. */
   minHours: number;
 }
 

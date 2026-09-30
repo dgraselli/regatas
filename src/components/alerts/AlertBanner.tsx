@@ -28,7 +28,10 @@ export function AlertBanner({ alert }: { alert: SurgeAlert }) {
       <p className="text-sm mt-1">{alert.message}</p>
       <p className="text-xs mt-2 opacity-80">
         {formatDate(alert.startsAt)} {formatHour(alert.startsAt)} →{' '}
-        {formatDate(alert.endsAt)} {formatHour(alert.endsAt)} · viento medio {alert.avgWindKt} kt
+        {formatDate(alert.endsAt)} {formatHour(alert.endsAt)} ·{' '}
+        {alert.source === 'nivel'
+          ? 'según el nivel del río pronosticado'
+          : `sólo por viento (sin nivel del río) · viento medio ${alert.avgWindKt} kt`}
       </p>
     </div>
   );

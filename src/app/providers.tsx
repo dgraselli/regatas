@@ -66,7 +66,7 @@ export function Providers({ children }: { children: ReactNode }) {
       // que si no se lo desaloja el usuario sigue viendo el dato viejo hasta que
       // venza el staleTime. Pasó con `dayWindow`, que guardaba el nivel de anoche
       // y disparaba un falso "la estación puede estar caída".
-      persistOptions={{ persister, buster: 'schema-14' }}
+      persistOptions={{ persister, buster: 'schema-15' }}
     >
       <ProfileProvider>{children}</ProfileProvider>
     </PersistQueryClientProvider>

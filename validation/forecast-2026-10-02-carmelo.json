@@ -1,0 +1,181 @@
+{
+  "capturedAt": "2026-10-02T15:46:27.630Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-02",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 10,
+        "windDirDominant": 32,
+        "precipTotalMm": 0,
+        "visibilityMinM": 18560
+      }
+    },
+    {
+      "date": "2026-10-03",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (7.9 mm)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 13,
+        "windDirDominant": 59,
+        "precipTotalMm": 7.9,
+        "visibilityMinM": 2720
+      }
+    },
+    {
+      "date": "2026-10-04",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 140 m, 9 h)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 8,
+        "windDirDominant": 140,
+        "precipTotalMm": 0,
+        "visibilityMinM": 140
+      }
+    },
+    {
+      "date": "2026-10-05",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 10,
+        "windDirDominant": 28,
+        "precipTotalMm": 0,
+        "visibilityMinM": 42020
+      }
+    },
+    {
+      "date": "2026-10-06",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 11,
+        "windDirDominant": 33,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 46280
+      }
+    },
+    {
+      "date": "2026-10-07",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (6.6 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 119,
+        "precipTotalMm": 6.6,
+        "visibilityMinM": 2880
+      }
+    },
+    {
+      "date": "2026-10-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 15,
+        "windDirDominant": 162,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 11920
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-02T01:00",
+      "endsAt": "2026-10-02T07:00",
+      "durationH": 7,
+      "severity": 1,
+      "avgWindKt": 4,
+      "source": "nivel",
+      "peakLevelM": 0.47
+    },
+    {
+      "type": "bajante",
+      "startsAt": "2026-10-03T14:00",
+      "endsAt": "2026-10-04T03:00",
+      "durationH": 14,
+      "severity": 1,
+      "avgWindKt": 4,
+      "source": "nivel",
+      "peakLevelM": -0.2
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-03T09:00",
+      "endsAt": "2026-10-03T11:00",
+      "durationH": 3,
+      "severity": 1,
+      "minVisibilityM": 2720
+    },
+    {
+      "startsAt": "2026-10-03T13:00",
+      "endsAt": "2026-10-03T13:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3600
+    },
+    {
+      "startsAt": "2026-10-04T01:00",
+      "endsAt": "2026-10-04T02:00",
+      "durationH": 2,
+      "severity": 2,
+      "minVisibilityM": 200
+    },
+    {
+      "startsAt": "2026-10-04T04:00",
+      "endsAt": "2026-10-04T15:00",
+      "durationH": 12,
+      "severity": 2,
+      "minVisibilityM": 140
+    },
+    {
+      "startsAt": "2026-10-07T18:00",
+      "endsAt": "2026-10-07T18:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2880
+    }
+  ]
+}

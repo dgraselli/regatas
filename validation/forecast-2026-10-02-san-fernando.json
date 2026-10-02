@@ -1,0 +1,189 @@
+{
+  "capturedAt": "2026-10-02T15:46:32.662Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-02",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 66,
+        "precipTotalMm": 0,
+        "visibilityMinM": 42160
+      }
+    },
+    {
+      "date": "2026-10-03",
+      "level": "rojo",
+      "reasons": [
+        "Lluvia fuerte (18.4 mm)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 63,
+        "precipTotalMm": 18.4,
+        "visibilityMinM": 2000
+      }
+    },
+    {
+      "date": "2026-10-04",
+      "level": "rojo",
+      "reasons": [
+        "Niebla buena parte del día (mín 160 m)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 130,
+        "precipTotalMm": 0,
+        "visibilityMinM": 160
+      }
+    },
+    {
+      "date": "2026-10-05",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 20,
+        "windDirDominant": 37,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46520
+      }
+    },
+    {
+      "date": "2026-10-06",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 16,
+        "windDirDominant": 60,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 44920
+      }
+    },
+    {
+      "date": "2026-10-07",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (31 kt)",
+        "Algo de lluvia (5.2 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 31,
+        "windDirDominant": 112,
+        "precipTotalMm": 5.2,
+        "visibilityMinM": 2400
+      }
+    },
+    {
+      "date": "2026-10-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 21,
+        "windDirDominant": 131,
+        "precipTotalMm": 0,
+        "visibilityMinM": 16360
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-02T00:00",
+      "endsAt": "2026-10-02T06:00",
+      "durationH": 7,
+      "severity": 1,
+      "avgWindKt": 3,
+      "source": "nivel",
+      "peakLevelM": 0.48
+    },
+    {
+      "type": "bajante",
+      "startsAt": "2026-10-03T14:00",
+      "endsAt": "2026-10-04T04:00",
+      "durationH": 15,
+      "severity": 1,
+      "avgWindKt": 3,
+      "source": "nivel",
+      "peakLevelM": -0.2
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-03T08:00",
+      "endsAt": "2026-10-03T10:00",
+      "durationH": 3,
+      "severity": 1,
+      "minVisibilityM": 2000
+    },
+    {
+      "startsAt": "2026-10-03T12:00",
+      "endsAt": "2026-10-03T13:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2520
+    },
+    {
+      "startsAt": "2026-10-04T01:00",
+      "endsAt": "2026-10-04T10:00",
+      "durationH": 10,
+      "severity": 2,
+      "minVisibilityM": 160
+    },
+    {
+      "startsAt": "2026-10-04T13:00",
+      "endsAt": "2026-10-04T14:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 1120
+    },
+    {
+      "startsAt": "2026-10-04T16:00",
+      "endsAt": "2026-10-04T16:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 1100
+    },
+    {
+      "startsAt": "2026-10-07T18:00",
+      "endsAt": "2026-10-07T18:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2400
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "capturedAt": "2026-10-08T16:26:59.251Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 13,
+        "windDirDominant": 220,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 3060
+      }
+    },
+    {
+      "date": "2026-10-09",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 14,
+        "gustPeakKt": 20,
+        "windDirDominant": 145,
+        "precipTotalMm": 0.9,
+        "visibilityMinM": 8500
+      }
+    },
+    {
+      "date": "2026-10-10",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 16,
+        "windDirDominant": 164,
+        "precipTotalMm": 1.5,
+        "visibilityMinM": 5100
+      }
+    },
+    {
+      "date": "2026-10-11",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 12,
+        "windDirDominant": 159,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 8860
+      }
+    },
+    {
+      "date": "2026-10-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 15,
+        "windDirDominant": 128,
+        "precipTotalMm": 1,
+        "visibilityMinM": 28140
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 13,
+        "windDirDominant": 125,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 9720
+      }
+    },
+    {
+      "date": "2026-10-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 14,
+        "windDirDominant": 147,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38560
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-09T05:00",
+      "endsAt": "2026-10-11T11:00",
+      "durationH": 55,
+      "severity": 3,
+      "avgWindKt": 10,
+      "source": "nivel",
+      "peakLevelM": 0.91
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-08T08:00",
+      "endsAt": "2026-10-08T09:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 3060
+    },
+    {
+      "startsAt": "2026-10-10T02:00",
+      "endsAt": "2026-10-10T02:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3720
+    }
+  ]
+}

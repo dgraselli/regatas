@@ -1,0 +1,157 @@
+{
+  "capturedAt": "2026-10-08T16:27:01.939Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "La Plata",
+    "lat": -34.8399,
+    "lon": -57.9234
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-08",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 23,
+        "windDirDominant": 203,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 3720
+      }
+    },
+    {
+      "date": "2026-10-09",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)",
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 27,
+        "windDirDominant": 147,
+        "precipTotalMm": 0.7,
+        "visibilityMinM": 14140
+      }
+    },
+    {
+      "date": "2026-10-10",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.2 mm)",
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 17,
+        "windDirDominant": 167,
+        "precipTotalMm": 2.2,
+        "visibilityMinM": 5220
+      }
+    },
+    {
+      "date": "2026-10-11",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 16,
+        "windDirDominant": 138,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 1860
+      }
+    },
+    {
+      "date": "2026-10-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 108,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 17560
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 20,
+        "windDirDominant": 89,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 16520
+      }
+    },
+    {
+      "date": "2026-10-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 23,
+        "windDirDominant": 92,
+        "precipTotalMm": 0,
+        "visibilityMinM": 27320
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-09T09:00",
+      "endsAt": "2026-10-11T05:00",
+      "durationH": 45,
+      "severity": 2,
+      "avgWindKt": 7,
+      "source": "nivel",
+      "peakLevelM": 0.72
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-08T01:00",
+      "endsAt": "2026-10-08T01:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3580
+    },
+    {
+      "startsAt": "2026-10-08T07:00",
+      "endsAt": "2026-10-08T07:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3720
+    },
+    {
+      "startsAt": "2026-10-11T02:00",
+      "endsAt": "2026-10-11T07:00",
+      "durationH": 6,
+      "severity": 2,
+      "minVisibilityM": 200
+    }
+  ]
+}

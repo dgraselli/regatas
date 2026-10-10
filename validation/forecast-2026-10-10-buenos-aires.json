@@ -1,0 +1,145 @@
+{
+  "capturedAt": "2026-10-10T15:21:03.185Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-10",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 17,
+        "windDirDominant": 167,
+        "precipTotalMm": 1,
+        "visibilityMinM": 8100
+      }
+    },
+    {
+      "date": "2026-10-11",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 19,
+        "windDirDominant": 118,
+        "precipTotalMm": 0,
+        "visibilityMinM": 32980
+      }
+    },
+    {
+      "date": "2026-10-12",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.4 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 24,
+        "windDirDominant": 102,
+        "precipTotalMm": 2.4,
+        "visibilityMinM": 6720
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 21,
+        "windDirDominant": 116,
+        "precipTotalMm": 0,
+        "visibilityMinM": 20480
+      }
+    },
+    {
+      "date": "2026-10-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~9 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 24,
+        "windDirDominant": 93,
+        "precipTotalMm": 0,
+        "visibilityMinM": 18900
+      }
+    },
+    {
+      "date": "2026-10-15",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (29 kt)",
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 29,
+        "windDirDominant": 102,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 16680
+      }
+    },
+    {
+      "date": "2026-10-16",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (28 kt)",
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 28,
+        "windDirDominant": 100,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 21400
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-10T00:00",
+      "endsAt": "2026-10-10T14:00",
+      "durationH": 15,
+      "severity": 3,
+      "avgWindKt": 6,
+      "source": "nivel",
+      "peakLevelM": 0.9
+    },
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-15T18:00",
+      "endsAt": "2026-10-16T23:00",
+      "durationH": 30,
+      "severity": 2,
+      "avgWindKt": 10,
+      "source": "nivel",
+      "peakLevelM": 0.62
+    }
+  ],
+  "fog": []
+}

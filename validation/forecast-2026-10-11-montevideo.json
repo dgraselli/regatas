@@ -1,0 +1,122 @@
+{
+  "capturedAt": "2026-10-11T15:37:56.467Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Montevideo",
+    "lat": -34.912,
+    "lon": -56.137
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 17,
+        "windDirDominant": 166,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 14940
+      }
+    },
+    {
+      "date": "2026-10-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~12 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 12,
+        "gustPeakKt": 19,
+        "windDirDominant": 122,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 8920
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~12 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 12,
+        "gustPeakKt": 18,
+        "windDirDominant": 116,
+        "precipTotalMm": 0.5,
+        "visibilityMinM": 9000
+      }
+    },
+    {
+      "date": "2026-10-14",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.1 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 14,
+        "gustPeakKt": 20,
+        "windDirDominant": 118,
+        "precipTotalMm": 2.1,
+        "visibilityMinM": 4820
+      }
+    },
+    {
+      "date": "2026-10-15",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~16 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 16,
+        "gustPeakKt": 24,
+        "windDirDominant": 119,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 13600
+      }
+    },
+    {
+      "date": "2026-10-16",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 18,
+        "gustPeakKt": 25,
+        "windDirDominant": 110,
+        "precipTotalMm": 1.5,
+        "visibilityMinM": 5580
+      }
+    },
+    {
+      "date": "2026-10-17",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~14 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 14,
+        "gustPeakKt": 21,
+        "windDirDominant": 122,
+        "precipTotalMm": 0.9,
+        "visibilityMinM": 12980
+      }
+    }
+  ],
+  "surge": [],
+  "fog": []
+}

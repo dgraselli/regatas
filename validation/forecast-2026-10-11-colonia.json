@@ -1,0 +1,136 @@
+{
+  "capturedAt": "2026-10-11T15:37:53.672Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 22,
+        "windDirDominant": 142,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 16100
+      }
+    },
+    {
+      "date": "2026-10-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~11 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 23,
+        "windDirDominant": 107,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 14920
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 12,
+        "gustPeakKt": 27,
+        "windDirDominant": 114,
+        "precipTotalMm": 0,
+        "visibilityMinM": 37020
+      }
+    },
+    {
+      "date": "2026-10-14",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (30 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 12,
+        "gustPeakKt": 30,
+        "windDirDominant": 123,
+        "precipTotalMm": 0.2,
+        "visibilityMinM": 14760
+      }
+    },
+    {
+      "date": "2026-10-15",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (32 kt)",
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 15,
+        "gustPeakKt": 32,
+        "windDirDominant": 120,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 26460
+      }
+    },
+    {
+      "date": "2026-10-16",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas peligrosas (33 kt)",
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 13,
+        "gustPeakKt": 33,
+        "windDirDominant": 116,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 13320
+      }
+    },
+    {
+      "date": "2026-10-17",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (29 kt)",
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 13,
+        "gustPeakKt": 29,
+        "windDirDominant": 129,
+        "precipTotalMm": 1.8,
+        "visibilityMinM": 34500
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-15T12:00",
+      "endsAt": "2026-10-17T04:00",
+      "durationH": 41,
+      "severity": 1,
+      "avgWindKt": 14,
+      "source": "nivel",
+      "peakLevelM": 0.58
+    }
+  ],
+  "fog": []
+}

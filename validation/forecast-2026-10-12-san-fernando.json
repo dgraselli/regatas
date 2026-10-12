@@ -1,0 +1,157 @@
+{
+  "capturedAt": "2026-10-12T19:02:53.486Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 24,
+        "windDirDominant": 101,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 13620
+      }
+    },
+    {
+      "date": "2026-10-13",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 25,
+        "windDirDominant": 104,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 9400
+      }
+    },
+    {
+      "date": "2026-10-14",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 16,
+        "windDirDominant": 142,
+        "precipTotalMm": 0.2,
+        "visibilityMinM": 14500
+      }
+    },
+    {
+      "date": "2026-10-15",
+      "level": "rojo",
+      "reasons": [
+        "Lluvia fuerte (18.2 mm)",
+        "Visibilidad reducida (2300 m)",
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 150,
+        "precipTotalMm": 18.2,
+        "visibilityMinM": 2300
+      }
+    },
+    {
+      "date": "2026-10-16",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 23,
+        "windDirDominant": 144,
+        "precipTotalMm": 1.6,
+        "visibilityMinM": 8120
+      }
+    },
+    {
+      "date": "2026-10-17",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 18,
+        "windDirDominant": 130,
+        "precipTotalMm": 0,
+        "visibilityMinM": 37800
+      }
+    },
+    {
+      "date": "2026-10-18",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 116,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48020
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-15T09:00",
+      "endsAt": "2026-10-17T06:00",
+      "durationH": 46,
+      "severity": 1,
+      "avgWindKt": 9,
+      "source": "nivel",
+      "peakLevelM": 0.56
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-15T09:00",
+      "endsAt": "2026-10-15T09:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2300
+    },
+    {
+      "startsAt": "2026-10-15T14:00",
+      "endsAt": "2026-10-15T15:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2880
+    },
+    {
+      "startsAt": "2026-10-15T17:00",
+      "endsAt": "2026-10-15T17:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3260
+    }
+  ]
+}

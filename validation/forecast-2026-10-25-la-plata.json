@@ -1,0 +1,167 @@
+{
+  "capturedAt": "2026-10-25T13:41:55.571Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "La Plata",
+    "lat": -34.8399,
+    "lon": -57.9234
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-25",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 24,
+        "windDirDominant": 174,
+        "precipTotalMm": 0,
+        "visibilityMinM": 17120
+      }
+    },
+    {
+      "date": "2026-10-26",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 16,
+        "windDirDominant": 163,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46160
+      }
+    },
+    {
+      "date": "2026-10-27",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 47,
+        "precipTotalMm": 0.2,
+        "visibilityMinM": 14200
+      }
+    },
+    {
+      "date": "2026-10-28",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2.2 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 2,
+        "gustPeakKt": 15,
+        "windDirDominant": 50,
+        "precipTotalMm": 2.2,
+        "visibilityMinM": 5980
+      }
+    },
+    {
+      "date": "2026-10-29",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 63,
+        "precipTotalMm": 0.8,
+        "visibilityMinM": 22600
+      }
+    },
+    {
+      "date": "2026-10-30",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 460 m, 3 h)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 2,
+        "gustPeakKt": 12,
+        "windDirDominant": 262,
+        "precipTotalMm": 1.2,
+        "visibilityMinM": 460
+      }
+    },
+    {
+      "date": "2026-10-31",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 960 m, 3 h)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 93,
+        "precipTotalMm": 0,
+        "visibilityMinM": 960
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-10-25T00:00",
+      "endsAt": "2026-10-25T23:00",
+      "durationH": 24,
+      "severity": 3,
+      "avgWindKt": 7,
+      "source": "nivel",
+      "peakLevelM": 0.93
+    },
+    {
+      "type": "bajante",
+      "startsAt": "2026-10-30T21:00",
+      "endsAt": "2026-10-31T07:00",
+      "durationH": 11,
+      "severity": 1,
+      "avgWindKt": 3,
+      "source": "nivel",
+      "peakLevelM": -0.19
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-29T21:00",
+      "endsAt": "2026-10-29T21:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2640
+    },
+    {
+      "startsAt": "2026-10-30T06:00",
+      "endsAt": "2026-10-30T09:00",
+      "durationH": 4,
+      "severity": 2,
+      "minVisibilityM": 120
+    },
+    {
+      "startsAt": "2026-10-31T03:00",
+      "endsAt": "2026-10-31T09:00",
+      "durationH": 7,
+      "severity": 2,
+      "minVisibilityM": 100
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "capturedAt": "2026-10-28T15:59:29.173Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Montevideo",
+    "lat": -34.912,
+    "lon": -56.137
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-28",
+      "level": "rojo",
+      "reasons": [
+        "Niebla buena parte del día (mín 120 m)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 11,
+        "windDirDominant": 143,
+        "precipTotalMm": 0,
+        "visibilityMinM": 120
+      }
+    },
+    {
+      "date": "2026-10-29",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (2 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 18,
+        "windDirDominant": 81,
+        "precipTotalMm": 2,
+        "visibilityMinM": 3920
+      }
+    },
+    {
+      "date": "2026-10-30",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (11.9 mm)",
+        "Visibilidad reducida (2760 m)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 17,
+        "windDirDominant": 50,
+        "precipTotalMm": 11.9,
+        "visibilityMinM": 2760
+      }
+    },
+    {
+      "date": "2026-10-31",
+      "level": "amarillo",
+      "reasons": [
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 13,
+        "windDirDominant": 80,
+        "precipTotalMm": 1,
+        "visibilityMinM": 5620
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 15,
+        "windDirDominant": 46,
+        "precipTotalMm": 0.6,
+        "visibilityMinM": 15620
+      }
+    },
+    {
+      "date": "2026-11-02",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 12,
+        "windDirDominant": 207,
+        "precipTotalMm": 0,
+        "visibilityMinM": 23780
+      }
+    },
+    {
+      "date": "2026-11-03",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (8.8 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 22,
+        "windDirDominant": 95,
+        "precipTotalMm": 8.8,
+        "visibilityMinM": 6400
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "bajante",
+      "startsAt": "2026-10-30T15:00",
+      "endsAt": "2026-10-31T07:00",
+      "durationH": 17,
+      "severity": 1,
+      "avgWindKt": 8,
+      "source": "nivel",
+      "peakLevelM": -0.2
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-28T04:00",
+      "endsAt": "2026-10-28T17:00",
+      "durationH": 14,
+      "severity": 2,
+      "minVisibilityM": 100
+    },
+    {
+      "startsAt": "2026-10-29T14:00",
+      "endsAt": "2026-10-29T14:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3920
+    },
+    {
+      "startsAt": "2026-10-30T07:00",
+      "endsAt": "2026-10-30T08:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2760
+    },
+    {
+      "startsAt": "2026-10-30T10:00",
+      "endsAt": "2026-10-30T10:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3840
+    },
+    {
+      "startsAt": "2026-10-30T15:00",
+      "endsAt": "2026-10-30T16:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 3420
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "capturedAt": "2026-10-30T15:54:22.594Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-30",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas marcadas (30 kt)",
+        "Lluvia fuerte (13.1 mm)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 11,
+        "gustPeakKt": 30,
+        "windDirDominant": 351,
+        "precipTotalMm": 13.1,
+        "visibilityMinM": 2140
+      }
+    },
+    {
+      "date": "2026-10-31",
+      "level": "amarillo",
+      "reasons": [
+        "Niebla varias horas (mín 460 m, 3 h)",
+        "bajante sev 1"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 15,
+        "windDirDominant": 204,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 460
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)",
+        "Algo de lluvia (4.8 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 27,
+        "windDirDominant": 0,
+        "precipTotalMm": 4.8,
+        "visibilityMinM": 3220
+      }
+    },
+    {
+      "date": "2026-11-02",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 18,
+        "windDirDominant": 208,
+        "precipTotalMm": 0.1,
+        "visibilityMinM": 12980
+      }
+    },
+    {
+      "date": "2026-11-03",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 20,
+        "windDirDominant": 106,
+        "precipTotalMm": 0,
+        "visibilityMinM": 20200
+      }
+    },
+    {
+      "date": "2026-11-04",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 23,
+        "windDirDominant": 260,
+        "precipTotalMm": 0,
+        "visibilityMinM": 26800
+      }
+    },
+    {
+      "date": "2026-11-05",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 14,
+        "windDirDominant": 275,
+        "precipTotalMm": 0,
+        "visibilityMinM": 51220
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "bajante",
+      "startsAt": "2026-10-30T23:00",
+      "endsAt": "2026-10-31T07:00",
+      "durationH": 9,
+      "severity": 1,
+      "avgWindKt": 5,
+      "source": "nivel",
+      "peakLevelM": -0.18
+    },
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-03T06:00",
+      "endsAt": "2026-11-04T07:00",
+      "durationH": 26,
+      "severity": 2,
+      "avgWindKt": 8,
+      "source": "nivel",
+      "peakLevelM": 0.61
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-10-30T07:00",
+      "endsAt": "2026-10-30T08:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2140
+    },
+    {
+      "startsAt": "2026-10-30T10:00",
+      "endsAt": "2026-10-30T10:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3480
+    },
+    {
+      "startsAt": "2026-10-31T02:00",
+      "endsAt": "2026-10-31T07:00",
+      "durationH": 6,
+      "severity": 2,
+      "minVisibilityM": 460
+    },
+    {
+      "startsAt": "2026-10-31T09:00",
+      "endsAt": "2026-10-31T09:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3060
+    },
+    {
+      "startsAt": "2026-10-31T12:00",
+      "endsAt": "2026-10-31T12:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3660
+    },
+    {
+      "startsAt": "2026-11-01T13:00",
+      "endsAt": "2026-11-01T13:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3220
+    },
+    {
+      "startsAt": "2026-11-01T22:00",
+      "endsAt": "2026-11-02T00:00",
+      "durationH": 3,
+      "severity": 1,
+      "minVisibilityM": 2300
+    },
+    {
+      "startsAt": "2026-11-02T02:00",
+      "endsAt": "2026-11-02T05:00",
+      "durationH": 4,
+      "severity": 2,
+      "minVisibilityM": 640
+    }
+  ]
+}

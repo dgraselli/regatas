@@ -1,0 +1,170 @@
+{
+  "capturedAt": "2026-10-31T15:18:01.710Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-10-31",
+      "level": "amarillo",
+      "reasons": [
+        "bajante sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 83,
+        "precipTotalMm": 0,
+        "visibilityMinM": 6720
+      }
+    },
+    {
+      "date": "2026-11-01",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (4.9 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 17,
+        "windDirDominant": 19,
+        "precipTotalMm": 4.9,
+        "visibilityMinM": 2500
+      }
+    },
+    {
+      "date": "2026-11-02",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 15,
+        "windDirDominant": 138,
+        "precipTotalMm": 0,
+        "visibilityMinM": 620
+      }
+    },
+    {
+      "date": "2026-11-03",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)",
+        "Algo de lluvia (4.3 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 25,
+        "windDirDominant": 119,
+        "precipTotalMm": 4.3,
+        "visibilityMinM": 3060
+      }
+    },
+    {
+      "date": "2026-11-04",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 25,
+        "windDirDominant": 221,
+        "precipTotalMm": 0,
+        "visibilityMinM": 20180
+      }
+    },
+    {
+      "date": "2026-11-05",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 20,
+        "windDirDominant": 226,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48280
+      }
+    },
+    {
+      "date": "2026-11-06",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 22,
+        "windDirDominant": 121,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46640
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "bajante",
+      "startsAt": "2026-10-31T00:00",
+      "endsAt": "2026-10-31T08:00",
+      "durationH": 9,
+      "severity": 2,
+      "avgWindKt": 2,
+      "source": "nivel",
+      "peakLevelM": -0.34
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-11-01T12:00",
+      "endsAt": "2026-11-01T13:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 2500
+    },
+    {
+      "startsAt": "2026-11-01T23:00",
+      "endsAt": "2026-11-02T00:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 3460
+    },
+    {
+      "startsAt": "2026-11-02T04:00",
+      "endsAt": "2026-11-02T08:00",
+      "durationH": 5,
+      "severity": 2,
+      "minVisibilityM": 560
+    },
+    {
+      "startsAt": "2026-11-02T21:00",
+      "endsAt": "2026-11-03T06:00",
+      "durationH": 10,
+      "severity": 2,
+      "minVisibilityM": 140
+    },
+    {
+      "startsAt": "2026-11-03T17:00",
+      "endsAt": "2026-11-03T18:00",
+      "durationH": 2,
+      "severity": 1,
+      "minVisibilityM": 3060
+    }
+  ]
+}

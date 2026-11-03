@@ -1,0 +1,163 @@
+{
+  "capturedAt": "2026-11-03T17:00:04.837Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Colonia",
+    "lat": -34.472,
+    "lon": -57.851
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-11-03",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 19,
+        "windDirDominant": 98,
+        "precipTotalMm": 1.6,
+        "visibilityMinM": 3060
+      }
+    },
+    {
+      "date": "2026-11-04",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 14,
+        "windDirDominant": 208,
+        "precipTotalMm": 0,
+        "visibilityMinM": 32400
+      }
+    },
+    {
+      "date": "2026-11-05",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 12,
+        "windDirDominant": 267,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46340
+      }
+    },
+    {
+      "date": "2026-11-06",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 16,
+        "windDirDominant": 110,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 46320
+      }
+    },
+    {
+      "date": "2026-11-07",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas peligrosas (36 kt)",
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 36,
+        "windDirDominant": 169,
+        "precipTotalMm": 0,
+        "visibilityMinM": 42760
+      }
+    },
+    {
+      "date": "2026-11-08",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 17,
+        "windDirDominant": 304,
+        "precipTotalMm": 0,
+        "visibilityMinM": 47600
+      }
+    },
+    {
+      "date": "2026-11-09",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 18,
+        "windDirDominant": 35,
+        "precipTotalMm": 0,
+        "visibilityMinM": 50180
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-06T22:00",
+      "endsAt": "2026-11-08T14:00",
+      "durationH": 41,
+      "severity": 3,
+      "avgWindKt": 10,
+      "source": "nivel",
+      "peakLevelM": 1.04
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-11-03T16:00",
+      "endsAt": "2026-11-03T16:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3060
+    },
+    {
+      "startsAt": "2026-11-03T22:00",
+      "endsAt": "2026-11-03T22:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 2520
+    },
+    {
+      "startsAt": "2026-11-06T20:00",
+      "endsAt": "2026-11-06T20:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3660
+    },
+    {
+      "startsAt": "2026-11-07T00:00",
+      "endsAt": "2026-11-07T00:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3940
+    }
+  ]
+}

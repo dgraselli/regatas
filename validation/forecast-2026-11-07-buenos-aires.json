@@ -1,0 +1,144 @@
+{
+  "capturedAt": "2026-11-07T15:38:26.819Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-11-07",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)",
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 27,
+        "windDirDominant": 181,
+        "precipTotalMm": 0,
+        "visibilityMinM": 26600
+      }
+    },
+    {
+      "date": "2026-11-08",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 23,
+        "precipTotalMm": 0,
+        "visibilityMinM": 34960
+      }
+    },
+    {
+      "date": "2026-11-09",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 21,
+        "windDirDominant": 30,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46860
+      }
+    },
+    {
+      "date": "2026-11-10",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 47,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46860
+      }
+    },
+    {
+      "date": "2026-11-11",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 20,
+        "windDirDominant": 35,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48140
+      }
+    },
+    {
+      "date": "2026-11-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 20,
+        "windDirDominant": 48,
+        "precipTotalMm": 0,
+        "visibilityMinM": 48120
+      }
+    },
+    {
+      "date": "2026-11-13",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 21,
+        "windDirDominant": 65,
+        "precipTotalMm": 0,
+        "visibilityMinM": 50920
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-07T00:00",
+      "endsAt": "2026-11-08T09:00",
+      "durationH": 34,
+      "severity": 3,
+      "avgWindKt": 7,
+      "source": "nivel",
+      "peakLevelM": 0.98
+    },
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-13T03:00",
+      "endsAt": "2026-11-13T23:00",
+      "durationH": 21,
+      "severity": 2,
+      "avgWindKt": 6,
+      "source": "nivel",
+      "peakLevelM": 0.6
+    }
+  ],
+  "fog": []
+}

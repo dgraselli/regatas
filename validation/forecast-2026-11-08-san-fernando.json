@@ -1,0 +1,133 @@
+{
+  "capturedAt": "2026-11-08T15:56:59.276Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "San Fernando",
+    "lat": -34.433,
+    "lon": -58.55
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-11-08",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 19,
+        "windDirDominant": 54,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38280
+      }
+    },
+    {
+      "date": "2026-11-09",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 20,
+        "windDirDominant": 39,
+        "precipTotalMm": 0,
+        "visibilityMinM": 42540
+      }
+    },
+    {
+      "date": "2026-11-10",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 19,
+        "windDirDominant": 64,
+        "precipTotalMm": 0,
+        "visibilityMinM": 47020
+      }
+    },
+    {
+      "date": "2026-11-11",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 17,
+        "windDirDominant": 22,
+        "precipTotalMm": 0.7,
+        "visibilityMinM": 7560
+      }
+    },
+    {
+      "date": "2026-11-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 23,
+        "windDirDominant": 91,
+        "precipTotalMm": 0,
+        "visibilityMinM": 42440
+      }
+    },
+    {
+      "date": "2026-11-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 16,
+        "windDirDominant": 81,
+        "precipTotalMm": 0,
+        "visibilityMinM": 47020
+      }
+    },
+    {
+      "date": "2026-11-14",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 17,
+        "windDirDominant": 283,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 45260
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-08T00:00",
+      "endsAt": "2026-11-08T08:00",
+      "durationH": 9,
+      "severity": 2,
+      "avgWindKt": 4,
+      "source": "nivel",
+      "peakLevelM": 0.68
+    }
+  ],
+  "fog": []
+}

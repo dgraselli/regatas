@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { detectSurge, tidalFilter, levelToAnomalyM } from '@/lib/domain/surge';
+import { detectSurge, tidalFilter, levelToAnomalyM, surgeSeverityOn } from '@/lib/domain/surge';
+import { SURGE } from '@/lib/config/boat';
 import type { HourlyPoint } from '@/lib/types/forecast';
 
 const iso = (i: number) => {
@@ -82,6 +83,41 @@ describe('surge por nivel del mar', () => {
     expect(at(0.5).severity).toBe(1);
     expect(at(0.65).severity).toBe(2);
     expect(at(0.85).severity).toBe(3);
+  });
+
+  it('severidad por día: la punta del evento no hereda el pico', () => {
+    // Subida y bajada lentas (pico +0.95 en la hora 60, día 20): los días 19 y
+    // 21 tienen agua alta, pero lejos del pico.
+    const mean = (i: number) => 0.15 + 0.8 * Math.max(0, 1 - Math.abs(i - 60) / 40);
+    const [a] = detectSurge(hours(120, { wind: 10, dir: 170, sea: tide(mean) }));
+    expect(a.severity).toBe(3);
+    for (const d of a.days) expect(d.hours).toBeGreaterThanOrEqual(SURGE.dayMinHours);
+    const sevs = a.days.map((d) => d.severity);
+    expect(Math.max(...sevs)).toBe(3);
+    expect(Math.min(...sevs)).toBeLessThan(3);
+  });
+
+  it('un día con pocas horas del evento no cuenta', () => {
+    // Evento de la hora 30 a la 49 (UTC = fecha local del eje): 18-19 jun + 2 h del 20.
+    const mean = (i: number) => (i >= 34 && i < 46 ? 0.8 : 0.15);
+    const [a] = detectSurge(hours(96, { wind: 10, dir: 170, sea: tide(mean) }));
+    const byDate = new Map<string, number>();
+    for (let t = Date.parse(a.startsAt + 'Z'); t <= Date.parse(a.endsAt + 'Z'); t += 3_600_000) {
+      const d = new Date(t).toISOString().slice(0, 10);
+      byDate.set(d, (byDate.get(d) ?? 0) + 1);
+    }
+    for (const [date, h] of byDate) {
+      expect(a.days.some((d) => d.date === date)).toBe(h >= SURGE.dayMinHours);
+    }
+  });
+
+  it('surgeSeverityOn usa días y cae al rango si la alerta no los trae', () => {
+    const mean = (i: number) => (i >= 36 && i < 60 ? 0.85 : 0.15);
+    const [a] = detectSurge(hours(120, { wind: 10, dir: 170, sea: tide(mean) }));
+    expect(surgeSeverityOn(a, '2026-06-30')).toBe(0);
+    expect(surgeSeverityOn(a, a.days[0].date)).toBe(a.days[0].severity);
+    const old = { ...a, days: undefined } as unknown as typeof a;
+    expect(surgeSeverityOn(old, a.startsAt.slice(0, 10))).toBe(a.severity);
   });
 
   it('convierte a la escala del mareógrafo', () => {

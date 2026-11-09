@@ -1,5 +1,5 @@
 import type { HourlyPoint } from '@/lib/types/forecast';
-import type { SurgeAlert, SurgeType } from '@/lib/types/water';
+import type { SurgeAlert, SurgeDay, SurgeType } from '@/lib/types/water';
 import type { SurgeThresholds } from '@/lib/types/config';
 import { SURGE } from '@/lib/config/boat';
 import { inSector } from '@/lib/domain/geo';
@@ -73,7 +73,42 @@ function groupRuns(n: number, typeAt: (i: number) => SurgeType | null): Run[] {
   return runs;
 }
 
-const INTENSIDAD = { 1: 'leve', 2: 'marcada', 3: 'severa' } as const;
+export const INTENSIDAD = { 1: 'leve', 2: 'marcada', 3: 'severa' } as const;
+
+/**
+ * Parte un evento en días: cada día con las horas que le tocan y la severidad
+ * máxima de esas horas. Sólo deja los días con ≥ `dayMinHours` (o el evento
+ * entero si dura menos): la punta de un evento largo no cuenta como día afectado.
+ */
+function splitDays(
+  slice: HourlyPoint[],
+  severityAt: (k: number) => 1 | 2 | 3,
+  t: SurgeThresholds,
+): SurgeDay[] {
+  const byDate = new Map<string, SurgeDay>();
+  slice.forEach((p, k) => {
+    const date = p.time.slice(0, 10);
+    const sev = severityAt(k);
+    const d = byDate.get(date);
+    if (d) {
+      d.hours++;
+      if (sev > d.severity) d.severity = sev;
+    } else {
+      byDate.set(date, { date, hours: 1, severity: sev });
+    }
+  });
+  const minH = Math.min(t.dayMinHours, slice.length);
+  return [...byDate.values()].filter((d) => d.hours >= minH);
+}
+
+/**
+ * Severidad del evento en un día dado (0 si el evento no afecta ese día).
+ * Alertas sin `days` (caché o snapshots viejos) caen al rango completo.
+ */
+export function surgeSeverityOn(alert: SurgeAlert, date: string): 0 | 1 | 2 | 3 {
+  if (alert.days) return alert.days.find((d) => d.date === date)?.severity ?? 0;
+  return alert.startsAt.slice(0, 10) <= date && alert.endsAt.slice(0, 10) >= date ? alert.severity : 0;
+}
 
 function windPhrase(avgWindKt: number): string {
   return avgWindKt >= 1 ? `viento medio ~${Math.round(avgWindKt)} kt` : 'poco viento';
@@ -97,8 +132,12 @@ function fromSeaLevel(hourly: HourlyPoint[], filtered: (number | null)[], t: Sur
     const alta = run.type === 'sudestada';
     const peak = alta ? Math.max(...levels) : Math.min(...levels);
     const [sev2, sev3] = alta ? t.seaLevelHighSevM : t.seaLevelLowSevM;
-    const beyond = (cut: number) => (alta ? peak >= cut : peak <= cut);
-    const severity: 1 | 2 | 3 = beyond(sev3) ? 3 : beyond(sev2) ? 2 : 1;
+    const sevOf = (v: number): 1 | 2 | 3 => {
+      const beyond = (cut: number) => (alta ? v >= cut : v <= cut);
+      return beyond(sev3) ? 3 : beyond(sev2) ? 2 : 1;
+    };
+    const severity = sevOf(peak);
+    const days = splitDays(slice, (k) => sevOf(levels[k]), t);
     const anomalyM = Math.round(levelToAnomalyM(peak) * 10) / 10;
     const avgWindKt = slice.reduce((s, p) => s + p.windKt, 0) / durationH;
     const cuanto = `~${Math.abs(anomalyM).toFixed(1)} m ${alta ? 'sobre' : 'bajo'} lo normal`;
@@ -113,6 +152,7 @@ function fromSeaLevel(hourly: HourlyPoint[], filtered: (number | null)[], t: Sur
       avgWindKt: Math.round(avgWindKt),
       source: 'nivel',
       anomalyM,
+      days,
       message: alta
         ? `Agua alta prevista (sudestada ${INTENSIDAD[severity]}): el río puede subir ${cuanto}. Puede dificultar la salida o inundar el club.`
         : `Agua baja prevista (bajante ${INTENSIDAD[severity]}): el río puede bajar ${cuanto}. Riesgo de varar al entrar o salir.`,
@@ -145,6 +185,7 @@ function fromWind(hourly: HourlyPoint[], t: SurgeThresholds): SurgeAlert[] {
     if (durationH < t.minHours) continue;
     const avgWindKt = slice.reduce((s, p) => s + p.windKt, 0) / durationH;
     const severity = windSeverity(durationH, avgWindKt);
+    const days = splitDays(slice, () => severity, t);
     const alta = run.type === 'sudestada';
     alerts.push({
       type: run.type,
@@ -156,6 +197,7 @@ function fromWind(hourly: HourlyPoint[], t: SurgeThresholds): SurgeAlert[] {
       confidence: 0.5,
       avgWindKt: Math.round(avgWindKt),
       source: 'viento',
+      days,
       message: alta
         ? `Posible sudestada ${INTENSIDAD[severity]}: viento del S/SE, ${windPhrase(avgWindKt)} durante ~${durationH} h. El agua puede subir y dificultar la salida o inundar el club.`
         : `Posible bajante ${INTENSIDAD[severity]}: viento del N/NW, ${windPhrase(avgWindKt)} durante ~${durationH} h. El agua puede bajar y dejar varada la embarcación.`,

@@ -148,9 +148,15 @@ export function MetodologiaInfo({ stationName }: { stationName?: string }) {
             </li>
             <li>
               <span className="text-slate-300">•</span> La <strong>severidad</strong> crece con el
-              pico. Sólo la severa pone el día en rojo: agua alta o baja moderada complica la
-              amarra (eso lo evalúa el resumen de marea contra tus niveles seguros), no la
-              navegación.
+              nivel y se mide <strong>día por día</strong>: un evento de varios días pinta cada uno
+              según lo que sube ese día, no según el pico. Un día sólo cuenta si el evento lo
+              cubre {SURGE.dayMinHours} h o más (si no, son la subida o la bajada del evento).
+            </li>
+            <li>
+              <span className="text-slate-300">•</span> En el color del día: la{' '}
+              <strong>severa</strong> pone rojo y la <strong>marcada</strong> amarillo. La{' '}
+              <strong>leve</strong> no lo cambia: complica a lo sumo la amarra, y eso lo evalúa el
+              resumen de marea contra tus niveles seguros.
             </li>
           </ul>
           <p className="mt-2">

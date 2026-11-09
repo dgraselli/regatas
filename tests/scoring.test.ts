@@ -87,12 +87,16 @@ describe('scoring', () => {
     expect(s.level).toBe('rojo');
   });
 
-  const surgeAlert = (severity: 1 | 2 | 3): SurgeAlert => ({
+  const surgeAlert = (
+    severity: 1 | 2 | 3,
+    days: SurgeAlert['days'] = [{ date: '2026-06-18', hours: 13, severity }],
+  ): SurgeAlert => ({
     type: 'sudestada',
     startsAt: '2026-06-18T08:00',
     endsAt: '2026-06-18T20:00',
     durationH: 12,
     severity,
+    days,
     confidence: 0.85,
     avgWindKt: 15,
     source: 'nivel',
@@ -110,6 +114,26 @@ describe('scoring', () => {
     // Agua alta/baja moderada complica la amarra, no la navegación: es ~1 de
     // cada 3 días con la detección por nivel, no puede pintar el día de rojo.
     expect(scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, [surgeAlert(2)]).level).toBe('amarillo');
+  });
+
+  it('alerta de marea leve no cambia el color del día', () => {
+    // ~0.4 m sobre lo normal: dato para la amarra (panel de marea), no para navegar.
+    const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, [surgeAlert(1)]);
+    expect(s.level).toBe('verde');
+    expect(s.reasons.join(' ')).not.toMatch(/agua alta/i);
+  });
+
+  it('usa la severidad del día, no la del pico del evento', () => {
+    // Evento severo cuyo pico es otro día: este día sólo tiene la subida (marcada).
+    const a = surgeAlert(3, [{ date: '2026-06-18', hours: 10, severity: 2 }, { date: '2026-06-19', hours: 24, severity: 3 }]);
+    const s = scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, [a]);
+    expect(s.level).toBe('amarillo');
+    expect(s.reasons.join(' ')).toMatch(/marcada este día/);
+  });
+
+  it('un día que el evento no afecta (fuera de `days`) no se degrada', () => {
+    const a = surgeAlert(3, [{ date: '2026-06-17', hours: 24, severity: 3 }]);
+    expect(scoreDay('2026-06-18', day('2026-06-18', 12, 16), undefined, [a]).level).toBe('verde');
   });
 
   it('niebla densa todo el día => rojo', () => {

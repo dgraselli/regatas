@@ -73,9 +73,22 @@ export const SURGE: SurgeThresholds = {
   seaLevelLowM: -0.15,
   /** Severidad 2 / 3 del agua alta (nivel filtrado, m). */
   seaLevelHighSevM: [0.6, 0.75],
-  /** Severidad 2 / 3 del agua baja (nivel filtrado, m). */
-  seaLevelLowSevM: [-0.25, -0.35],
+  /**
+   * Severidad 2 / 3 del agua baja (nivel filtrado, m). Marine se queda corto con
+   * las bajantes: del lado negativo el mareógrafo da ≈ 1.14 × nivel − 0.25
+   * (ago–nov 2026, BA y La Plata). Con −0.20 la marcada (amarillo) equivale a
+   * ~−0.48 m medidos; todos los días ≤ −0.20 bajaron entre −0.43 y −0.89 m.
+   * Antes (−0.25) la bajante del 3/10 (−0.58 m) salía leve.
+   */
+  seaLevelLowSevM: [-0.2, -0.35],
   seaLevelMinHours: 3,
+  /**
+   * Un día cuenta como afectado si el evento lo cubre ≥ 6 h. Validado contra el
+   * mareógrafo (oct–nov 2026): pintar cada día que el evento tocaba, con la
+   * severidad del pico, daba 8 de 35 días en alerta con el agua < +0.3 m (las
+   * puntas de eventos de 50-90 h, a veces con 2 h dentro del día).
+   */
+  dayMinHours: 6,
   // Respaldo por viento (de dónde viene).
   sudestadaSector: [150, 210],
   bajanteSector: [292, 22],

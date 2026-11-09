@@ -3,6 +3,7 @@ import type { ScoringThresholds, Propulsion } from '@/lib/types/config';
 import type { SurgeAlert } from '@/lib/types/water';
 import { SCORING } from '@/lib/config/boat';
 import { daylightHours } from '@/lib/domain/sun';
+import { surgeSeverityOn, INTENSIDAD } from '@/lib/domain/surge';
 
 /** Posición del lugar, para calcular el amanecer/atardecer reales del día. */
 export interface DaylightLocation {
@@ -227,13 +228,21 @@ export function scoreDay(
     }
   }
 
-  // Marea meteorológica. Sólo la severa pone el día en rojo: agua alta o baja
-  // moderada complica la amarra (eso lo evalúa el panel de marea contra los
-  // niveles seguros de cada uno), no la navegación. Con la detección por nivel
-  // del mar hay agua alta/baja moderada en ~1 de cada 3 días.
+  // Marea meteorológica, con la severidad de ESTE día (no la del pico del
+  // evento). Sólo la severa pone rojo y la marcada amarillo: agua alta o baja
+  // leve (~0.4 m) complica a lo sumo la amarra, y eso ya lo muestra el panel de
+  // marea contra los niveles seguros de cada uno; no cambia el color del día.
   for (const alert of surgeOnDay) {
-    const to: TrafficLevel = alert.severity >= 3 ? 'rojo' : 'amarillo';
-    escalate(to, alert.message);
+    const daySev = surgeSeverityOn(alert, date);
+    if (daySev < 2) continue;
+    const sev = daySev as 2 | 3;
+    const reason =
+      sev === alert.severity
+        ? alert.message
+        : alert.type === 'sudestada'
+          ? `Agua alta prevista (sudestada ${INTENSIDAD[sev]} este día). Puede dificultar la salida.`
+          : `Agua baja prevista (bajante ${INTENSIDAD[sev]} este día). Riesgo de varar al entrar o salir.`;
+    escalate(sev >= 3 ? 'rojo' : 'amarillo', reason);
   }
 
   // Poco viento: no es peligro, es que probablemente no se pueda navegar a vela.
@@ -282,9 +291,7 @@ export function scoreDays(
   const byDay = groupByDay(hourly);
   const days: DayScore[] = [];
   for (const [date, points] of byDay) {
-    const surgeOnDay = surgeAlerts.filter(
-      (a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date,
-    );
+    const surgeOnDay = surgeAlerts.filter((a) => surgeSeverityOn(a, date) > 0);
     days.push(scoreDay(date, points, thresholds, surgeOnDay, propulsion, location));
   }
   return days.sort((a, b) => a.date.localeCompare(b.date));

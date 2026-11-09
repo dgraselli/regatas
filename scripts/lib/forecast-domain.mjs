@@ -38,7 +38,7 @@ export const SCORING = {
 };
 // Mirror de SURGE (src/lib/config/boat.ts): por nivel del mar filtrado; viento sólo de respaldo.
 export const SURGE = {
-  seaLevelHighM: 0.45, seaLevelLowM: -0.15, seaLevelHighSevM: [0.6, 0.75], seaLevelLowSevM: [-0.25, -0.35], seaLevelMinHours: 3,
+  seaLevelHighM: 0.45, seaLevelLowM: -0.15, seaLevelHighSevM: [0.6, 0.75], seaLevelLowSevM: [-0.2, -0.35], seaLevelMinHours: 3, dayMinHours: 6,
   sudestadaSector: [150, 210], bajanteSector: [292, 22], minWindKt: 10, minHours: 6,
 };
 export const DAYLIGHT = { sunriseHour: 7, sunsetHour: 19 };
@@ -153,6 +153,20 @@ export function tidalFilter(levels) {
 }
 
 /** Mirror de src/lib/domain/surge.ts: por nivel del mar si lo hay, si no por viento. */
+/** Mirror de splitDays (surge.ts): severidad por día, sólo días con ≥ dayMinHours. */
+function splitDays(sl, sevAt, t) {
+  const by = new Map();
+  sl.forEach((p, k) => { const date = p.time.slice(0, 10), sev = sevAt(k), d = by.get(date); if (d) { d.hours++; if (sev > d.severity) d.severity = sev; } else by.set(date, { date, hours: 1, severity: sev }); });
+  const minH = Math.min(t.dayMinHours, sl.length);
+  return [...by.values()].filter((d) => d.hours >= minH);
+}
+
+/** Mirror de surgeSeverityOn (surge.ts). Snapshots viejos (sin `days`) caen al rango. */
+export function surgeSeverityOn(a, date) {
+  if (a.days) return a.days.find((d) => d.date === date)?.severity ?? 0;
+  return dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date ? a.severity : 0;
+}
+
 export function detectSurge(hourly, t = SURGE) {
   const group = (typeAt) => { const runs = []; let cur = null; hourly.forEach((_, i) => { const ty = typeAt(i); if (cur && ty === cur.type) cur.end = i; else { if (cur) runs.push(cur); cur = ty ? { type: ty, start: i, end: i } : null; } }); if (cur) runs.push(cur); return runs; };
   const alerts = [];
@@ -163,8 +177,9 @@ export function detectSurge(hourly, t = SURGE) {
       const dur = run.end - run.start + 1; if (dur < t.seaLevelMinHours) continue;
       const sl = hourly.slice(run.start, run.end + 1), lv = f.slice(run.start, run.end + 1);
       const alta = run.type === 'sudestada', peak = alta ? Math.max(...lv) : Math.min(...lv);
-      const [s2, s3] = alta ? t.seaLevelHighSevM : t.seaLevelLowSevM; const past = (c) => (alta ? peak >= c : peak <= c);
-      alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: past(s3) ? 3 : past(s2) ? 2 : 1,
+      const [s2, s3] = alta ? t.seaLevelHighSevM : t.seaLevelLowSevM;
+      const sevOf = (v) => { const past = (c) => (alta ? v >= c : v <= c); return past(s3) ? 3 : past(s2) ? 2 : 1; };
+      alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: sevOf(peak), days: splitDays(sl, (k) => sevOf(lv[k]), t),
         avgWindKt: Math.round(sl.reduce((s, p) => s + p.windKt, 0) / dur), source: 'nivel', peakLevelM: Math.round(peak * 100) / 100 });
     }
     return alerts;
@@ -175,7 +190,8 @@ export function detectSurge(hourly, t = SURGE) {
     if (dur < t.minHours) continue;
     const avg = sl.reduce((s, p) => s + p.windKt, 0) / dur;
     const strong = avg >= 18, long = dur >= 12;
-    alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: strong && long ? 3 : strong || long ? 2 : 1, avgWindKt: Math.round(avg), source: 'viento' });
+    const sev = strong && long ? 3 : strong || long ? 2 : 1;
+    alerts.push({ type: run.type, startsAt: sl[0].time, endsAt: sl[sl.length - 1].time, durationH: dur, severity: sev, days: splitDays(sl, () => sev, t), avgWindKt: Math.round(avg), source: 'viento' });
   }
   return alerts;
 }
@@ -237,7 +253,8 @@ export function scoreDay(date, points, surgeOnDay = [], t = SCORING) {
     // else: niebla temporal que despeja, no degrada (partialFog en la app).
   }
 
-  for (const a of surgeOnDay) esc(a.severity >= 3 ? 'rojo' : 'amarillo', `${a.type} sev ${a.severity}`);
+  // Severidad del DÍA; la leve no cambia el color (mirror de scoring.ts).
+  for (const a of surgeOnDay) { const sev = surgeSeverityOn(a, date); if (sev >= 2) esc(sev >= 3 ? 'rojo' : 'amarillo', `${a.type} sev ${sev}`); }
   if (level === 'verde' && windMedianKt < t.idealWindMin) { level = 'poco-viento'; reasons.push(`Poco viento (~${windMedianKt} kt)`); }
   if (level === 'verde' && !reasons.length) reasons.push(`Buenas condiciones (~${windMedianKt} kt)`);
 
@@ -259,7 +276,7 @@ export function scoreDays(hourly, t = SCORING) {
     // acierto de viento caía de ~85 % a 56 % a medida que crecía el archivo de
     // snapshots, simulando una degradación que no existía.
     if (!pts.some((p) => Number.isFinite(p.windKt))) continue;
-    const onDay = surge.filter((a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date);
+    const onDay = surge.filter((a) => surgeSeverityOn(a, date) > 0);
     days.push(scoreDay(date, pts, onDay, t));
   }
   return { days: days.sort((a, b) => a.date.localeCompare(b.date)), surge, fog };

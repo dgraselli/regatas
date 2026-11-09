@@ -31,6 +31,7 @@
 import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import {
   fetchObservedHourly, scoreDays, dateOf, angularDiff, SCORING, SAFE, DANGER,
+  surgeSeverityOn,
 } from './lib/forecast-domain.mjs';
 
 const OUT_DIR = 'public/validacion';
@@ -45,7 +46,7 @@ const today = dateOf(new Date().toLocaleString('sv', { timeZone: TZ }).replace('
 
 const rainCat = (mm) => (mm >= SCORING.rainRed ? 'fuerte' : mm >= SCORING.rainYellow ? 'algo' : 'seco');
 const fogFlag = (v) => (v == null ? null : v <= FOG_M);
-const surgeOn = (alerts, date) => (alerts ?? []).some((a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date);
+const surgeOn = (alerts, date) => (alerts ?? []).some((a) => surgeSeverityOn(a, date) > 0);
 
 const DIMS = [
   { key: 'viento', label: 'Viento (fuerza)', desc: 'Acierto: |pron−real| ≤ 2 kt (viento mediano del día).' },

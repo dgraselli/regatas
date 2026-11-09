@@ -83,6 +83,8 @@ export interface SurgeThresholds {
   seaLevelLowSevM: [number, number];
   /** Horas mínimas por encima/debajo del umbral para alertar. */
   seaLevelMinHours: number;
+  /** Horas mínimas del evento dentro de un día para que ese día cuente como afectado. */
+  dayMinHours: number;
   /** Respaldo por viento: sector de sudestada [min, max] en grados. */
   sudestadaSector: [number, number];
   /** Respaldo por viento: sector de bajante. Puede cruzar el 0. */

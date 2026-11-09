@@ -22,7 +22,7 @@ import {
   waveSeverityFactor,
   type WaveSector,
 } from '@/lib/domain/pointOfSail';
-import { detectSurge } from '@/lib/domain/surge';
+import { detectSurge, surgeSeverityOn } from '@/lib/domain/surge';
 
 const hourOf = (iso: string) => Number(iso.slice(11, 13));
 const dateOf = (iso: string) => iso.slice(0, 10);
@@ -257,7 +257,13 @@ function simulate(
   }, 0);
   if (peakEffWaveM >= thresholds.waveRedM) escLevel('rojo');
   else if (peakEffWaveM >= thresholds.waveYellowM) escLevel('amarillo');
-  for (const a of overlapSurge) escLevel(a.severity >= 3 ? 'rojo' : 'amarillo');
+  // Marea: la severidad del día de salida/llegada, no la del pico del evento; la
+  // leve queda como advertencia (complica la amarra) sin cambiar el semáforo.
+  for (const a of overlapSurge) {
+    const sev = Math.max(surgeSeverityOn(a, dateOf(departAt)), surgeSeverityOn(a, dateOf(arriveAt)));
+    if (sev >= 3) escLevel('rojo');
+    else if (sev === 2) escLevel('amarillo');
+  }
 
   // Una sola advertencia de ráfaga, con el máximo del cruce (no una por hora).
   if (isMotor) {

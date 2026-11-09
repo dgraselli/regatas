@@ -33,6 +33,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import {
   fetchHourly, scoreDays, dateOf, angularDiff, SCORING, SAFE, DANGER,
+  surgeSeverityOn,
 } from './lib/forecast-domain.mjs';
 
 const DIR = 'America/Argentina/Buenos_Aires';
@@ -46,8 +47,7 @@ const pad = (s, n) => String(s).padEnd(n);
 const padL = (s, n) => String(s).padStart(n);
 
 /** ¿Hay un evento de surge (sudestada/bajante) activo ese día en la lista? */
-const surgeOn = (alerts, date) =>
-  (alerts ?? []).some((a) => dateOf(a.startsAt) <= date && dateOf(a.endsAt) >= date);
+const surgeOn = (alerts, date) => (alerts ?? []).some((a) => surgeSeverityOn(a, date) > 0);
 
 /** Flag de niebla del día a partir de la visibilidad mínima guardada/observada. */
 const fogFlag = (visMinM) => (visMinM == null ? null : visMinM <= FOG_M);

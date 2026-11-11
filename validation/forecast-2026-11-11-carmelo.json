@@ -1,0 +1,150 @@
+{
+  "capturedAt": "2026-11-11T17:05:23.533Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Carmelo",
+    "lat": -33.997,
+    "lon": -58.293
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-11-11",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 9,
+        "windDirDominant": 51,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 9160
+      }
+    },
+    {
+      "date": "2026-11-12",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 133,
+        "precipTotalMm": 0,
+        "visibilityMinM": 38160
+      }
+    },
+    {
+      "date": "2026-11-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~8 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 13,
+        "windDirDominant": 36,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46940
+      }
+    },
+    {
+      "date": "2026-11-14",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 9,
+        "windDirDominant": 177,
+        "precipTotalMm": 0.4,
+        "visibilityMinM": 7760
+      }
+    },
+    {
+      "date": "2026-11-15",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 10,
+        "gustPeakKt": 16,
+        "windDirDominant": 153,
+        "precipTotalMm": 0,
+        "visibilityMinM": 31940
+      }
+    },
+    {
+      "date": "2026-11-16",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 9,
+        "gustPeakKt": 15,
+        "windDirDominant": 154,
+        "precipTotalMm": 0,
+        "visibilityMinM": 43880
+      }
+    },
+    {
+      "date": "2026-11-17",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 12,
+        "gustPeakKt": 21,
+        "windDirDominant": 143,
+        "precipTotalMm": 0,
+        "visibilityMinM": 47980
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-15T01:00",
+      "endsAt": "2026-11-17T16:00",
+      "durationH": 64,
+      "severity": 3,
+      "days": [
+        {
+          "date": "2026-11-15",
+          "hours": 23,
+          "severity": 3
+        },
+        {
+          "date": "2026-11-16",
+          "hours": 24,
+          "severity": 3
+        },
+        {
+          "date": "2026-11-17",
+          "hours": 17,
+          "severity": 3
+        }
+      ],
+      "avgWindKt": 7,
+      "source": "nivel",
+      "peakLevelM": 1.04
+    }
+  ],
+  "fog": []
+}

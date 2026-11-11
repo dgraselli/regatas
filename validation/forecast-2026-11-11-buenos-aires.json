@@ -1,0 +1,151 @@
+{
+  "capturedAt": "2026-11-11T17:05:22.502Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "Buenos Aires",
+    "lat": -34.6,
+    "lon": -58.37
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-11-11",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 20,
+        "windDirDominant": 41,
+        "precipTotalMm": 0,
+        "visibilityMinM": 36140
+      }
+    },
+    {
+      "date": "2026-11-12",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~6 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 24,
+        "windDirDominant": 78,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46840
+      }
+    },
+    {
+      "date": "2026-11-13",
+      "level": "verde",
+      "reasons": [
+        "Buenas condiciones (~7 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 62,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46840
+      }
+    },
+    {
+      "date": "2026-11-14",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 18,
+        "windDirDominant": 213,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 7720
+      }
+    },
+    {
+      "date": "2026-11-15",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 22,
+        "windDirDominant": 94,
+        "precipTotalMm": 0,
+        "visibilityMinM": 20060
+      }
+    },
+    {
+      "date": "2026-11-16",
+      "level": "rojo",
+      "reasons": [
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 22,
+        "windDirDominant": 92,
+        "precipTotalMm": 0,
+        "visibilityMinM": 45640
+      }
+    },
+    {
+      "date": "2026-11-17",
+      "level": "rojo",
+      "reasons": [
+        "Ráfagas marcadas (25 kt)",
+        "sudestada sev 3"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 25,
+        "windDirDominant": 94,
+        "precipTotalMm": 0,
+        "visibilityMinM": 49220
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-15T02:00",
+      "endsAt": "2026-11-17T14:00",
+      "durationH": 61,
+      "severity": 3,
+      "days": [
+        {
+          "date": "2026-11-15",
+          "hours": 22,
+          "severity": 3
+        },
+        {
+          "date": "2026-11-16",
+          "hours": 24,
+          "severity": 3
+        },
+        {
+          "date": "2026-11-17",
+          "hours": 15,
+          "severity": 3
+        }
+      ],
+      "avgWindKt": 6,
+      "source": "nivel",
+      "peakLevelM": 0.98
+    }
+  ],
+  "fog": []
+}

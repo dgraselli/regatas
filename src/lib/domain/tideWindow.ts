@@ -106,13 +106,13 @@ export interface TideWindow {
 const EMPTY: TideWindow = { points: [], unsafe: [], offsetM: null };
 
 /** Timestamp naive → clave de la hora más cercana ('YYYY-MM-DDTHH:00'). */
-function hourKey(iso: string): string | null {
+export function hourKey(iso: string): string | null {
   const ms = parseLocalIso(iso);
   if (ms == null) return null;
   return `${new Date(Math.round(ms / HOUR_MS) * HOUR_MS).toISOString().slice(0, 13)}:00`;
 }
 
-function shiftHours(key: string, hours: number): string {
+export function shiftHours(key: string, hours: number): string {
   const ms = parseLocalIso(key);
   return `${new Date(ms! + hours * HOUR_MS).toISOString().slice(0, 13)}:00`;
 }

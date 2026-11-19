@@ -9,7 +9,8 @@ export function reasonIcon(reason: string): string {
   if (r.includes('buenas condiciones')) return '✅';
   if (r.includes('niebla') || r.includes('visibilidad')) return '🌫️';
   if (r.includes('ráfaga') || r.includes('rafaga')) return '💨';
-  if (r.includes('sudestada')) return '🌊';
+  if (r.includes('poca agua')) return '🏜️';
+  if (r.includes('sudestada') || r.includes('agua alta')) return '🌊';
   if (r.includes('ola')) return '🌊';
   if (r.includes('bajante')) return '🏜️';
   if (r.includes('lluvia')) return '🌧️';

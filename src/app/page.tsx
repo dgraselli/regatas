@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useNowInTz } from '@/lib/hooks/useNow';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
+import { useWaterAlerts } from '@/lib/hooks/useWaterAlerts';
 import { useMetarObservation } from '@/lib/hooks/useMetarObservation';
 import { Onboarding } from '@/components/common/Onboarding';
 import { useProfile } from '@/lib/profile/ProfileContext';
@@ -47,7 +48,18 @@ export default function DashboardPage() {
   // Descartar días ya pasados: el caché persistido puede servir un pronóstico
   // viejo (de un día anterior) mientras revalida. Solo desde el día en curso.
   const today = todayInTz(activeLocation?.timezone ?? TIMEZONE);
-  const days = (data?.bundle.days ?? []).filter((d) => d.date >= today);
+  // Alertas de agua: contra el rango seguro de la amarra si se puede estimar el
+  // nivel ahí; si no, las regionales. Los días se repuntúan con ellas.
+  const water_ = useWaterAlerts({
+    location: activeLocation,
+    forecast: data,
+    water: water.data,
+    now: nowLocal,
+    caution: profile.caution,
+    lowWindKt: profile.lowWindKt,
+    propulsion: activeBoat?.propulsion ?? 'vela',
+  });
+  const days = water_.days.filter((d) => d.date >= today);
   // Si la selección guardada apunta a un día ya pasado, caer al primer día vigente.
   const selectedIsValid = selectedDate != null && days.some((d) => d.date === selectedDate);
   const activeDate = (selectedIsValid ? selectedDate : days[0]?.date) ?? '';
@@ -134,7 +146,7 @@ export default function DashboardPage() {
           <TideSummary
             status={water.data}
             hourly={data.bundle.hourly}
-            surge={data.surge}
+            surge={water_.surge}
             safeMinM={activeLocation.safeLevelMinM}
             safeMaxM={activeLocation.safeLevelMaxM}
             timezone={activeLocation.timezone}

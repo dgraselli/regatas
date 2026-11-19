@@ -2,6 +2,7 @@
 
 import { useForecast } from '@/lib/hooks/useForecast';
 import { useWaterLevel } from '@/lib/hooks/useWaterLevel';
+import { useWaterAlerts } from '@/lib/hooks/useWaterAlerts';
 import { useProfile } from '@/lib/profile/ProfileContext';
 import { AlertBanner, NoAlerts } from '@/components/alerts/AlertBanner';
 import { WaterLevelGauge } from '@/components/alerts/WaterLevelGauge';
@@ -22,6 +23,14 @@ export default function MareasPage() {
   const forecast = useForecast(activeLocation, profile.caution, profile.lowWindKt);
   const water = useWaterLevel(activeLocation);
   const now = useNowInTz(activeLocation?.timezone ?? TIMEZONE);
+  const alerts = useWaterAlerts({
+    location: activeLocation,
+    forecast: forecast.data,
+    water: water.data,
+    now,
+    caution: profile.caution,
+    lowWindKt: profile.lowWindKt,
+  });
   const win = buildTideWindow(
     water.data?.observations ?? [],
     forecast.data?.bundle.hourly ?? [],
@@ -122,11 +131,18 @@ export default function MareasPage() {
 
       {forecast.data && (
         <section className="space-y-2">
-          <h2 className="font-semibold text-slate-700">Marea meteorológica</h2>
-          {forecast.data.surge.length > 0 ? (
-            forecast.data.surge.map((a, i) => <AlertBanner key={i} alert={a} />)
+          <h2 className="font-semibold text-slate-700">
+            {alerts.fromMooring ? 'Nivel en tu amarra, próximos 7 días' : 'Marea meteorológica'}
+          </h2>
+          <p className="text-xs text-slate-500">
+            {alerts.fromMooring
+              ? 'Nivel estimado con el pronóstico del río (Open-Meteo) corregido y anclado a lo medido en la estación, contra tu rango seguro. Error típico ~0.2 m: tomalo como aviso, no como certeza.'
+              : 'Cuánto se aparta el río de lo normal en los próximos 7 días, con umbrales iguales para todos (no mira tu amarra). Cargá los niveles seguros de tu amarra en Perfil para que el aviso sea contra tu rango.'}
+          </p>
+          {alerts.surge.length > 0 ? (
+            alerts.surge.map((a, i) => <AlertBanner key={i} alert={a} />)
           ) : (
-            <NoAlerts />
+            <NoAlerts mooring={alerts.fromMooring} />
           )}
         </section>
       )}

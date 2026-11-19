@@ -72,6 +72,11 @@ export interface ForecastBundle {
   fetchedAt: string;
   hourly: HourlyPoint[];
   days: DayScore[];
+  /**
+   * Nivel del mar de Open-Meteo Marine, con 3 días de pasado (el `hourly` arranca
+   * hoy). Para anclar el nivel estimado de la amarra al mareógrafo.
+   */
+  seaLevel?: { time: string; m: number }[];
 }
 
 /**

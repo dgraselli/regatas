@@ -42,6 +42,8 @@ export const SURGE = {
   sudestadaSector: [150, 210], bajanteSector: [292, 22], minWindKt: 10, minHours: 6,
 };
 export const DAYLIGHT = { sunriseHour: 7, sunsetHour: 19 };
+/** Mirror de MOORING (src/lib/config/boat.ts): nivel estimado en la amarra. */
+export const MOORING = { lagH: 2, tideAmp: 1.2, lowKneeM: 0.2, lowGain: 2.0, calibHours: 72, minCalibHours: 24, marginM: 0.1 };
 
 // Ventanas de niebla en el scoring (mirror de scoring.ts).
 const FOG_NAVIGABLE_WINDOW_H = 4;
@@ -150,6 +152,23 @@ export function tidalFilter(levels) {
     for (let j = i - 12; j <= i + 12; j++) if (levels[j] != null) { sum += levels[j]; n++; }
     return n >= 13 ? sum / n : null;
   });
+}
+
+/**
+ * Mirror de correctedModel (src/lib/domain/mooringLevel.ts). `series`: [{ time
+ * 'YYYY-MM-DDTHH:00', m }] horaria y ordenada. Devuelve Map hora → nivel corregido
+ * (sin anclar al mareógrafo), ya corrido lagH horas.
+ */
+export function mooringModel(series, t = MOORING) {
+  const f = tidalFilter(series.map((s) => s.m));
+  const out = new Map();
+  series.forEach((s, i) => {
+    if (f[i] == null) return;
+    const meteo = f[i] >= t.lowKneeM ? f[i] : t.lowKneeM + t.lowGain * (f[i] - t.lowKneeM);
+    const key = new Date(Date.parse(`${s.time}:00Z`) + t.lagH * 3600_000).toISOString().slice(0, 13) + ':00';
+    out.set(key, t.tideAmp * (s.m - f[i]) + meteo);
+  });
+  return out;
 }
 
 /** Mirror de src/lib/domain/surge.ts: por nivel del mar si lo hay, si no por viento. */

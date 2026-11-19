@@ -14,12 +14,17 @@ function icon(type: SurgeAlert['type']) {
   return type === 'sudestada' ? '🌊⬆️' : '🏜️⬇️';
 }
 
+function title(alert: SurgeAlert) {
+  if (alert.source === 'amarra') return alert.type === 'sudestada' ? 'Agua alta en tu amarra' : 'Poca agua en tu amarra';
+  return alert.type;
+}
+
 export function AlertBanner({ alert }: { alert: SurgeAlert }) {
   return (
     <div className={`rounded-lg border px-4 py-3 ${STYLES[alert.severity]}`}>
       <div className="flex items-center justify-between gap-2">
-        <span className="font-semibold capitalize">
-          {icon(alert.type)} {alert.type}
+        <span className={`font-semibold ${alert.source === 'amarra' ? '' : 'capitalize'}`}>
+          {icon(alert.type)} {title(alert)}
         </span>
         <span className="text-xs opacity-80">
           confianza {Math.round(alert.confidence * 100)}%
@@ -29,18 +34,22 @@ export function AlertBanner({ alert }: { alert: SurgeAlert }) {
       <p className="text-xs mt-2 opacity-80">
         {formatDate(alert.startsAt)} {formatHour(alert.startsAt)} →{' '}
         {formatDate(alert.endsAt)} {formatHour(alert.endsAt)} ·{' '}
-        {alert.source === 'nivel'
-          ? 'según el nivel del río pronosticado'
-          : `sólo por viento (sin nivel del río) · viento medio ${alert.avgWindKt} kt`}
+        {alert.source === 'amarra'
+          ? 'nivel estimado en tu amarra contra tu rango seguro'
+          : alert.source === 'nivel'
+            ? 'según el nivel del río pronosticado (no mira tu amarra)'
+            : `sólo por viento (sin nivel del río) · viento medio ${alert.avgWindKt} kt`}
       </p>
     </div>
   );
 }
 
-export function NoAlerts() {
+export function NoAlerts({ mooring = false }: { mooring?: boolean }) {
   return (
     <div className="rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 px-4 py-3 text-sm">
-      ✓ Sin sudestadas ni bajantes pronunciadas previstas en el horizonte del pronóstico.
+      {mooring
+        ? '✓ El nivel estimado se mantiene dentro de tu rango seguro los próximos 7 días.'
+        : '✓ Sin sudestadas ni bajantes pronunciadas previstas en el horizonte del pronóstico.'}
     </div>
   );
 }

@@ -29,6 +29,12 @@ export interface ForecastPoint {
   timezone?: string;
 }
 
+function seaLevelSeries(marine: Awaited<ReturnType<typeof fetchMarine>>): { time: string; m: number }[] {
+  if (!marine?.hourly.sea_level_height_msl) return [];
+  const levels = marine.hourly.sea_level_height_msl;
+  return marine.hourly.time.flatMap((time, i) => (levels[i] != null ? [{ time, m: levels[i]! }] : []));
+}
+
 /** Pronóstico normalizado + días puntuados + alertas de surge y niebla para un lugar. */
 export async function getForecastBundle(
   loc: ForecastPoint,
@@ -57,6 +63,7 @@ export async function getForecastBundle(
       fetchedAt,
       hourly,
       days,
+      seaLevel: seaLevelSeries(marine),
     },
     surge,
     fog,

@@ -15,6 +15,9 @@ const TREND: Record<WaterLevelStatus['trend'], { label: string; arrow: string; c
   estable: { label: 'estable', arrow: '→', color: 'text-slate-500' },
 };
 
+/** Avisos de agua que entran en el resumen del panel; el resto, en Mareas. */
+const MAX_EVENTS = 3;
+
 function windowLabel(a: SurgeAlert): string {
   const sameDay = a.startsAt.slice(0, 10) === a.endsAt.slice(0, 10);
   return sameDay
@@ -122,8 +125,12 @@ export function TideSummary({
   // nivel que mostramos nunca es exactamente el de ahora.
   const age = useObservationAge(last?.time);
   const now = useNowInTz(timezone);
-  // Evento más severo primero.
-  const events = [...surge].sort((a, b) => b.severity - a.severity);
+  // Evento más severo primero (y, a igual severidad, el más próximo). Es un
+  // resumen: con el rango de la amarra puede haber un aviso por día, el resto
+  // queda en Mareas.
+  const sorted = [...surge].sort((a, b) => b.severity - a.severity || a.startsAt.localeCompare(b.startsAt));
+  const events = sorted.slice(0, MAX_EVENTS);
+  const moreEvents = sorted.length - events.length;
   const win = buildTideWindow(obs, hourly, now, { safeMinM, safeMaxM });
   const levelNote = assessLevel(win, safeMinM, safeMaxM);
   const salida = windowNote(win);
@@ -192,15 +199,32 @@ export function TideSummary({
 
       {events.map((a, i) => {
         const alta = a.type === 'sudestada';
+        const amarra = a.source === 'amarra';
         return (
           <p key={i} className={`text-sm mt-2 ${alta ? 'text-orange-800' : 'text-mar-700'}`}>
-            ⚠️ <strong>{alta ? 'Agua alta' : 'Agua baja'} prevista</strong> ({windowLabel(a)}) —{' '}
-            {alta
-              ? 'puede dificultar la entrada/salida de la amarra.'
-              : 'riesgo de varadura al entrar/salir de la amarra.'}
+            ⚠️{' '}
+            <strong>
+              {amarra
+                ? alta
+                  ? 'Posible agua alta en tu amarra'
+                  : 'Posible poca agua en tu amarra'
+                : `${alta ? 'Agua alta' : 'Agua baja'} prevista`}
+            </strong>{' '}
+            ({windowLabel(a)}) —{' '}
+            {amarra
+              ? 'fuera de tu rango seguro (estimado, ±0.2 m).'
+              : alta
+                ? 'puede dificultar la entrada/salida de la amarra.'
+                : 'riesgo de varadura al entrar/salir de la amarra.'}
           </p>
         );
       })}
+
+      {moreEvents > 0 && (
+        <p className="text-xs text-slate-500 mt-1">
+          +{moreEvents} {moreEvents === 1 ? 'aviso más' : 'avisos más'} en los próximos días
+        </p>
+      )}
 
       <p className="text-xs text-mar-600 mt-2">Ver detalle en Mareas →</p>
     </Link>

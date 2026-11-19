@@ -40,7 +40,7 @@ reconstruir.
   vía TanStack Query (`src/app/providers.tsx`). **Si cambia la FORMA de esos datos**
   (campos nuevos en `ForecastBundle`, `DayScore`, `CrossingPlan`/`DepartureCandidate`),
   hay que **subir el `buster`** (`schema-N`) o la app crashea sirviendo caché viejo. Pasó
-  varias veces. Valor actual: `schema-16`.
+  varias veces. Valor actual: `schema-17`.
 - **Git:** se trabaja y pushea en `main`. El usuario pidió **consultar antes de commitear o
   pushear** (no hacerlo automáticamente). `run.sh` y `validar_pronostico.txt` van sin trackear.
 
@@ -103,6 +103,18 @@ regenerar y commitear.
   (cancela la marea astronómica); el viento es sólo respaldo si no hay nivel. Calibrado contra
   el mareógrafo (`nivel-eval.mjs`): 24/25 agua alta y 11/11 agua baja hasta 5 días antes. En el
   semáforo sólo la severidad 3 pone rojo. Umbrales y números en `SURGE` (`config/boat.ts`).
+  **Ojo:** esas alertas miran cuánto se aparta el río de lo normal, con umbrales iguales
+  para todos; **no** miran la amarra del usuario.
+- **Nivel en la amarra** (`domain/mooringLevel.ts`, `MOORING` en `config/boat.ts`): si el
+  lugar tiene rango seguro y hay mediciones del mareógrafo, se estima el nivel en la escala
+  del mareógrafo a 7 días (Marine con 3 días de pasado → marea ×1.2, bajante amplificada ×2
+  bajo +0.2, corrido 2 h, anclado con las últimas 72 h medidas) y se avisa por día cuando
+  queda a menos de 0.1 m del límite (amarillo, nunca rojo). **Reemplaza** a las alertas
+  regionales salvo los días severos (`combineWaterAlerts`); lo junta `hooks/useWaterAlerts.ts`,
+  que repuntúa los días en el panel. Validación: `node scripts/nivel-eval.mjs amarra`
+  (pronósticos `previous_dayN` de Open-Meteo vs. mareógrafo): a 1-4 días avisa ~80-90 % de
+  los días fuera de rango y ~65-80 % de los avisos se cumplen; a 5-6 días la poca agua cae a
+  ~45-70 %.
 - **Niebla**: `detectFog` + visibilidad en el scoring (niebla matinal que despeja **no**
   hunde el día; ver `FOG_NAVIGABLE_WINDOW_H`). Aparece en panel, alertas y gráfico.
 - **Cruce**: considera niebla, marea y **olas**, da **semáforo por salida**, lista en **orden

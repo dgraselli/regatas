@@ -96,6 +96,43 @@ export const SURGE: SurgeThresholds = {
   minHours: 6,
 };
 
+/**
+ * Nivel estimado EN LA AMARRA (escala del mareógrafo) para los próximos días, y
+ * aviso cuando sale del rango seguro que cargó el usuario. Ver
+ * `src/lib/domain/mooringLevel.ts`.
+ *
+ * Validado contra los pronósticos que Open-Meteo emitió 1 a 6 días antes
+ * (`sea_level_height_msl_previous_dayN`) y el mareógrafo de San Fernando y
+ * Buenos Aires (jun–nov 2026, SHN e INA). Sin corregir, el modelo achica la
+ * marea, la adelanta ~1-2 h y se queda muy corto con las bajantes: avisaba 1 de
+ * cada 6-10 días de agua baja. Con esta corrección el nivel queda sin sesgo
+ * (error medio en la pleamar/bajamar del día ~0.2 m, casi igual a 1 que a 6 días)
+ * y, con un rango que deja afuera el 10 % más bajo y el 10 % más alto, avisa
+ * ~75-90 % de los días fuera de rango y ~65-75 % de los avisos se cumplen.
+ */
+export const MOORING = {
+  /** El modelo adelanta la marea: su valor de las H vale para las H + lagH. */
+  lagH: 2,
+  /** Factor sobre la marea astronómica (nivel − media de 25 h): el modelo la achica. */
+  tideAmp: 1.2,
+  /** Por debajo de este nivel filtrado (Marine, m) la bajante se amplifica… */
+  lowKneeM: 0.2,
+  /** …por este factor: el modelo marca la mitad de lo que baja el río. */
+  lowGain: 2.0,
+  /** Horas de medición (las más recientes) con que se ancla el modelo al cero del mareógrafo. */
+  calibHours: 72,
+  /** Mínimo de horas medidas que coinciden con el modelo para poder anclar. */
+  minCalibHours: 24,
+  /**
+   * Se avisa cuando el nivel estimado queda a menos de esto del límite (m). Con
+   * 0 se perdían ~30 % de los eventos; con 0.2 la mitad de los avisos de agua alta
+   * eran falsos. 0.1 es el compromiso.
+   */
+  marginM: 0.1,
+  /** Confianza que se muestra en el aviso (proporción de avisos que se cumplieron). */
+  confidence: 0.65,
+};
+
 /** Hora local aproximada de salida y puesta de sol para flags de "llega de noche". */
 export const DAYLIGHT = {
   sunriseHour: 7,

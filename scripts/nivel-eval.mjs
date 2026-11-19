@@ -19,6 +19,13 @@
  *     -> Por día: qué alertas pronosticó cada snapshot y cuánto se apartó el
  *        nivel MEDIO del día de lo normal en cada estación.
  *
+ *   node scripts/nivel-eval.mjs amarra [días=92]
+ *     -> Valida el nivel estimado EN LA AMARRA (src/lib/domain/mooringLevel.ts):
+ *        baja los pronósticos de nivel que Open-Meteo emitió 1 a 6 días antes
+ *        (`sea_level_height_msl_previous_dayN`), los corrige y ancla igual que la
+ *        app, y los cruza con lo medido. Como no hay rangos de amarra reales, usa
+ *        de ejemplo el 10 % más bajo y el 10 % más alto de lo medido en la estación.
+ *
  * Por qué el nivel medio diario y no el máximo: la marea astronómica del Río de
  * la Plata es semidiurna (~2 ciclos por día), así que el promedio de 24 h la
  * cancela casi entera y lo que queda es la marea meteorológica, que es justo lo
@@ -26,6 +33,7 @@
  */
 import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { fetchRetry } from './lib/fetch-retry.mjs';
+import { MOORING, mooringModel } from './lib/forecast-domain.mjs';
 
 const OBS_FILE = 'validation/nivel-observado.jsonl';
 const SHN_CSV = 'https://www.hidro.gov.ar/oceanografia/AlturasHorarias.asp?export=csv';
@@ -221,8 +229,78 @@ async function report() {
   console.log(`\nEstaciones: ${stations.map((s) => `${short(s).trim()}=${s}`).join(', ')}`);
 }
 
+// ---------------------------------------------------------------------------
+// Nivel en la amarra
+
+const MARINE = 'https://marine-api.open-meteo.com/v1/marine';
+/** Estaciones con punto de Marine (el mismo que usaría la amarra de ahí). */
+const MOORING_STATIONS = [
+  { station: 'San Fernando', lat: -34.433, lon: -58.55 },
+  { station: 'Buenos Aires', lat: -34.6, lon: -58.37 },
+];
+const LEADS = [1, 2, 3, 4, 5, 6];
+const hourKeyOf = (t) => new Date(Math.round(Date.parse(`${t.slice(0, 16)}:00Z`) / 3600_000) * 3600_000).toISOString().slice(0, 13) + ':00';
+const addDays = (date, n) => new Date(Date.parse(`${date}T00:00:00Z`) + n * 86400_000).toISOString().slice(0, 10);
+const quantile = (xs, q) => [...xs].sort((a, b) => a - b)[Math.floor(q * (xs.length - 1))];
+
+async function amarra(pastDays = 92) {
+  const { rows } = await loadObs();
+  const vars = ['sea_level_height_msl', ...LEADS.map((n) => `sea_level_height_msl_previous_day${n}`)];
+  console.log(`Nivel en la amarra: pronóstico emitido N días antes vs. medido. Margen ${MOORING.marginM} m.`);
+  console.log('Rango de ejemplo: P10–P90 de lo medido. "detecta" = días fuera de rango que se avisaron; "ciertos" = avisos que se cumplieron.\n');
+  for (const { station, lat, lon } of MOORING_STATIONS) {
+    const p = new URLSearchParams({ latitude: lat, longitude: lon, hourly: vars.join(','), past_days: String(pastDays), forecast_days: '1', timezone: 'America/Argentina/Buenos_Aires' });
+    const r = await fetchRetry(`${MARINE}?${p}`, { label: 'Open-Meteo Marine' });
+    if (!r.ok) throw new Error(`Marine HTTP ${r.status}`);
+    const h = (await r.json()).hourly;
+    const models = [0, ...LEADS].map((n, i) => mooringModel(h.time.flatMap((time, k) => (h[vars[i]][k] != null ? [{ time, m: h[vars[i]][k] }] : []))));
+
+    for (const source of ['SHN', 'INA']) {
+      const obs = new Map();
+      for (const o of rows) if (o.station === station && o.source === source) obs.set(hourKeyOf(o.time), o.heightM);
+      const hours = [...obs.keys()].filter((k) => models[0].has(k)).sort();
+      if (hours.length < 24 * 10) continue;
+      const lo = quantile(hours.map((k) => obs.get(k)), 0.1);
+      const hi = quantile(hours.map((k) => obs.get(k)), 0.9);
+      const days = [...new Set(hours.map((k) => k.slice(0, 10)))];
+      // Ancla de cada día de emisión: últimas calibHours medidas antes de su medianoche.
+      const offset = new Map();
+      for (const d of days) {
+        const prev = hours.filter((k) => k < `${d}T00:00`).slice(-MOORING.calibHours);
+        if (prev.length >= MOORING.minCalibHours) offset.set(d, prev.reduce((s, k) => s + obs.get(k) - models[0].get(k), 0) / prev.length);
+      }
+      console.log(`== ${station} (${source}) ${days[0]} → ${days.at(-1)} · rango de ejemplo ${lo.toFixed(2)}–${hi.toFixed(2)} m`);
+      console.log(' antic. | error pleamar (MAE, sesgo) | error bajamar (MAE, sesgo) | poca agua: detecta / ciertos | agua alta: detecta / ciertos');
+      for (const n of LEADS) {
+        const eh = [], el = [], c = { b: [0, 0, 0], a: [0, 0, 0] }; // [acierto, falsa, perdido]
+        for (const d of days) {
+          const off = offset.get(addDays(d, -n));
+          const hs = Array.from({ length: 24 }, (_, i) => `${d}T${String(i).padStart(2, '0')}:00`);
+          if (off == null || hs.some((k) => !models[n].has(k))) continue;
+          const ob = hs.filter((k) => obs.has(k)).map((k) => obs.get(k));
+          if (ob.length < 20) continue;
+          const pr = hs.map((k) => models[n].get(k) + off);
+          const [pmin, pmax, omin, omax] = [Math.min(...pr), Math.max(...pr), Math.min(...ob), Math.max(...ob)];
+          eh.push(pmax - omax); el.push(pmin - omin);
+          const tally = (k, pred, real) => { if (pred && real) c[k][0]++; else if (pred) c[k][1]++; else if (real) c[k][2]++; };
+          tally('b', pmin < lo + MOORING.marginM, omin < lo);
+          tally('a', pmax > hi - MOORING.marginM, omax > hi);
+        }
+        if (!eh.length) continue;
+        const mae = (xs) => (xs.reduce((s, x) => s + Math.abs(x), 0) / xs.length).toFixed(2);
+        const bias = (xs) => { const b = xs.reduce((s, x) => s + x, 0) / xs.length; return `${b >= 0 ? '+' : ''}${b.toFixed(2)}`; };
+        const pct = (a, b) => (b ? `${Math.round((100 * a) / b)}%` : '—');
+        const dc = ([ok, fa, mi]) => `${pct(ok, ok + mi).padStart(4)} (${ok}/${ok + mi}) / ${pct(ok, ok + fa).padStart(4)}`;
+        console.log(`  ${n} d   |   ${mae(eh)} m, ${bias(eh)}           |   ${mae(el)} m, ${bias(el)}           | ${dc(c.b)}           | ${dc(c.a)}`);
+      }
+      console.log('');
+    }
+  }
+}
+
 const [cmd, arg] = process.argv.slice(2);
 if (cmd === 'capture') await capture();
 else if (cmd === 'backfill') await backfill(arg);
 else if (cmd === 'report') await report();
-else { console.error('Uso: node scripts/nivel-eval.mjs capture | backfill [desde] | report'); process.exit(1); }
+else if (cmd === 'amarra') await amarra(arg ? Number(arg) : undefined);
+else { console.error('Uso: node scripts/nivel-eval.mjs capture | backfill [desde] | report | amarra [días]'); process.exit(1); }

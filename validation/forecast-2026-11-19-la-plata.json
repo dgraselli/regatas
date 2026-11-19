@@ -1,0 +1,155 @@
+{
+  "capturedAt": "2026-11-19T18:14:22.899Z",
+  "source": "open-meteo-forecast",
+  "location": {
+    "name": "La Plata",
+    "lat": -34.8399,
+    "lon": -57.9234
+  },
+  "thresholds": {
+    "idealWindMin": 6,
+    "strongWind": 22,
+    "dangerWind": 28,
+    "gustYellow": 25,
+    "gustRed": 33,
+    "rainYellow": 2,
+    "rainRed": 12,
+    "fogYellowM": 4000,
+    "fogRedM": 1000
+  },
+  "days": [
+    {
+      "date": "2026-11-19",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 7,
+        "gustPeakKt": 27,
+        "windDirDominant": 241,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 10580
+      }
+    },
+    {
+      "date": "2026-11-20",
+      "level": "amarillo",
+      "reasons": [
+        "Algo de lluvia (4.7 mm)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 16,
+        "windDirDominant": 355,
+        "precipTotalMm": 4.7,
+        "visibilityMinM": 3860
+      }
+    },
+    {
+      "date": "2026-11-21",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~3 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 3,
+        "gustPeakKt": 11,
+        "windDirDominant": 309,
+        "precipTotalMm": 0,
+        "visibilityMinM": 240
+      }
+    },
+    {
+      "date": "2026-11-22",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~5 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 5,
+        "gustPeakKt": 19,
+        "windDirDominant": 237,
+        "precipTotalMm": 0.9,
+        "visibilityMinM": 6680
+      }
+    },
+    {
+      "date": "2026-11-23",
+      "level": "poco-viento",
+      "reasons": [
+        "Poco viento (~4 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 4,
+        "gustPeakKt": 14,
+        "windDirDominant": 252,
+        "precipTotalMm": 0,
+        "visibilityMinM": 46280
+      }
+    },
+    {
+      "date": "2026-11-24",
+      "level": "amarillo",
+      "reasons": [
+        "Ráfagas marcadas (27 kt)"
+      ],
+      "metrics": {
+        "windMedianKt": 8,
+        "gustPeakKt": 27,
+        "windDirDominant": 266,
+        "precipTotalMm": 0.3,
+        "visibilityMinM": 44280
+      }
+    },
+    {
+      "date": "2026-11-25",
+      "level": "amarillo",
+      "reasons": [
+        "sudestada sev 2"
+      ],
+      "metrics": {
+        "windMedianKt": 6,
+        "gustPeakKt": 21,
+        "windDirDominant": 352,
+        "precipTotalMm": 0,
+        "visibilityMinM": 57140
+      }
+    }
+  ],
+  "surge": [
+    {
+      "type": "sudestada",
+      "startsAt": "2026-11-25T12:00",
+      "endsAt": "2026-11-25T23:00",
+      "durationH": 12,
+      "severity": 2,
+      "days": [
+        {
+          "date": "2026-11-25",
+          "hours": 12,
+          "severity": 2
+        }
+      ],
+      "avgWindKt": 6,
+      "source": "nivel",
+      "peakLevelM": 0.68
+    }
+  ],
+  "fog": [
+    {
+      "startsAt": "2026-11-20T11:00",
+      "endsAt": "2026-11-20T11:00",
+      "durationH": 1,
+      "severity": 1,
+      "minVisibilityM": 3860
+    },
+    {
+      "startsAt": "2026-11-21T01:00",
+      "endsAt": "2026-11-21T08:00",
+      "durationH": 8,
+      "severity": 2,
+      "minVisibilityM": 160
+    }
+  ]
+}
